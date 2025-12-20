@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dupeças Duarte Peças | Sistema Online (Firebase)</title>
+    <title>Dupeças Duarte Peças | Sistema Integrado</title>
     
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* (CSS MANTIDO IGUAL AO ORIGINAL PARA PRESERVAR O DESIGN) */
+        /* (CSS MANTIDO IGUAL - ADICIONADO ESTILOS PARA STATUS DE PEDIDO) */
         :root {
             --primary: #2563eb;        
             --primary-dark: #1e40af;   
@@ -128,9 +128,10 @@
         .report-tabs { display: flex; gap: 0.5rem; overflow-x: auto; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
         .report-tab-btn { padding: 0.5rem 1rem; background: transparent; border: none; font-weight: 600; color: var(--text-muted); border-bottom: 2px solid transparent; transition: 0.2s; white-space: nowrap; }
         .report-tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
-        .status-badge { padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; }
-        .status-pending { background: #fef3c7; color: #d97706; }
-        .status-completed { background: #dcfce7; color: #16a34a; }
+        .status-badge { padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
+        .status-Pendente { background: #fef3c7; color: #d97706; }
+        .status-Entregue { background: #dcfce7; color: #16a34a; }
+        .status-Cancelado { background: #fee2e2; color: #b91c1c; }
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 1rem; }
         .modal-overlay.active { display: flex; }
         .modal { background: var(--bg-card); width: 100%; max-width: 900px; border-radius: 1rem; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); animation: scaleIn 0.2s; max-height: 90vh; overflow-y: auto; position: relative; border: 1px solid var(--border); }
@@ -203,6 +204,14 @@
                 <button type="submit" class="btn btn-primary w-full">Acessar Painel</button>
             </form>
             <button onclick="closeLogin()" style="margin-top: 1.5rem; color: var(--text-muted); background: none; font-size: 0.9rem;">Voltar à Loja</button>
+        </div>
+    </div>
+
+    <div id="orderDetailModal" class="modal-overlay" onclick="if(event.target === this) closeOrderDetail()">
+        <div class="modal">
+            <div class="close-modal" onclick="closeOrderDetail()"><i data-lucide="x"></i></div>
+            <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem;">Detalhes do Pedido</h3>
+            <div id="orderDetailContent"></div>
         </div>
     </div>
 
@@ -501,7 +510,7 @@
                 <div class="data-table-wrapper">
                     <table class="data-table">
                         <thead>
-                            <tr><th>ID</th><th>Data</th><th>Cliente</th><th>Total</th><th>Status</th></tr>
+                            <tr><th>ID</th><th>Data</th><th>Cliente</th><th>Total</th><th>Status</th><th>Ações</th></tr>
                         </thead>
                         <tbody id="ordersTableBody"></tbody>
                     </table>
@@ -659,7 +668,6 @@
         const analytics = getAnalytics(app);
 
         // --- SERVIÇO DE BANCO DE DADOS (FIRESTORE) ---
-        // Substitui o antigo IDBService para falar com a nuvem
         const DBService = {
             async getAll(collectionName) {
                 try {
@@ -672,7 +680,6 @@
             },
 
             async put(collectionName, data) {
-                // Firestore precisa de strings nos IDs para documentos
                 const idString = String(data.id || Date.now());
                 await setDoc(doc(db, collectionName, idString), data);
                 return data;
@@ -682,7 +689,6 @@
                 await deleteDoc(doc(db, collectionName, String(id)));
             },
 
-            // Função para limpar coleção inteira (Batch delete)
             async clear(collectionName) {
                 const q = await getDocs(collection(db, collectionName));
                 const batch = writeBatch(db);
@@ -692,11 +698,9 @@
                 await batch.commit();
             }
         };
-
-        // Expõe o DBService para o escopo global (window)
         window.DBService = DBService;
 
-        // Dados Iniciais (Caso o banco esteja vazio)
+        // Dados Iniciais
         const DEFAULT_BRANDS = ["Todas", "Audi", "BMW", "BYD", "Chevrolet", "Citroën", "Fiat", "Ford", "Honda", "Hyundai", "Jeep", "Kia", "Mercedes-Benz", "Mitsubishi", "Nissan", "Peugeot", "Renault", "Toyota", "Volkswagen", "Volvo", "Yamaha"].map(b => ({ name: b }));
         const INITIAL_PRODUCTS = [
             { id: 1, name: "Óleo Sintético 5W30", category: "Óleos", price: 45.90, stock: 50, image: "https://images.pexels.com/photos/4489749/pexels-photo-4489749.jpeg?auto=compress&cs=tinysrgb&w=600", sku: "OL5W30", vehicleBrand: "Todas", vehicleModel: "Universal", description: "Proteção máxima." },
@@ -705,13 +709,13 @@
 
         // --- VARIÁVEIS GLOBAIS ---
         window.products = [];
-        window.cart = []; // Carrinho continua local para não misturar sessões de usuários
+        window.cart = []; 
         window.orders = [];
         window.brands = [];
         window.currentFilter = 'Todos';
         window.isAdmin = false;
         
-        // --- FUNÇÕES GLOBAIS (UX/UI) ---
+        // --- FUNÇÕES GLOBAIS ---
         window.showToast = function(msg, type = 'success') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
@@ -739,16 +743,13 @@
         };
 
         async function loadData() {
-            // Carrega do Firebase
             window.products = await DBService.getAll('products');
             window.brands = await DBService.getAll('brands');
             window.orders = await DBService.getAll('orders');
             
-            // Carrinho pode ser LocalStorage ou DB. Vamos usar LocalStorage para ser por dispositivo
             const localCart = localStorage.getItem('dupecas_cart');
             window.cart = localCart ? JSON.parse(localCart) : [];
 
-            // Se estiver vazio (primeira vez), popula
             if (window.products.length === 0) {
                 for(const p of INITIAL_PRODUCTS) await DBService.put('products', p);
                 window.products = [...INITIAL_PRODUCTS];
@@ -758,11 +759,10 @@
                 window.brands = [...DEFAULT_BRANDS];
             }
             
-            // Ordena marcas
             let brandNames = window.brands.map(b => b.name).filter(b => b !== "Todas").sort();
             window.brands = ["Todas", ...brandNames];
         }
-        window.loadData = loadData; // Export
+        window.loadData = loadData; 
 
         // --- FILTROS ---
         window.renderBrandsFilter = function() {
@@ -998,10 +998,12 @@
             const total = window.cart.reduce((a, b) => a + (b.price * b.quantity), 0);
             const newOrder = {
                 id: Date.now(),
+                timestamp: Date.now(), // Salva data numérica para o cálculo de 72h
                 date: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR'),
                 customer: name,
                 phone: phone,
                 total: total,
+                status: 'Pendente',
                 items: JSON.parse(JSON.stringify(window.cart))
             };
             
@@ -1020,7 +1022,8 @@
             
             const msg = `*PEDIDO #${newOrder.id}*\n👤 *${name}*\n📞 ${phone}\n\n` +
                         window.cart.map(i => `📦 ${i.quantity}x ${i.name}`).join('\n') + 
-                        `\n\n💰 *Total: ${formatMoney(total)}*`;
+                        `\n\n💰 *Total: ${formatMoney(total)}*` +
+                        `\n\n⚠️ *Aviso:* O seu pedido ficará reservado por 72h. Após esse prazo, caso não confirmado, será cancelado automaticamente.`;
             
             window.cart = [];
             localStorage.removeItem('dupecas_cart');
@@ -1043,6 +1046,7 @@
                 document.getElementById('storeView').classList.add('hidden');
                 closeLogin();
                 loadAdminDashboard();
+                checkExpiredOrders(); // Verifica validade dos pedidos ao logar
             } else showToast("Senha incorreta!", "error");
         }
 
@@ -1050,6 +1054,26 @@
             window.isAdmin = false;
             document.getElementById('adminView').classList.add('hidden');
             document.getElementById('storeView').classList.remove('hidden');
+        }
+
+        // --- SISTEMA DE EXPIRAÇÃO 72H ---
+        window.checkExpiredOrders = async function() {
+            const now = Date.now();
+            const limit = 72 * 60 * 60 * 1000; // 72 horas em milissegundos
+            let updated = false;
+
+            for (const order of window.orders) {
+                // Se estiver pendente e o tempo passou
+                if ((order.status === 'Pendente' || !order.status) && order.timestamp && (now - order.timestamp > limit)) {
+                    await cancelOrderLogic(order.id, true); // true = auto cancel
+                    updated = true;
+                }
+            }
+            if(updated) {
+                showToast("Pedidos expirados (72h) foram cancelados e retornados ao estoque.");
+                renderOrdersTable();
+                loadData(); // Recarrega produtos atualizados
+            }
         }
 
         // --- ADMIN SIDEBAR ---
@@ -1086,14 +1110,15 @@
         let salesChartRef;
         window.loadAdminDashboard = function() {
             const totalVal = window.products.reduce((a, b) => a + (b.price * b.stock), 0);
-            document.getElementById('kpiSales').innerText = formatMoney(window.orders.reduce((a,b)=>a+b.total, 0));
+            document.getElementById('kpiSales').innerText = formatMoney(window.orders.filter(o => o.status !== 'Cancelado').reduce((a,b)=>a+b.total, 0));
             document.getElementById('kpiOrderCount').innerText = window.orders.length;
             document.getElementById('kpiStockVal').innerText = formatMoney(totalVal);
 
             const ctx = document.getElementById('salesChart');
             if(salesChartRef) salesChartRef.destroy();
             
-            const dataSales = [1200, 1900, 3000, 5000, 2000, 3000, window.orders.reduce((a,b)=>a+b.total, 0)];
+            // Dados fictícios para gráfico (pode ser melhorado para usar datas reais)
+            const dataSales = [1200, 1900, 3000, 5000, 2000, 3000, window.orders.filter(o => o.status !== 'Cancelado').reduce((a,b)=>a+b.total, 0)];
             salesChartRef = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -1143,7 +1168,7 @@
             const container = document.getElementById('report-content');
             let html = '';
             if(type === 'sales') {
-                html = `<h4 class="font-bold mb-4">Relatório de Vendas</h4><table class="data-table"><thead><tr><th>Data</th><th>Cliente</th><th>Total</th></tr></thead><tbody>${window.orders.map(o => `<tr><td>${o.date}</td><td>${o.customer}</td><td>${formatMoney(o.total)}</td></tr>`).join('')}</tbody></table>`;
+                html = `<h4 class="font-bold mb-4">Relatório de Vendas</h4><table class="data-table"><thead><tr><th>Data</th><th>Cliente</th><th>Total</th></tr></thead><tbody>${window.orders.filter(o => o.status !== 'Cancelado').map(o => `<tr><td>${o.date}</td><td>${o.customer}</td><td>${formatMoney(o.total)}</td></tr>`).join('')}</tbody></table>`;
             } else if (type === 'stock') { 
                 const low = window.products.filter(p => p.stock < 5); 
                 html = `<h4 class="font-bold mb-4">Estoque Crítico (<5)</h4><table class="data-table"><thead><tr><th>Produto</th><th>SKU</th><th>Estoque</th></tr></thead><tbody>${low.map(p => `<tr><td>${p.name}</td><td>${p.sku}</td><td style="color:red;font-weight:bold;">${p.stock}</td></tr>`).join('')}</tbody></table>`; 
@@ -1268,11 +1293,106 @@
             } 
         }
         
+        // --- GESTÃO DE PEDIDOS ---
         window.renderOrdersTable = function() {
             const tbody = document.getElementById('ordersTableBody');
             document.getElementById('orderCountBadge').innerText = window.orders.length;
-            if(window.orders.length === 0) { document.getElementById('noOrdersMsg').classList.remove('hidden'); tbody.innerHTML = ''; }
-            else { document.getElementById('noOrdersMsg').classList.add('hidden'); tbody.innerHTML = window.orders.map(o => `<tr><td>#${o.id.toString().slice(-6)}</td><td>${o.date}</td><td>${o.customer}</td><td class="font-bold">${formatMoney(o.total)}</td><td><span class="status-badge status-completed">OK</span></td></tr>`).join(''); }
+            if(window.orders.length === 0) { 
+                document.getElementById('noOrdersMsg').classList.remove('hidden'); 
+                tbody.innerHTML = ''; 
+            } else { 
+                document.getElementById('noOrdersMsg').classList.add('hidden'); 
+                tbody.innerHTML = window.orders.map(o => {
+                    const statusClass = `status-${o.status || 'Pendente'}`;
+                    const statusText = o.status || 'Pendente';
+                    return `
+                    <tr>
+                        <td>#${o.id.toString().slice(-6)}</td>
+                        <td>${o.date}</td>
+                        <td>${o.customer}<br><span class="text-xs text-muted">${o.phone}</span></td>
+                        <td class="font-bold">${formatMoney(o.total)}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td style="display:flex; gap:0.5rem; justify-content:center;">
+                            <button onclick="openOrderDetail(${o.id})" title="Ver Detalhes" class="btn-icon text-primary"><i data-lucide="eye" size="16"></i></button>
+                            ${statusText !== 'Cancelado' ? 
+                                `<button onclick="confirmOrder(${o.id})" title="Concluir/Entregar" class="btn-icon text-success"><i data-lucide="check" size="16"></i></button>
+                                 <button onclick="cancelOrder(${o.id})" title="Cancelar e Estornar Estoque" class="btn-icon text-danger"><i data-lucide="ban" size="16"></i></button>` 
+                            : ''}
+                        </td>
+                    </tr>`;
+                }).join(''); 
+                lucide.createIcons();
+            }
+        }
+
+        window.openOrderDetail = function(orderId) {
+            const o = window.orders.find(x => x.id === orderId);
+            if(!o) return;
+            
+            const html = `
+                <div style="background:var(--bg-body); padding:1rem; border-radius:8px; margin-bottom:1rem;">
+                    <p><strong>Cliente:</strong> ${o.customer}</p>
+                    <p><strong>Contato:</strong> ${o.phone}</p>
+                    <p><strong>Data:</strong> ${o.date}</p>
+                    <p><strong>Status:</strong> ${o.status || 'Pendente'}</p>
+                </div>
+                <h4 style="font-weight:bold; margin-bottom:0.5rem;">Itens do Pedido:</h4>
+                <div style="max-height:200px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; margin-bottom:1rem;">
+                    <table style="width:100%; font-size:0.9rem;">
+                        ${o.items.map(i => `
+                            <tr style="border-bottom:1px solid var(--border);">
+                                <td style="padding:0.5rem;"><img src="${i.image}" width="30"></td>
+                                <td style="padding:0.5rem;">${i.quantity}x ${i.name}</td>
+                                <td style="padding:0.5rem; text-align:right;">${formatMoney(i.price * i.quantity)}</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                </div>
+                <div style="text-align:right; font-size:1.25rem; font-weight:800; color:var(--primary);">
+                    Total: ${formatMoney(o.total)}
+                </div>
+            `;
+            document.getElementById('orderDetailContent').innerHTML = html;
+            document.getElementById('orderDetailModal').classList.add('active');
+        }
+        window.closeOrderDetail = function() { document.getElementById('orderDetailModal').classList.remove('active'); }
+
+        window.confirmOrder = async function(id) {
+            const o = window.orders.find(x => x.id === id);
+            if(o) {
+                o.status = 'Entregue';
+                await DBService.put('orders', o);
+                renderOrdersTable();
+                showToast("Pedido marcado como Entregue");
+            }
+        }
+
+        window.cancelOrderLogic = async function(id, isAuto = false) {
+            const o = window.orders.find(x => x.id === id);
+            if(!o || o.status === 'Cancelado') return;
+
+            // Retorna itens ao estoque
+            for (const item of o.items) {
+                const prod = window.products.find(p => p.id === item.id);
+                if (prod) {
+                    prod.stock += item.quantity;
+                    await DBService.put('products', prod);
+                }
+            }
+
+            o.status = 'Cancelado';
+            await DBService.put('orders', o);
+            if(!isAuto) {
+                renderOrdersTable();
+                loadAdminDashboard(); // Atualiza grafico e kpis
+                showToast("Pedido cancelado e estoque restaurado.");
+            }
+        }
+
+        window.cancelOrder = function(id) {
+            if(confirm("Tem certeza? Isso irá cancelar o pedido e devolver os produtos para o estoque.")) {
+                cancelOrderLogic(id);
+            }
         }
 
         // --- ZERAR SISTEMA COM SENHA ---
