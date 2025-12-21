@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* (CSS MANTIDO IGUAL - ADICIONADO ESTILOS PARA STATUS DE PEDIDO) */
+        /* (CSS MANTIDO IGUAL - ADICIONADO ESTILOS PARA MODAL DE EDIÇÃO) */
         :root {
             --primary: #2563eb;        
             --primary-dark: #1e40af;   
@@ -212,6 +212,32 @@
             <div class="close-modal" onclick="closeOrderDetail()"><i data-lucide="x"></i></div>
             <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem;">Detalhes do Pedido</h3>
             <div id="orderDetailContent"></div>
+        </div>
+    </div>
+
+    <div id="orderEditModal" class="modal-overlay" style="z-index: 1500;" onclick="if(event.target === this) closeEditOrder()">
+        <div class="modal" style="max-width: 800px;">
+            <div class="close-modal" onclick="closeEditOrder()"><i data-lucide="x"></i></div>
+            <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem;">Editar Pedido</h3>
+            
+            <div style="display:flex; flex-direction:column; gap:1rem; height: 100%;">
+                
+                <div style="flex:1; border:1px solid var(--border); border-radius:8px; padding:1rem; overflow-y:auto; max-height: 250px;">
+                    <h4 style="font-weight:700; margin-bottom:0.5rem;">Itens no Pedido</h4>
+                    <div id="editOrderItemsList"></div>
+                </div>
+
+                <div style="border:1px solid var(--border); border-radius:8px; padding:1rem; background: var(--bg-body);">
+                    <h4 style="font-weight:700; margin-bottom:0.5rem;">Adicionar Produto</h4>
+                    <input type="text" id="editSearchProd" placeholder="Buscar produto para adicionar..." oninput="searchProdForOrder(this.value)">
+                    <div id="editProdResults" style="max-height: 150px; overflow-y: auto; display: none; background: white; border: 1px solid var(--border); border-radius: 4px;"></div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1rem;">
+                    <div style="font-size:1.2rem; font-weight:800;">Novo Total: <span id="editOrderTotal">R$ 0,00</span></div>
+                    <button onclick="saveOrderChanges()" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -734,6 +760,14 @@
             lucide.createIcons();
             await loadData();
             
+            // VERIFICA SESSÃO ADMIN
+            if (localStorage.getItem('dupecas_admin_logged') === 'true') {
+                window.isAdmin = true;
+                document.getElementById('adminView').classList.remove('hidden');
+                document.getElementById('storeView').classList.add('hidden');
+                loadAdminDashboard();
+            }
+
             renderBrandsFilter();
             renderCategories();
             renderProducts();
@@ -998,7 +1032,7 @@
             const total = window.cart.reduce((a, b) => a + (b.price * b.quantity), 0);
             const newOrder = {
                 id: Date.now(),
-                timestamp: Date.now(), // Salva data numérica para o cálculo de 72h
+                timestamp: Date.now(), 
                 date: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR'),
                 customer: name,
                 phone: phone,
@@ -1042,16 +1076,22 @@
             e.preventDefault();
             if (document.getElementById('adminPass').value === 'admin') {
                 window.isAdmin = true;
+                // SALVA SESSÃO NO LOCALSTORAGE
+                localStorage.setItem('dupecas_admin_logged', 'true');
+                
                 document.getElementById('adminView').classList.remove('hidden');
                 document.getElementById('storeView').classList.add('hidden');
                 closeLogin();
                 loadAdminDashboard();
-                checkExpiredOrders(); // Verifica validade dos pedidos ao logar
+                checkExpiredOrders();
             } else showToast("Senha incorreta!", "error");
         }
 
         window.logoutAdmin = function() {
             window.isAdmin = false;
+            // LIMPA SESSÃO
+            localStorage.removeItem('dupecas_admin_logged');
+            
             document.getElementById('adminView').classList.add('hidden');
             document.getElementById('storeView').classList.remove('hidden');
         }
@@ -1059,20 +1099,19 @@
         // --- SISTEMA DE EXPIRAÇÃO 72H ---
         window.checkExpiredOrders = async function() {
             const now = Date.now();
-            const limit = 72 * 60 * 60 * 1000; // 72 horas em milissegundos
+            const limit = 72 * 60 * 60 * 1000; 
             let updated = false;
 
             for (const order of window.orders) {
-                // Se estiver pendente e o tempo passou
                 if ((order.status === 'Pendente' || !order.status) && order.timestamp && (now - order.timestamp > limit)) {
-                    await cancelOrderLogic(order.id, true); // true = auto cancel
+                    await cancelOrderLogic(order.id, true); 
                     updated = true;
                 }
             }
             if(updated) {
                 showToast("Pedidos expirados (72h) foram cancelados e retornados ao estoque.");
                 renderOrdersTable();
-                loadData(); // Recarrega produtos atualizados
+                loadData(); 
             }
         }
 
@@ -1110,15 +1149,17 @@
         let salesChartRef;
         window.loadAdminDashboard = function() {
             const totalVal = window.products.reduce((a, b) => a + (b.price * b.stock), 0);
-            document.getElementById('kpiSales').innerText = formatMoney(window.orders.filter(o => o.status !== 'Cancelado').reduce((a,b)=>a+b.total, 0));
-            document.getElementById('kpiOrderCount').innerText = window.orders.length;
+            // FILTRA PEDIDOS CANCELADOS PARA O TOTAL DE VENDAS
+            const validOrders = window.orders.filter(o => o.status !== 'Cancelado');
+            
+            document.getElementById('kpiSales').innerText = formatMoney(validOrders.reduce((a,b)=>a+b.total, 0));
+            document.getElementById('kpiOrderCount').innerText = validOrders.length;
             document.getElementById('kpiStockVal').innerText = formatMoney(totalVal);
 
             const ctx = document.getElementById('salesChart');
             if(salesChartRef) salesChartRef.destroy();
             
-            // Dados fictícios para gráfico (pode ser melhorado para usar datas reais)
-            const dataSales = [1200, 1900, 3000, 5000, 2000, 3000, window.orders.filter(o => o.status !== 'Cancelado').reduce((a,b)=>a+b.total, 0)];
+            const dataSales = [1200, 1900, 3000, 5000, 2000, 3000, validOrders.reduce((a,b)=>a+b.total, 0)];
             salesChartRef = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -1315,7 +1356,8 @@
                         <td style="display:flex; gap:0.5rem; justify-content:center;">
                             <button onclick="openOrderDetail(${o.id})" title="Ver Detalhes" class="btn-icon text-primary"><i data-lucide="eye" size="16"></i></button>
                             ${statusText !== 'Cancelado' ? 
-                                `<button onclick="confirmOrder(${o.id})" title="Concluir/Entregar" class="btn-icon text-success"><i data-lucide="check" size="16"></i></button>
+                                `<button onclick="openEditOrder(${o.id})" title="Editar Pedido" class="btn-icon text-warning"><i data-lucide="edit" size="16"></i></button>
+                                 <button onclick="confirmOrder(${o.id})" title="Concluir/Entregar" class="btn-icon text-success"><i data-lucide="check" size="16"></i></button>
                                  <button onclick="cancelOrder(${o.id})" title="Cancelar e Estornar Estoque" class="btn-icon text-danger"><i data-lucide="ban" size="16"></i></button>` 
                             : ''}
                         </td>
@@ -1384,7 +1426,7 @@
             await DBService.put('orders', o);
             if(!isAuto) {
                 renderOrdersTable();
-                loadAdminDashboard(); // Atualiza grafico e kpis
+                loadAdminDashboard(); 
                 showToast("Pedido cancelado e estoque restaurado.");
             }
         }
@@ -1393,6 +1435,148 @@
             if(confirm("Tem certeza? Isso irá cancelar o pedido e devolver os produtos para o estoque.")) {
                 cancelOrderLogic(id);
             }
+        }
+
+        // --- SISTEMA DE EDIÇÃO DE PEDIDOS (NOVO) ---
+        let editingOrder = null;
+
+        window.openEditOrder = function(id) {
+            const originalOrder = window.orders.find(o => o.id === id);
+            if(!originalOrder) return;
+            // Cria uma cópia profunda para não alterar direto
+            editingOrder = JSON.parse(JSON.stringify(originalOrder));
+            renderEditModal();
+            document.getElementById('orderEditModal').classList.add('active');
+        }
+
+        window.closeEditOrder = function() {
+            editingOrder = null;
+            document.getElementById('orderEditModal').classList.remove('active');
+        }
+
+        window.renderEditModal = function() {
+            const list = document.getElementById('editOrderItemsList');
+            if(!editingOrder.items.length) {
+                list.innerHTML = `<div class="text-muted text-center py-4">Sem itens</div>`;
+            } else {
+                list.innerHTML = editingOrder.items.map(i => `
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:0.5rem 0;">
+                        <div style="flex:1;">
+                            <div class="font-bold">${i.name}</div>
+                            <div class="text-xs text-muted">${formatMoney(i.price)} un.</div>
+                        </div>
+                        <div class="qty-controls" style="margin:0 10px;">
+                            <button class="qty-btn" onclick="editChangeQty(${i.id}, -1)">-</button>
+                            <span class="qty-val">${i.quantity}</span>
+                            <button class="qty-btn" onclick="editChangeQty(${i.id}, 1)">+</button>
+                        </div>
+                        <button onclick="editRemoveItem(${i.id})" class="text-danger"><i data-lucide="trash-2" size="16"></i></button>
+                    </div>
+                `).join('');
+            }
+            // Recalcula total
+            editingOrder.total = editingOrder.items.reduce((a,b)=> a + (b.price * b.quantity), 0);
+            document.getElementById('editOrderTotal').innerText = formatMoney(editingOrder.total);
+            lucide.createIcons();
+        }
+
+        window.editChangeQty = function(id, delta) {
+            const item = editingOrder.items.find(i => i.id === id);
+            if(!item) return;
+            if(delta > 0) item.quantity++;
+            else {
+                if(item.quantity > 1) item.quantity--;
+            }
+            renderEditModal();
+        }
+
+        window.editRemoveItem = function(id) {
+            editingOrder.items = editingOrder.items.filter(i => i.id !== id);
+            renderEditModal();
+        }
+
+        window.searchProdForOrder = function(val) {
+            const resDiv = document.getElementById('editProdResults');
+            if(val.length < 2) { resDiv.style.display = 'none'; return; }
+            
+            const results = window.products.filter(p => p.name.toLowerCase().includes(val.toLowerCase()) || p.sku.toLowerCase().includes(val.toLowerCase()));
+            
+            if(results.length > 0) {
+                resDiv.style.display = 'block';
+                resDiv.innerHTML = results.map(p => `
+                    <div onclick="addProdToOrder(${p.id})" style="padding:0.5rem; border-bottom:1px solid #eee; cursor:pointer; hover:bg-gray-100;">
+                        <div class="font-bold text-sm">${p.name}</div>
+                        <div class="text-xs text-muted">Estoque: ${p.stock} | ${formatMoney(p.price)}</div>
+                    </div>
+                `).join('');
+            } else {
+                resDiv.style.display = 'none';
+            }
+        }
+
+        window.addProdToOrder = function(prodId) {
+            const p = window.products.find(x => x.id === prodId);
+            if(!p) return;
+            
+            // Verifica se já existe
+            const existing = editingOrder.items.find(i => i.id === prodId);
+            if(existing) {
+                existing.quantity++;
+            } else {
+                editingOrder.items.push({
+                    id: p.id,
+                    name: p.name,
+                    price: p.price,
+                    image: p.image,
+                    quantity: 1
+                });
+            }
+            document.getElementById('editSearchProd').value = '';
+            document.getElementById('editProdResults').style.display = 'none';
+            renderEditModal();
+        }
+
+        window.saveOrderChanges = async function() {
+            const originalOrder = window.orders.find(o => o.id === editingOrder.id);
+            if(!originalOrder) return;
+
+            // 1. DEVOLVE TUDO DO PEDIDO ORIGINAL PRO ESTOQUE
+            for (const item of originalOrder.items) {
+                const prod = window.products.find(p => p.id === item.id);
+                if(prod) {
+                    prod.stock += item.quantity;
+                }
+            }
+
+            // 2. RETIRA TUDO DO NOVO PEDIDO DO ESTOQUE
+            for (const item of editingOrder.items) {
+                const prod = window.products.find(p => p.id === item.id);
+                if(prod) {
+                    if(prod.stock < item.quantity) {
+                        alert(`Estoque insuficiente para ${prod.name}. Operação cancelada.`);
+                        // Recarrega dados para desfazer bagunça local
+                        loadData(); 
+                        return;
+                    }
+                    prod.stock -= item.quantity;
+                }
+            }
+
+            // 3. SALVA PRODUTOS ATUALIZADOS E O PEDIDO
+            for (const p of window.products) {
+                await DBService.put('products', p);
+            }
+            
+            // Atualiza objeto original
+            originalOrder.items = editingOrder.items;
+            originalOrder.total = editingOrder.total;
+            
+            await DBService.put('orders', originalOrder);
+            
+            closeEditOrder();
+            renderOrdersTable();
+            loadAdminDashboard();
+            showToast("Pedido atualizado com sucesso!");
         }
 
         // --- ZERAR SISTEMA COM SENHA ---
