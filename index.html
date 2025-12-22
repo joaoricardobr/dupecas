@@ -11,12 +11,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* ESTILOS CSS COMPLETOS */
+        /* (CSS MANTIDO IGUAL - ADICIONADO ESTILOS PARA MODAL DE EDIÇÃO) */
         :root {
-            --primary: #2563eb;         
-            --primary-dark: #1e40af;    
-            --primary-light: #eff6ff;   
-            --secondary: #0f172a;        
+            --primary: #2563eb;        
+            --primary-dark: #1e40af;   
+            --primary-light: #eff6ff; 
+            --secondary: #0f172a;       
             --bg-body: #f8fafc;
             --bg-card: #ffffff;
             --text-main: #1e293b;
@@ -673,13 +673,12 @@
     </div>
 
     <script type="module">
-        // --- IMPORTAÇÕES DO FIREBASE (COM STORAGE) ---
+        // Importa Firebase diretamente da CDN (Versão Modular)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
 
-        // CONFIGURAÇÃO
+        // CONFIGURAÇÃO FORNECIDA PELO USUÁRIO
         const firebaseConfig = {
             apiKey: "AIzaSyA1bJpcVTG8C7W6SDqYTUW2MGEgagiKN-E",
             authDomain: "dupecas-77955.firebaseapp.com",
@@ -690,10 +689,9 @@
             measurementId: "G-10HENTDJ8R"
         };
 
-        // INICIALIZAÇÃO
+        // Inicializa Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const storage = getStorage(app); // Inicializa Storage
         const analytics = getAnalytics(app);
 
         // --- SERVIÇO DE BANCO DE DADOS (FIRESTORE) ---
@@ -743,9 +741,6 @@
         window.brands = [];
         window.currentFilter = 'Todos';
         window.isAdmin = false;
-        
-        // NOVO: Armazena o arquivo de imagem selecionado para upload
-        window.currentImageFile = null;
         
         // --- FUNÇÕES GLOBAIS ---
         window.showToast = function(msg, type = 'success') {
@@ -1265,8 +1260,6 @@
             document.getElementById('prodVehBrand').value = 'Todas'; 
             document.getElementById('formPreview').style.display = 'none'; 
             document.getElementById('uploadPlaceholder').style.display = 'block'; 
-            window.currentImageFile = null; 
-            document.getElementById('fileInput').value = ''; 
             document.getElementById('productFormModal').classList.add('active'); 
         }
         window.closeProductForm = function() { document.getElementById('productFormModal').classList.remove('active'); }
@@ -1289,55 +1282,11 @@
             document.getElementById('formPreview').src = p.image;
             document.getElementById('formPreview').style.display = 'block';
             document.getElementById('uploadPlaceholder').style.display = 'none';
-            window.currentImageFile = null;
             document.getElementById('productFormModal').classList.add('active');
         }
 
-        window.handleImageUpload = function(input) {
-            if(input.files && input.files[0]) {
-                window.currentImageFile = input.files[0];
-                const reader = new FileReader();
-                reader.onload = function(e) { 
-                    document.getElementById('formPreview').src = e.target.result; 
-                    document.getElementById('formPreview').style.display = 'block'; 
-                    document.getElementById('uploadPlaceholder').style.display = 'none'; 
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-        window.previewUrl = function(url) { if(url) { document.getElementById('formPreview').src = url; document.getElementById('formPreview').style.display = 'block'; document.getElementById('uploadPlaceholder').style.display = 'none'; window.currentImageFile = null; } }
-        
-        // --- FUNÇÃO DE SALVAMENTO COM UPLOAD NO STORAGE ---
         window.saveProduct = async function(e) {
             e.preventDefault();
-            
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            const originalBtnText = submitBtn.innerText;
-            submitBtn.disabled = true;
-            submitBtn.innerText = "Salvando (Enviando Imagem)...";
-
-            let imageUrl = document.getElementById('formPreview').src;
-
-            // Se existe novo arquivo, faz upload
-            if (window.currentImageFile) {
-                try {
-                    const storageRef = ref(storage, `produtos/${Date.now()}_${window.currentImageFile.name}`);
-                    const snapshot = await uploadBytes(storageRef, window.currentImageFile);
-                    imageUrl = await getDownloadURL(snapshot.ref);
-                } catch (error) {
-                    console.error("Erro no upload:", error);
-                    showToast("Erro ao enviar imagem.", "error");
-                    submitBtn.disabled = false;
-                    submitBtn.innerText = originalBtnText;
-                    return;
-                }
-            } else {
-                const urlInput = document.getElementById('prodImgUrl').value;
-                if(urlInput && urlInput.trim() !== "") {
-                    imageUrl = urlInput;
-                }
-            }
-
             const id = document.getElementById('prodId').value;
             const newProd = {
                 id: id ? parseInt(id) : Date.now(),
@@ -1352,7 +1301,7 @@
                 vehicleYear: document.getElementById('prodVehYear').value,
                 vehicleVersion: document.getElementById('prodVehVersion').value,
                 description: document.getElementById('prodDesc').value,
-                image: imageUrl
+                image: document.getElementById('formPreview').src
             };
             
             await DBService.put('products', newProd);
@@ -1363,15 +1312,20 @@
             } else { 
                 window.products.push(newProd); 
             }
-            
-            submitBtn.disabled = false;
-            submitBtn.innerText = originalBtnText;
-
             closeProductForm();
             renderAdminTable();
-            showToast("Produto Salvo com Sucesso!");
+            showToast("Produto Salvo no Firebase!");
         }
 
+        window.handleImageUpload = function(input) {
+            if(input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) { document.getElementById('formPreview').src = e.target.result; document.getElementById('formPreview').style.display = 'block'; document.getElementById('uploadPlaceholder').style.display = 'none'; }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        window.previewUrl = function(url) { if(url) { document.getElementById('formPreview').src = url; document.getElementById('formPreview').style.display = 'block'; document.getElementById('uploadPlaceholder').style.display = 'none'; } }
+        
         window.deleteProduct = async function(id) { 
             if(confirm("Excluir?")) { 
                 window.products = window.products.filter(p => p.id !== id); 
