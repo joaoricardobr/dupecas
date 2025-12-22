@@ -1,258 +1,1737 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dupeças - Sistema Novo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dupeças Duarte Peças | Sistema Integrado</title>
+    
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
-        /* CSS LIMPO E FUNCIONAL */
-        :root { --primary: #2563eb; --bg: #f8fafc; --text: #1e293b; --card: #ffffff; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg); color: var(--text); padding-bottom: 50px; }
-        
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .btn { background: var(--primary); color: white; padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; }
-        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
-        
-        /* Grid de Produtos */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; margin-top: 20px; }
-        .card { background: var(--card); border-radius: 12px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
-        .card img { width: 100%; height: 200px; object-fit: contain; background: #fff; border-bottom: 1px solid #eee; }
-        .card-body { padding: 15px; }
-        .price { font-size: 1.2rem; font-weight: 800; color: var(--primary); }
-        
-        /* Modal */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        /* ESTILOS CSS COMPLETOS */
+        :root {
+            --primary: #2563eb;         
+            --primary-dark: #1e40af;    
+            --primary-light: #eff6ff;   
+            --secondary: #0f172a;        
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --border-focus: #2563eb;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --sidebar-width: 280px;
+            --sidebar-collapsed-width: 80px;
+            --header-height: 70px;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --radius: 0.75rem;
+        }
+        body.dark-mode {
+            --primary: #3b82f6;
+            --primary-dark: #60a5fa;
+            --primary-light: #1e293b;
+            --secondary: #020617;
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --border-focus: #3b82f6;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-body); color: var(--text-main); transition: background 0.3s, color 0.3s; overflow-x: hidden; display: flex; flex-direction: column; min-height: 100vh; }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+        button { cursor: pointer; border: none; font-family: inherit; }
+        input, select, textarea { width: 100%; padding: 0.8rem 1rem; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 1rem; background: var(--bg-body); color: var(--text-main); font-size: 0.95rem; transition: all 0.2s; }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        label { display: block; margin-bottom: 0.4rem; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
+        .container { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; }
+        .flex { display: flex; } .flex-col { flex-direction: column; } .items-center { align-items: center; } .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 0.5rem; } .gap-3 { gap: 0.75rem; } .gap-4 { gap: 1rem; } .hidden { display: none !important; } .w-full { width: 100%; }
+        .text-sm { font-size: 0.875rem; } .font-bold { font-weight: 700; } .rounded { border-radius: var(--radius); } .text-warning { color: var(--warning); }
+        .btn { padding: 0.75rem 1.25rem; border-radius: var(--radius); font-weight: 600; font-size: 0.95rem; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer; border: 1px solid transparent; }
+        .btn-sm { padding: 0.5rem 1rem; font-size: 0.85rem; }
+        .btn-primary { background: var(--primary); color: white; box-shadow: var(--shadow-sm); }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+        .btn-secondary { background: var(--bg-body); border: 1px solid var(--border); color: var(--text-main); }
+        .btn-secondary:hover { background: var(--border); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-icon { padding: 0.6rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; background: transparent; color: var(--text-muted); }
+        .btn-icon:hover { background: rgba(0,0,0,0.05); color: var(--primary); }
+        header { background: var(--bg-card); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; height: var(--header-height); box-shadow: var(--shadow-sm); }
+        .header-inner { height: 100%; display: flex; align-items: center; justify-content: space-between; }
+        .logo-area { display: flex; align-items: center; gap: 0.75rem; }
+        .logo-icon { background: var(--primary); color: white; padding: 0.5rem; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 0.5rem; }
+        .logo-text h1 { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.5px; line-height: 1; }
+        .logo-text span { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 600; }
+        .search-wrapper { flex: 1; max-width: 500px; position: relative; margin: 0 2rem; }
+        .search-wrapper input { margin: 0; padding-left: 2.75rem; border-radius: 99px; background: var(--bg-body); border: 1px solid transparent; }
+        .search-wrapper input:focus { background: var(--bg-card); border-color: var(--primary); }
+        .search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); width: 18px; pointer-events: none; }
+        .promo-section { padding: 2rem 0; }
+        .promo-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+        @media(min-width: 768px) { .promo-grid { grid-template-columns: 2fr 1fr; } }
+        .promo-card { border-radius: 1rem; overflow: hidden; position: relative; height: 220px; display: flex; align-items: center; padding: 2rem; color: white; background-size: cover; background-position: center; box-shadow: var(--shadow-md); }
+        .promo-card.main { background-image: linear-gradient(to right, rgba(0,0,0,0.8), rgba(0,0,0,0.1)), url('https://images.pexels.com/photos/3807386/pexels-photo-3807386.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'); }
+        .promo-card.secondary { background-image: linear-gradient(to right, rgba(37, 99, 235, 0.9), rgba(37, 99, 235, 0.6)), url('https://images.pexels.com/photos/4489749/pexels-photo-4489749.jpeg?auto=compress&cs=tinysrgb&w=600'); }
+        .promo-content { position: relative; z-index: 2; max-width: 60%; }
+        .promo-tag { background: #f59e0b; color: black; font-weight: 700; font-size: 0.7rem; padding: 0.3rem 0.6rem; border-radius: 4px; text-transform: uppercase; margin-bottom: 0.5rem; display: inline-block; }
+        .promo-title { font-size: 1.8rem; font-weight: 800; line-height: 1.1; margin-bottom: 0.5rem; }
+        .promo-desc { font-size: 0.9rem; opacity: 0.9; margin-bottom: 1rem; }
+        .filter-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow-sm); margin-bottom: 2rem; }
+        .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
+        .toolbar { background: var(--bg-card); padding: 1rem 0; border-bottom: 1px solid var(--border); position: sticky; top: var(--header-height); z-index: 30; }
+        .categories-scroll { display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+        .cat-pill { padding: 0.5rem 1.25rem; border-radius: 99px; background: var(--bg-body); border: 1px solid var(--border); font-size: 0.9rem; white-space: nowrap; cursor: pointer; transition: 0.2s; font-weight: 500; color: var(--text-muted); }
+        .cat-pill:hover, .cat-pill.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; padding: 2rem 0; }
+        .product-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 1rem; overflow: hidden; transition: 0.3s; position: relative; display: flex; flex-direction: column; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); border-color: var(--primary); }
+        .card-img { height: 200px; width: 100%; object-fit: contain; padding: 10px; background: #f8fafc; cursor: pointer; border-bottom: 1px solid var(--border); }
+        .card-body { padding: 1.25rem; flex: 1; display: flex; flex-direction: column; }
+        .card-cat { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px; margin-bottom: 0.25rem; }
+        .card-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; line-height: 1.4; color: var(--text-main); min-height: 2.8rem; }
+        .card-meta { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem; display: flex; flex-direction: column; gap: 2px; }
+        .card-price { font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin-top: auto; display: flex; align-items: center; justify-content: space-between; }
+        .btn-cart-mini { width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .btn-cart-mini:hover { background: var(--primary); color: white; transform: scale(1.1); }
+        .products-list { display: flex; flex-direction: column; gap: 1rem; padding: 2rem 0; }
+        .products-list .product-card { flex-direction: row; height: auto; align-items: center; padding-right: 1.5rem; }
+        .products-list .card-img { width: 140px; height: 140px; flex-shrink: 0; }
+        .products-list .card-body { padding: 1rem 1.5rem; }
+        .admin-layout { display: flex; height: 100vh; overflow: hidden; }
+        .admin-sidebar { width: var(--sidebar-width); background: var(--secondary); color: white; display: flex; flex-direction: column; flex-shrink: 0; z-index: 100; transition: width 0.3s ease; overflow: hidden; white-space: nowrap; }
+        .admin-sidebar.collapsed { width: var(--sidebar-collapsed-width); }
+        .admin-sidebar.collapsed .logo-text, .admin-sidebar.collapsed .menu-text, .admin-sidebar.collapsed .badge-count { display: none; }
+        .admin-sidebar.collapsed .sidebar-logo { justify-content: center; padding: 1.5rem 0; }
+        .admin-sidebar.collapsed .menu-item { justify-content: center; padding: 1rem 0; }
+        .admin-sidebar.collapsed .menu-item i { margin: 0; }
+        .sidebar-logo { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 0.75rem; height: 80px; }
+        .sidebar-menu { padding: 1.5rem 1rem; flex: 1; display: flex; flex-direction: column; gap: 0.5rem; overflow-y: auto; overflow-x: hidden; }
+        .menu-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1rem; border-radius: 0.5rem; color: #94a3b8; font-weight: 500; transition: 0.2s; cursor: pointer; }
+        .menu-item:hover, .menu-item.active { background: var(--primary); color: white; }
+        .menu-item i { width: 20px; height: 20px; flex-shrink: 0; }
+        .admin-main { flex: 1; background: var(--bg-body); overflow-y: auto; padding: 2rem; transition: margin 0.3s; }
+        .data-table-wrapper { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card); }
+        .data-table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        .data-table th { text-align: left; padding: 1rem; background: var(--bg-body); border-bottom: 2px solid var(--border); color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 700; }
+        .data-table td { padding: 1rem; border-bottom: 1px solid var(--border); font-size: 0.95rem; vertical-align: middle; background: var(--bg-card); }
+        .data-table tr:hover td { background: var(--primary-light); }
+        .report-tabs { display: flex; gap: 0.5rem; overflow-x: auto; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+        .report-tab-btn { padding: 0.5rem 1rem; background: transparent; border: none; font-weight: 600; color: var(--text-muted); border-bottom: 2px solid transparent; transition: 0.2s; white-space: nowrap; }
+        .report-tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .status-badge { padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
+        .status-Pendente { background: #fef3c7; color: #d97706; }
+        .status-Entregue { background: #dcfce7; color: #16a34a; }
+        .status-Cancelado { background: #fee2e2; color: #b91c1c; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 1rem; }
         .modal-overlay.active { display: flex; }
-        .modal { background: white; padding: 2rem; border-radius: 12px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
-        
-        /* Loading */
-        #loading { display: none; position: fixed; top: 20px; right: 20px; background: #333; color: white; padding: 10px 20px; border-radius: 50px; z-index: 2000; }
+        .modal { background: var(--bg-card); width: 100%; max-width: 900px; border-radius: 1rem; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); animation: scaleIn 0.2s; max-height: 90vh; overflow-y: auto; position: relative; border: 1px solid var(--border); }
+        .close-modal { position: absolute; top: 1rem; right: 1rem; background: var(--bg-body); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid var(--border); }
+        .cart-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 100%; max-width: 450px; background: var(--bg-card); z-index: 200; transform: translateX(100%); transition: 0.3s; display: flex; flex-direction: column; box-shadow: -10px 0 30px rgba(0,0,0,0.2); }
+        .cart-drawer.open { transform: translateX(0); }
+        .cart-header { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--secondary); color: white; }
+        .cart-body { flex: 1; overflow-y: auto; padding: 1.5rem; }
+        .cart-footer { padding: 2rem; border-top: 1px solid var(--border); background: var(--bg-body); }
+        .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 150; display: none; }
+        .drawer-overlay.open { display: block; }
+        .qty-controls { display: flex; align-items: center; gap: 0.5rem; background: var(--bg-body); border: 1px solid var(--border); border-radius: 4px; padding: 2px; }
+        .qty-btn { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; background: white; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; font-weight: bold; color: var(--text-main); }
+        .qty-btn:hover { background: var(--primary-light); color: var(--primary); }
+        .qty-val { font-size: 0.9rem; font-weight: 600; min-width: 20px; text-align: center; }
+        .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: var(--secondary); color: white; padding: 12px 20px; border-radius: 8px; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 10px; animation: slideInRight 0.3s ease-out; max-width: 300px; font-size: 0.9rem; }
+        .toast.success { border-left: 4px solid var(--success); }
+        .toast.error { border-left: 4px solid var(--danger); }
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .animate-spin-slow { animation: spin 2s linear infinite; }
+        @media (max-width: 768px) {
+            .admin-sidebar { position: fixed; top: 0; left: 0; bottom: 0; transform: translateX(-100%); width: 85%; }
+            .admin-sidebar.active { transform: translateX(0); }
+            .btn-collapse-sidebar { display: none !important; }
+            .hide-mobile { display: none; }
+            .search-wrapper { margin: 0 1rem; }
+            .admin-main { padding: 1rem; }
+            .promo-grid { grid-template-columns: 1fr; }
+            .mobile-card-table { display: block; }
+            .desktop-table-view { display: none; }
+            .admin-card-item { background: var(--bg-card); border-radius: 0.75rem; padding: 1rem; margin-bottom: 1rem; border: 1px solid var(--border); display: flex; gap: 1rem; align-items: center; }
+            .admin-card-img { width: 60px; height: 60px; border-radius: 0.5rem; object-fit: cover; }
+        }
+        @media (min-width: 769px) {
+            .mobile-card-table { display: none; }
+            .desktop-table-view { display: table; }
+            .btn-toggle-mobile { display: none; }
+        }
+        @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
-
-    <div id="loading">Processando...</div>
-
-    <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-            <h1>Dupeças <span style="font-size:0.5em; color:#666;">Sistema V2.0</span></h1>
-            <button class="btn" onclick="openModal()">+ Novo Produto</button>
-        </div>
-
-        <div id="productsGrid" class="grid">
+    
+    <div id="toastContainer" class="toast-container"></div>
+    
+    <div id="restoreModal" class="modal-overlay" style="z-index: 2000;">
+        <div class="modal" style="max-width: 400px; text-align: center;">
+            <div style="width: 64px; height: 64px; background: var(--primary-light); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                <i data-lucide="cloud-lightning" class="animate-spin-slow"></i> 
             </div>
+            <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 1rem;">Sincronizando Firebase</h3>
+            <div style="background: var(--border); border-radius: 99px; height: 10px; overflow: hidden; margin-bottom: 0.5rem; width: 100%;">
+                <div id="restoreProgress" style="width: 0%; height: 100%; background: var(--primary); transition: width 0.1s linear;"></div>
+            </div>
+            <p id="restoreStatus" style="font-size: 0.9rem; color: var(--text-muted); font-weight: 500;">Conectando...</p>
+        </div>
     </div>
 
-    <div id="productModal" class="modal-overlay">
+    <div id="loginModal" class="modal-overlay" onclick="if(event.target === this) closeLogin()">
+        <div class="modal" style="max-width: 400px; text-align: center;">
+            <div style="width: 64px; height: 64px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);">
+                <i data-lucide="lock" color="white" size="28"></i>
+            </div>
+            <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Acesso Restrito</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Painel Administrativo Dupeças</p>
+            <form onsubmit="handleLogin(event)">
+                <input type="password" id="adminPass" placeholder="Senha de acesso" style="text-align: center; font-size: 1.1rem; letter-spacing: 2px;" required>
+                <button type="submit" class="btn btn-primary w-full">Acessar Painel</button>
+            </form>
+            <button onclick="closeLogin()" style="margin-top: 1.5rem; color: var(--text-muted); background: none; font-size: 0.9rem;">Voltar à Loja</button>
+        </div>
+    </div>
+
+    <div id="orderDetailModal" class="modal-overlay" onclick="if(event.target === this) closeOrderDetail()">
         <div class="modal">
-            <h2 style="margin-bottom: 1rem;">Cadastrar Produto</h2>
-            <form id="prodForm">
+            <div class="close-modal" onclick="closeOrderDetail()"><i data-lucide="x"></i></div>
+            <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem;">Detalhes do Pedido</h3>
+            <div id="orderDetailContent"></div>
+        </div>
+    </div>
+
+    <div id="orderEditModal" class="modal-overlay" style="z-index: 1500;" onclick="if(event.target === this) closeEditOrder()">
+        <div class="modal" style="max-width: 800px;">
+            <div class="close-modal" onclick="closeEditOrder()"><i data-lucide="x"></i></div>
+            <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem;">Editar Pedido</h3>
+            
+            <div style="display:flex; flex-direction:column; gap:1rem; height: 100%;">
                 
-                <div class="input-group">
-                    <label>Imagem do Produto</label>
-                    <div style="border: 2px dashed #ccc; padding: 20px; text-align: center; border-radius: 8px; cursor: pointer;" onclick="document.getElementById('fileInput').click()">
-                        <img id="preview" src="" style="max-height: 150px; display: none; margin: 0 auto;">
-                        <span id="placeholder">Clique para escolher foto</span>
-                    </div>
-                    <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                <div style="flex:1; border:1px solid var(--border); border-radius:8px; padding:1rem; overflow-y:auto; max-height: 250px;">
+                    <h4 style="font-weight:700; margin-bottom:0.5rem;">Itens no Pedido</h4>
+                    <div id="editOrderItemsList"></div>
                 </div>
 
-                <div class="input-group">
-                    <label>Nome da Peça</label>
-                    <input type="text" id="name" required>
+                <div style="border:1px solid var(--border); border-radius:8px; padding:1rem; background: var(--bg-body);">
+                    <h4 style="font-weight:700; margin-bottom:0.5rem;">Adicionar Produto</h4>
+                    <input type="text" id="editSearchProd" placeholder="Buscar produto para adicionar..." oninput="searchProdForOrder(this.value)">
+                    <div id="editProdResults" style="max-height: 150px; overflow-y: auto; display: none; background: white; border: 1px solid var(--border); border-radius: 4px;"></div>
                 </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1rem;">
+                    <div style="font-size:1.2rem; font-weight:800;">Novo Total: <span id="editOrderTotal">R$ 0,00</span></div>
+                    <button onclick="saveOrderChanges()" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="storeView">
+        <header>
+            <div class="container header-inner">
+                <div class="logo-area cursor-pointer" onclick="window.scrollTo(0,0)">
+                    <div class="logo-icon"><i data-lucide="settings-2"></i></div>
+                    <div class="logo-text">
+                        <h1>DUPEÇAS</h1>
+                        <span>Duarte Peças</span>
+                    </div>
+                </div>
+
+                <div class="search-wrapper hide-mobile">
+                    <i data-lucide="search" class="search-icon"></i>
+                    <input type="text" id="searchInput" placeholder="Pesquisar peça, SKU, marca..." oninput="applyFilters()">
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleTheme()" class="btn-icon hide-mobile" title="Alternar Tema"><i data-lucide="moon"></i></button>
+                    <button onclick="openLogin()" class="btn-icon hide-mobile" title="Admin"><i data-lucide="shield"></i></button>
+                    <button onclick="toggleCart()" class="btn btn-primary" style="padding: 0.5rem 1rem; position: relative;">
+                        <i data-lucide="shopping-bag"></i> <span class="hide-mobile">Carrinho</span>
+                        <span id="cartCountBadge" class="hidden" style="position: absolute; top: -5px; right: -5px; background: var(--danger); width: 20px; height: 20px; border-radius: 50%; font-size: 11px; display: flex; align-items: center; justify-content: center; border: 2px solid white;">0</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="container promo-section">
+            <div class="promo-grid">
+                <div class="promo-card main">
+                    <div class="promo-content">
+                        <span class="promo-tag">Oferta da Semana</span>
+                        <h2 class="promo-title">Kits de Revisão<br>com 15% OFF</h2>
+                        <p class="promo-desc">Garanta a manutenção do seu veículo com as melhores marcas.</p>
+                        <button class="btn btn-primary" onclick="window.scrollTo(0,800)">Ver Ofertas</button>
+                    </div>
+                </div>
+                <div class="promo-card secondary">
+                    <div class="promo-content">
+                        <span class="promo-tag">Novidade</span>
+                        <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;">Óleos Sintéticos</h3>
+                        <p class="promo-desc">Alta performance.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="filter-box">
+                <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="car"></i> Compatibilidade Veicular</h2>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Encontre peças exatas para seu carro.</p>
                 
-                <div style="display: flex; gap: 10px;">
-                    <div class="input-group" style="flex: 1;">
-                        <label>Preço (R$)</label>
-                        <input type="number" id="price" step="0.01" required>
+                <div class="filter-grid">
+                    <div>
+                        <label>Marca</label>
+                        <select id="filterBrand" onchange="applyFilters()">
+                            <option value="">Todas</option>
+                        </select>
                     </div>
-                    <div class="input-group" style="flex: 1;">
-                        <label>Estoque</label>
-                        <input type="number" id="stock" required>
+                    <div>
+                        <label>Modelo (Digite)</label>
+                        <input type="text" id="filterModel" placeholder="Ex: Gol, Onix..." oninput="applyFilters()" style="margin-bottom:0;">
+                    </div>
+                    <div>
+                        <label>Ano</label>
+                        <input type="text" id="filterYear" placeholder="Ex: 2022" oninput="applyFilters()" style="margin-bottom:0;">
+                    </div>
+                    <div>
+                        <label>SKU / Código</label>
+                        <input type="text" id="filterSku" placeholder="Código da peça" oninput="applyFilters()" style="margin-bottom:0;">
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <div class="input-group">
-                    <label>Veículo Compatível (Marca/Modelo)</label>
-                    <input type="text" id="vehicle" placeholder="Ex: Fiat Palio">
+        <div class="toolbar">
+            <div class="container flex flex-col md:flex-row gap-4 justify-between items-center">
+                <div class="w-full md:hidden relative">
+                    <input type="text" placeholder="Buscar..." oninput="filterSearch(this.value)" style="margin: 0; padding-left: 1rem; border-radius: 99px;">
                 </div>
 
-                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-                    <button type="button" class="btn" style="background: #ccc; color: #333;" onclick="closeModal()">Cancelar</button>
-                    <button type="submit" class="btn">Salvar Produto</button>
+                <div class="categories-scroll w-full md:w-auto" id="categoryFilters">
+                    </div>
+
+                <div class="flex gap-2 items-center w-full md:w-auto justify-end overflow-x-auto">
+                    <select id="sortOrder" onchange="applyFilters()" style="margin: 0; width: auto; padding: 0.5rem 2rem 0.5rem 1rem; border-radius: 99px; font-size: 0.9rem;">
+                        <option value="relevant">Relevância</option>
+                        <option value="asc">Menor Preço</option>
+                        <option value="desc">Maior Preço</option>
+                        <option value="az">A-Z</option>
+                    </select>
+                    <div class="flex bg-body rounded border p-1 hide-mobile">
+                        <button onclick="setView('grid')" class="btn-icon"><i data-lucide="grid" size="18"></i></button>
+                        <button onclick="setView('list')" class="btn-icon"><i data-lucide="list" size="18"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <main class="container">
+            <div id="resultsCount" style="margin-bottom: 1rem; font-weight: 600; color: var(--text-muted); font-size: 0.9rem;"></div>
+            <div id="productsContainer" class="products-grid">
+                </div>
+            
+            <div id="emptyState" class="hidden text-center py-20">
+                <div style="background: var(--bg-body); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                    <i data-lucide="package-search" size="40" color="#94a3b8"></i>
+                </div>
+                <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-main);">Nenhum produto encontrado</h3>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Tente ajustar os filtros veiculares ou sua busca.</p>
+                <button onclick="resetFilters()" class="btn btn-secondary">Limpar Filtros</button>
+            </div>
+        </main>
+
+        <footer style="background: #0f172a; color: #e2e8f0; padding-top: 4rem; margin-top: 4rem; border-top: 1px solid #1e293b;">
+            <div class="container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 3rem; padding-bottom: 3rem;">
+                <div>
+                    <h3 style="color: white; font-size: 1.25rem; font-weight: 800; margin-bottom: 0.5rem;">Dupeças Duarte Peças</h3>
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="text-warning font-bold text-lg">4.8</span>
+                        <div class="flex text-warning">
+                            <i data-lucide="star" fill="currentColor" size="16"></i>
+                            <i data-lucide="star" fill="currentColor" size="16"></i>
+                            <i data-lucide="star" fill="currentColor" size="16"></i>
+                            <i data-lucide="star" fill="currentColor" size="16"></i>
+                            <i data-lucide="star" fill="currentColor" size="16"></i>
+                        </div>
+                        <span class="text-xs" style="color:#94a3b8;">(4.212 avaliações Google)</span>
+                    </div>
+                    <p style="font-size: 0.9rem; line-height: 1.6; color: #94a3b8; margin-bottom: 1.5rem;">
+                        Referência em autopeças em Petrolina e região. Qualidade, preço justo e o melhor atendimento para o seu veículo.
+                    </p>
+                    <div class="flex gap-2">
+                        <a href="https://www.google.com/maps/search/?api=1&query=Dupeças+Duarte+Peças+Petrolina" target="_blank" class="btn btn-primary btn-sm">
+                            <i data-lucide="map"></i> Rotas
+                        </a>
+                        <a href="tel:558799094280" class="btn btn-secondary btn-sm" style="background: rgba(255,255,255,0.1); border:none; color: white;">
+                            <i data-lucide="phone"></i> Ligar
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h4 style="color: white; font-weight: 700; margin-bottom: 1.25rem;">Contato & Endereço</h4>
+                    <ul style="display: flex; flex-direction: column; gap: 1rem; font-size: 0.95rem;">
+                        <li style="display: flex; gap: 0.75rem; color: #cbd5e1;">
+                            <i data-lucide="map-pin" style="flex-shrink: 0; color: var(--primary);"></i>
+                            Av. Sete de Setembro, 105 - Petrolina - PE
+                        </li>
+                        <li style="display: flex; gap: 0.75rem; color: #cbd5e1;">
+                            <i data-lucide="phone" style="flex-shrink: 0; color: var(--primary);"></i>
+                            (87) 9909-4280
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="color: white; font-weight: 700; margin-bottom: 1.25rem;">Navegação</h4>
+                    <ul style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.95rem;">
+                        <li><a href="#" onclick="window.scrollTo(0,0)" style="color: #94a3b8; transition: 0.2s;">Início</a></li>
+                        <li><a href="#" onclick="toggleCart()" style="color: #94a3b8; transition: 0.2s;">Meu Carrinho</a></li>
+                        <li><a href="#" onclick="openLogin()" style="color: #94a3b8; transition: 0.2s;">Área Administrativa</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div style="border-top: 1px solid #1e293b; padding: 1.5rem 0; text-align: center; font-size: 0.85rem; color: #64748b;">
+                © 2025 Dupeças Duarte Peças. Todos os direitos reservados.
+            </div>
+        </footer>
+    </div>
+
+    <div id="adminView" class="hidden admin-layout">
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="sidebar-logo">
+                <div class="logo-icon"><i data-lucide="settings-2"></i></div>
+                <div class="logo-text">
+                    <h3 style="font-weight: 800; font-size: 1.1rem;">ADMIN</h3>
+                    <span style="font-size: 0.75rem; opacity: 0.7;">Gerenciador (Firebase)</span>
+                </div>
+                <button class="md:hidden btn-toggle-mobile" onclick="toggleSidebarMobile()" style="margin-left: auto; color: white;"><i data-lucide="x"></i></button>
+            </div>
+            
+            <nav class="sidebar-menu">
+                <div class="menu-item active" onclick="setAdminTab('dashboard')">
+                    <i data-lucide="bar-chart-2"></i> <span class="menu-text">Dashboard</span>
+                </div>
+                <div class="menu-item" onclick="setAdminTab('products')">
+                    <i data-lucide="package"></i> <span class="menu-text">Produtos</span>
+                </div>
+                <div class="menu-item" onclick="setAdminTab('orders')">
+                    <i data-lucide="shopping-bag"></i> <span class="menu-text">Pedidos</span> 
+                    <span id="orderCountBadge" class="badge-count" style="background: var(--danger); font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; margin-left: auto;">0</span>
+                </div>
+                <div class="menu-item" onclick="setAdminTab('reports')">
+                    <i data-lucide="pie-chart"></i> <span class="menu-text">Relatórios</span>
+                </div>
+                <div class="menu-item" onclick="setAdminTab('brands')">
+                    <i data-lucide="car"></i> <span class="menu-text">Marcas</span>
+                </div>
+                <div class="menu-item" onclick="setAdminTab('settings')">
+                    <i data-lucide="settings"></i> <span class="menu-text">Configurações</span>
+                </div>
+            </nav>
+            
+            <div style="padding: 1rem; border-top: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 0.5rem;">
+                <button onclick="toggleSidebarCollapse()" class="btn-icon btn-collapse-sidebar" style="color:white; width: 100%; justify-content: flex-start; gap: 10px; padding: 0.8rem;">
+                    <i id="collapseIcon" data-lucide="chevrons-left"></i> <span class="menu-text">Recolher</span>
+                </button>
+                <button onclick="logoutAdmin()" class="btn btn-danger w-full" style="justify-content: center; margin-top: 0.5rem;">
+                    <i data-lucide="log-out" style="width: 16px;"></i> <span class="menu-text">Sair</span>
+                </button>
+            </div>
+        </aside>
+
+        <main class="admin-main">
+            <header class="flex justify-between items-center mb-6">
+                <button class="md:hidden btn-icon" onclick="toggleSidebarMobile()"><i data-lucide="menu"></i></button>
+                <h2 id="pageTitle" style="font-size: 1.5rem; font-weight: 800; color: var(--text-main);">Visão Geral</h2>
+                <div style="width: 40px;"></div>
+            </header>
+
+            <div id="tab-dashboard" class="admin-tab">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                    <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
+                        <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem;">Vendas Totais</div>
+                        <div style="font-size: 1.8rem; font-weight: 800; color: var(--primary);" id="kpiSales">R$ 0,00</div>
+                    </div>
+                    <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; box-shadow: var(--shadow-sm); border: 1px solid var(--border); border-left: 4px solid var(--primary);">
+                        <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem;">Pedidos</div>
+                        <div style="font-size: 1.8rem; font-weight: 800;" id="kpiOrderCount">0</div>
+                    </div>
+                    <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; box-shadow: var(--shadow-sm); border: 1px solid var(--border); border-left: 4px solid var(--success);">
+                        <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem;">Estoque (Valor)</div>
+                        <div style="font-size: 1.8rem; font-weight: 800;" id="kpiStockVal">R$ 0,00</div>
+                    </div>
+                </div>
+                <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border);">
+                    <h4 style="font-weight: 700; margin-bottom: 1rem;">Vendas Recentes</h4>
+                    <div style="height: 250px;"><canvas id="salesChart"></canvas></div>
+                </div>
+            </div>
+
+            <div id="tab-products" class="admin-tab hidden">
+                <div class="flex flex-col md:flex-row justify-between gap-4 mb-6">
+                    <input type="text" placeholder="Filtrar por nome, SKU, veículo..." oninput="filterAdminTable(this.value)" style="margin: 0; max-width: 300px;">
+                    <button onclick="openProductForm()" class="btn btn-primary"><i data-lucide="plus"></i> Novo Produto</button>
+                </div>
+                <div id="adminMobileList" class="mobile-card-table"></div>
+                <div class="desktop-table-view data-table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Imagem</th>
+                                <th>Produto / SKU</th>
+                                <th>Aplicação</th>
+                                <th>Preço</th>
+                                <th>Estoque</th>
+                                <th style="text-align: center;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tab-reports" class="admin-tab hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-lg">Central de Relatórios</h3>
+                    <div class="flex gap-2">
+                        <button onclick="exportCurrentReport('csv')" class="btn btn-secondary"><i data-lucide="sheet"></i> CSV</button>
+                    </div>
+                </div>
+                <div class="report-tabs">
+                    <button class="report-tab-btn active" onclick="switchReport('sales')">Vendas</button>
+                    <button class="report-tab-btn" onclick="switchReport('stock')">Estoque Baixo</button>
+                    <button class="report-tab-btn" onclick="switchReport('full-inventory')">Inventário Completo</button>
+                    <button class="report-tab-btn" onclick="switchReport('financial')">Financeiro</button>
+                    <button class="report-tab-btn" onclick="switchReport('compatibility')">Compatibilidade</button>
+                </div>
+                <div id="report-content" class="bg-card border rounded p-4" style="background: var(--bg-card); padding: 1.5rem;"></div>
+            </div>
+
+            <div id="tab-brands" class="admin-tab hidden">
+                <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border); max-width: 600px;">
+                    <h3 class="font-bold mb-4">Gerenciar Marcas de Veículos</h3>
+                    <div class="flex gap-2 mb-4">
+                        <input type="text" id="newBrandInput" placeholder="Nova Marca (Ex: Tesla)" style="margin: 0;">
+                        <button onclick="addBrand()" class="btn btn-primary">Adicionar</button>
+                    </div>
+                    <ul id="brandsList" style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius);"></ul>
+                </div>
+            </div>
+
+            <div id="tab-orders" class="admin-tab hidden">
+                <div class="data-table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>ID</th><th>Data</th><th>Cliente</th><th>Total</th><th>Status</th><th>Ações</th></tr>
+                        </thead>
+                        <tbody id="ordersTableBody"></tbody>
+                    </table>
+                </div>
+                <div id="noOrdersMsg" class="hidden" style="padding: 2rem; text-align: center; color: var(--text-muted);">Nenhum pedido registrado ainda.</div>
+            </div>
+
+            <div id="tab-settings" class="admin-tab hidden">
+                <div style="display: grid; gap: 1.5rem; max-width: 800px;">
+                    <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border);">
+                        <h3 style="font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="cloud"></i> Sincronização e Backup (Firebase)</h3>
+                        <p class="text-sm text-muted mb-4">Gerenciamento de dados na nuvem.</p>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <button onclick="exportData('json')" class="btn btn-primary flex-1"><i data-lucide="download"></i> Exportar Backup (JSON)</button>
+                            <label class="btn btn-secondary flex-1 cursor-pointer">
+                                <i data-lucide="upload"></i> Restaurar Backup
+                                <input type="file" accept=".json" class="hidden" onchange="restoreBackup(this)">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border);">
+                        <h3 style="font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="image"></i> Atualização em Massa</h3>
+                        <textarea id="bulkImgInput" rows="4" placeholder="Ex: ID,https://link-da-imagem.jpg"></textarea>
+                        <button onclick="bulkUpdateImages()" class="btn btn-primary w-full">Processar Imagens</button>
+                    </div>
+                    <div style="background: #fef2f2; padding: 1.5rem; border-radius: 1rem; border: 1px solid #fecaca;">
+                        <h3 style="font-weight: 700; font-size: 1.1rem; margin-bottom: 0.5rem; color: #b91c1c;">Zona de Perigo</h3>
+                        <p class="text-sm text-muted mb-2">Requer senha de segurança (dupeca2026)</p>
+                        <button onclick="resetSystem()" class="btn btn-danger w-full">Apagar Todo o Banco de Dados</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="productFormModal" class="modal-overlay" onclick="if(event.target === this) closeProductForm()">
+        <div class="modal">
+            <div class="close-modal" onclick="closeProductForm()"><i data-lucide="x"></i></div>
+            <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1.5rem;">Cadastro de Produto</h3>
+            <form onsubmit="saveProduct(event)">
+                <input type="hidden" id="prodId">
+                <div style="display: grid; grid-template-columns: 1fr; md:grid-template-columns: 1fr 2fr; gap: 2rem;">
+                    <div>
+                        <div style="width: 100%; aspect-ratio: 1; background: #f1f5f9; border-radius: var(--radius); overflow: hidden; position: relative; border: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer;" onclick="document.getElementById('fileInput').click()">
+                            <img id="formPreview" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                            <div id="uploadPlaceholder" style="text-align: center; color: var(--text-muted);">
+                                <i data-lucide="camera" size="32"></i><br><span style="font-size: 0.8rem;">Clique para enviar</span>
+                            </div>
+                        </div>
+                        <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleImageUpload(this)">
+                        <input type="text" id="prodImgUrl" placeholder="Ou URL da imagem" class="mt-2" onchange="previewUrl(this.value)">
+                    </div>
+                    <div>
+                        <div class="flex gap-4">
+                            <input type="text" id="prodName" placeholder="Nome do Produto *" required class="w-full">
+                            <input type="text" id="prodSku" placeholder="SKU / Cód. *" required style="width: 140px;">
+                        </div>
+                        <div class="flex gap-4">
+                            <input type="text" id="prodCat" list="catList" placeholder="Categoria *" required>
+                            <datalist id="catList"></datalist>
+                            <input type="text" id="prodSupplier" placeholder="Fornecedor">
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="w-full"><label>Preço (R$)</label><input type="number" id="prodPrice" step="0.01" required></div>
+                            <div class="w-full"><label>Estoque</label><input type="number" id="prodStock" required></div>
+                        </div>
+                        <fieldset style="border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius); margin-bottom: 1rem;">
+                            <legend style="font-size: 0.85rem; font-weight: 700; color: var(--primary); padding: 0 0.5rem;">Dados Veiculares</legend>
+                            <div class="flex gap-4">
+                                <div class="w-full"><label>Marca</label><select id="prodVehBrand"></select></div>
+                                <div class="w-full"><label>Modelo</label><input type="text" id="prodVehModel" placeholder="Ex: Gol"></div>
+                            </div>
+                            <div class="flex gap-4">
+                                <div class="w-full"><label>Ano</label><input type="text" id="prodVehYear"></div>
+                                <div class="w-full"><label>Versão</label><input type="text" id="prodVehVersion"></div>
+                            </div>
+                        </fieldset>
+                        <textarea id="prodDesc" rows="3" placeholder="Descrição técnica completa..."></textarea>
+                        <button type="submit" class="btn btn-primary w-full">Salvar Produto</button>
+                    </div>
                 </div>
             </form>
         </div>
     </div>
 
-    <script type="module">
-        // -----------------------------------------------------------
-        // 1. IMPORTAÇÕES
-        // -----------------------------------------------------------
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+    <div id="cartDrawer" class="cart-drawer">
+        <div class="cart-header">
+            <h3 style="font-weight: 700; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="shopping-bag"></i> Seu Carrinho</h3>
+            <button onclick="toggleCart()" style="color: white; background: rgba(255,255,255,0.1); padding: 0.5rem; border-radius: 50%;"><i data-lucide="x"></i></button>
+        </div>
+        <div id="cartItems" class="cart-body"></div>
+        <div class="cart-footer">
+            <div class="checkout-form">
+                <h4 style="font-weight: 700; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 1rem; color: var(--text-muted);">Dados de Contato</h4>
+                <input type="text" id="clientName" placeholder="Nome Completo *" required>
+                <input type="tel" id="clientPhone" placeholder="WhatsApp / Telefone *" required>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 1.25rem; font-weight: 800; color: var(--text-main);">
+                <span>Total</span>
+                <span id="cartTotal">R$ 0,00</span>
+            </div>
+            <button onclick="checkout()" class="btn btn-primary w-full" style="padding: 1rem; background: #25d366; color: white; border: none;">
+                <i data-lucide="message-circle"></i> Finalizar no WhatsApp
+            </button>
+        </div>
+    </div>
+    <div id="drawerOverlay" class="drawer-overlay" onclick="toggleCart()"></div>
 
-        // -----------------------------------------------------------
-        // 2. CONFIGURAÇÃO (COLE A SUA AQUI)
-        // -----------------------------------------------------------
+    <div id="productDetailModal" class="modal-overlay" onclick="if(event.target === this) closeProductDetail()">
+        <div class="modal">
+            <div class="close-modal" onclick="closeProductDetail()"><i data-lucide="x"></i></div>
+            <div style="display: flex; gap: 2rem; flex-direction: column; md:flex-row;">
+                <div style="flex: 1;">
+                    <img id="detailImg" src="" style="width: 100%; border-radius: var(--radius); border: 1px solid var(--border);">
+                </div>
+                <div style="flex: 1.5; display: flex; flex-direction: column;">
+                    <span id="detailCat" class="badge" style="background: var(--primary-light); color: var(--primary); padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; align-self: flex-start;">CAT</span>
+                    <h2 id="detailName" style="font-size: 1.75rem; font-weight: 800; margin-top: 0.5rem; line-height: 1.2;">Nome</h2>
+                    <div id="detailSku" style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">SKU: ---</div>
+                    
+                    <div style="background: var(--bg-body); padding: 1rem; border-radius: var(--radius); margin-bottom: 1rem; border: 1px solid var(--border);">
+                        <h4 style="font-size: 0.85rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); margin-bottom: 0.5rem;">Compatibilidade</h4>
+                        <ul id="detailVehicleSpecs" style="font-size: 0.95rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;"></ul>
+                    </div>
+
+                    <div id="detailPrice" style="font-size: 2rem; font-weight: 800; color: var(--primary); margin-top: auto;">R$ 0,00</div>
+                    <p id="detailDesc" style="line-height: 1.6; color: var(--text-muted); margin-bottom: 1.5rem;">...</p>
+                    <button id="detailBtnAdd" class="btn btn-primary w-full" style="padding: 1rem;">Adicionar ao Carrinho</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // --- IMPORTAÇÕES DO FIREBASE (COM STORAGE) ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
+
+        // CONFIGURAÇÃO
         const firebaseConfig = {
             apiKey: "AIzaSyA1bJpcVTG8C7W6SDqYTUW2MGEgagiKN-E",
             authDomain: "dupecas-77955.firebaseapp.com",
             projectId: "dupecas-77955",
-            
-            // ATENÇÃO: Se o seu bucket no terminal for .appspot.com, MUDE AQUI!
-            // O padrão costuma ser: id-do-projeto.appspot.com
-            storageBucket: "dupecas-77955.appspot.com", 
-            
+            storageBucket: "dupecas-77955.firebasestorage.app",
             messagingSenderId: "570238830984",
-            appId: "1:570238830984:web:83d08f95ce37fe5212123d"
+            appId: "1:570238830984:web:83d08f95ce37fe5212123d",
+            measurementId: "G-10HENTDJ8R"
         };
 
-        // INICIALIZA
+        // INICIALIZAÇÃO
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const storage = getStorage(app);
+        const storage = getStorage(app); // Inicializa Storage
+        const analytics = getAnalytics(app);
 
-        // VARIÁVEIS LOCAIS
-        let selectedFile = null;
+        // --- SERVIÇO DE BANCO DE DADOS (FIRESTORE) ---
+        const DBService = {
+            async getAll(collectionName) {
+                try {
+                    const querySnapshot = await getDocs(collection(db, collectionName));
+                    return querySnapshot.docs.map(doc => doc.data());
+                } catch (error) {
+                    console.error("Erro ao ler " + collectionName, error);
+                    return [];
+                }
+            },
 
-        // -----------------------------------------------------------
-        // 3. FUNÇÕES DE UI
-        // -----------------------------------------------------------
-        window.openModal = () => document.getElementById('productModal').classList.add('active');
-        window.closeModal = () => document.getElementById('productModal').classList.remove('active');
+            async put(collectionName, data) {
+                const idString = String(data.id || Date.now());
+                await setDoc(doc(db, collectionName, idString), data);
+                return data;
+            },
+
+            async delete(collectionName, id) {
+                await deleteDoc(doc(db, collectionName, String(id)));
+            },
+
+            async clear(collectionName) {
+                const q = await getDocs(collection(db, collectionName));
+                const batch = writeBatch(db);
+                q.forEach((doc) => {
+                    batch.delete(doc.ref);
+                });
+                await batch.commit();
+            }
+        };
+        window.DBService = DBService;
+
+        // Dados Iniciais
+        const DEFAULT_BRANDS = ["Todas", "Audi", "BMW", "BYD", "Chevrolet", "Citroën", "Fiat", "Ford", "Honda", "Hyundai", "Jeep", "Kia", "Mercedes-Benz", "Mitsubishi", "Nissan", "Peugeot", "Renault", "Toyota", "Volkswagen", "Volvo", "Yamaha"].map(b => ({ name: b }));
+        const INITIAL_PRODUCTS = [
+            { id: 1, name: "Óleo Sintético 5W30", category: "Óleos", price: 45.90, stock: 50, image: "https://images.pexels.com/photos/4489749/pexels-photo-4489749.jpeg?auto=compress&cs=tinysrgb&w=600", sku: "OL5W30", vehicleBrand: "Todas", vehicleModel: "Universal", description: "Proteção máxima." },
+            { id: 2, name: "Filtro de Óleo", category: "Filtros", price: 25.00, stock: 100, image: "https://images.pexels.com/photos/2244746/pexels-photo-2244746.jpeg?auto=compress&cs=tinysrgb&w=600", sku: "FIL001", vehicleBrand: "Volkswagen", vehicleModel: "Gol", description: "Alta retenção." },
+        ];
+
+        // --- VARIÁVEIS GLOBAIS ---
+        window.products = [];
+        window.cart = []; 
+        window.orders = [];
+        window.brands = [];
+        window.currentFilter = 'Todos';
+        window.isAdmin = false;
         
-        const showLoading = (show) => {
-            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        // NOVO: Armazena o arquivo de imagem selecionado para upload
+        window.currentImageFile = null;
+        
+        // --- FUNÇÕES GLOBAIS ---
+        window.showToast = function(msg, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            let icon = type === 'success' ? 'check-circle' : 'alert-circle';
+            toast.innerHTML = `<i data-lucide="${icon}" size="20"></i> <span>${msg}</span>`;
+            container.appendChild(toast);
+            lucide.createIcons();
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+        }
+
+        window.formatMoney = (val) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+        // --- CARREGAMENTO INICIAL ---
+        window.onload = async function() {
+            lucide.createIcons();
+            await loadData();
+            
+            // VERIFICA SESSÃO ADMIN
+            if (localStorage.getItem('dupecas_admin_logged') === 'true') {
+                window.isAdmin = true;
+                document.getElementById('adminView').classList.remove('hidden');
+                document.getElementById('storeView').classList.add('hidden');
+                loadAdminDashboard();
+            }
+
+            renderBrandsFilter();
+            renderCategories();
+            renderProducts();
+            updateCartUI();
+            initSidebarState();
+            if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
         };
 
-        // Preview da Imagem ao selecionar
-        document.getElementById('fileInput').addEventListener('change', (e) => {
-            if(e.target.files[0]) {
-                selectedFile = e.target.files[0];
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    document.getElementById('preview').src = ev.target.result;
-                    document.getElementById('preview').style.display = 'block';
-                    document.getElementById('placeholder').style.display = 'none';
-                };
-                reader.readAsDataURL(selectedFile);
-            }
-        });
-
-        // -----------------------------------------------------------
-        // 4. LÓGICA DE SALVAMENTO (UPLOAD + DATABASE)
-        // -----------------------------------------------------------
-        document.getElementById('prodForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            showLoading(true);
-
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            submitBtn.disabled = true;
-            submitBtn.innerText = "Enviando...";
-
-            try {
-                let imageUrl = "https://placehold.co/400?text=Sem+Imagem"; // Padrão se não tiver foto
-
-                // A) SE TIVER ARQUIVO, FAZ UPLOAD NO STORAGE
-                if (selectedFile) {
-                    console.log("Iniciando upload para o Storage...");
-                    // Cria referência: pasta produtos / timestamp_nomedoarquivo
-                    const storageRef = ref(storage, `produtos/${Date.now()}_${selectedFile.name}`);
-                    
-                    // Sobe o arquivo
-                    const snapshot = await uploadBytes(storageRef, selectedFile);
-                    console.log("Upload concluído!");
-
-                    // Pega o link público
-                    imageUrl = await getDownloadURL(snapshot.ref);
-                    console.log("URL da imagem:", imageUrl);
-                }
-
-                // B) SALVA OS DADOS NO FIRESTORE
-                const productData = {
-                    name: document.getElementById('name').value,
-                    price: parseFloat(document.getElementById('price').value),
-                    stock: parseInt(document.getElementById('stock').value),
-                    vehicle: document.getElementById('vehicle').value,
-                    image: imageUrl,
-                    createdAt: new Date()
-                };
-
-                await addDoc(collection(db, "products"), productData);
-                
-                alert("Produto cadastrado com sucesso!");
-                closeModal();
-                document.getElementById('prodForm').reset();
-                selectedFile = null;
-                document.getElementById('preview').style.display = 'none';
-                document.getElementById('placeholder').style.display = 'block';
-                
-                // Recarrega lista
-                loadProducts();
-
-            } catch (error) {
-                console.error("ERRO GRAVE:", error);
-                alert("Erro ao salvar: " + error.message);
-            } finally {
-                showLoading(false);
-                submitBtn.disabled = false;
-                submitBtn.innerText = "Salvar Produto";
-            }
-        });
-
-        // -----------------------------------------------------------
-        // 5. CARREGAR PRODUTOS
-        // -----------------------------------------------------------
-        async function loadProducts() {
-            const container = document.getElementById('productsGrid');
-            container.innerHTML = '<p>Carregando...</p>';
+        async function loadData() {
+            window.products = await DBService.getAll('products');
+            window.brands = await DBService.getAll('brands');
+            window.orders = await DBService.getAll('orders');
             
-            try {
-                const querySnapshot = await getDocs(collection(db, "products"));
+            const localCart = localStorage.getItem('dupecas_cart');
+            window.cart = localCart ? JSON.parse(localCart) : [];
+
+            if (window.products.length === 0) {
+                for(const p of INITIAL_PRODUCTS) await DBService.put('products', p);
+                window.products = [...INITIAL_PRODUCTS];
+            }
+            if (window.brands.length === 0) {
+                for(const b of DEFAULT_BRANDS) await DBService.put('brands', b);
+                window.brands = [...DEFAULT_BRANDS];
+            }
+            
+            let brandNames = window.brands.map(b => b.name).filter(b => b !== "Todas").sort();
+            window.brands = ["Todas", ...brandNames];
+        }
+        window.loadData = loadData; 
+
+        // --- FILTROS ---
+        window.renderBrandsFilter = function() {
+            const select = document.getElementById('filterBrand');
+            const formSelect = document.getElementById('prodVehBrand');
+            const html = window.brands.map(b => `<option value="${b}">${b}</option>`).join('');
+            if(select) select.innerHTML = html;
+            if(formSelect) formSelect.innerHTML = html;
+        }
+
+        window.renderCategories = function() {
+            const cats = ['Todos', ...new Set(window.products.map(p => p.category))];
+            document.getElementById('categoryFilters').innerHTML = cats.map(c => 
+                `<button class="cat-pill ${c === window.currentFilter ? 'active' : ''}" onclick="setCategoryFilter('${c}')">${c}</button>`
+            ).join('');
+            document.getElementById('catList').innerHTML = cats.filter(c => c!=='Todos').map(c => `<option value="${c}">`).join('');
+        }
+
+        window.setCategoryFilter = function(cat) { 
+            window.currentFilter = cat; 
+            document.getElementById('searchInput').value = '';
+            window.renderCategories(); 
+            window.applyFilters(); 
+        }
+        
+        window.setView = function(mode) { document.getElementById('productsContainer').className = mode === 'list' ? 'products-list' : 'products-grid'; applyFilters(); }
+        window.filterSearch = function(val) { document.getElementById('searchInput').value = val; applyFilters(); }
+
+        window.resetFilters = function() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterBrand').value = 'Todas';
+            document.getElementById('filterModel').value = '';
+            document.getElementById('filterYear').value = '';
+            document.getElementById('filterSku').value = '';
+            window.currentFilter = 'Todos';
+            window.renderCategories();
+            window.applyFilters();
+        }
+
+        window.applyFilters = function() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const fBrand = document.getElementById('filterBrand').value;
+            const fModel = document.getElementById('filterModel').value.toLowerCase();
+            const fYear = document.getElementById('filterYear').value;
+            const fSku = document.getElementById('filterSku').value.toLowerCase();
+            const sort = document.getElementById('sortOrder').value;
+
+            let filtered = window.products.filter(p => {
+                if (window.currentFilter !== 'Todos' && p.category !== window.currentFilter) return false;
+                const fullText = `${p.name} ${p.sku} ${p.category}`.toLowerCase();
+                return fullText.includes(search) &&
+                       (!fBrand || fBrand === 'Todas' || p.vehicleBrand === fBrand) &&
+                       (!fModel || (p.vehicleModel || '').toLowerCase().includes(fModel) || p.vehicleModel === 'Universal') &&
+                       (!fYear || (p.vehicleYear || '').includes(fYear)) &&
+                       (!fSku || (p.sku || '').toLowerCase().includes(fSku));
+            });
+
+            if(sort === 'asc') filtered.sort((a,b) => a.price - b.price);
+            if(sort === 'desc') filtered.sort((a,b) => b.price - a.price);
+            if(sort === 'az') filtered.sort((a,b) => a.name.localeCompare(b.name));
+
+            window.renderProducts(filtered);
+        }
+
+        window.renderProducts = function(list = null) {
+            const data = list || window.products;
+            const container = document.getElementById('productsContainer');
+            const empty = document.getElementById('emptyState');
+            const countEl = document.getElementById('resultsCount');
+
+            if(countEl) countEl.innerText = `Exibindo ${data.length} produto(s)`;
+
+            if(data.length === 0) {
                 container.innerHTML = '';
-                
-                querySnapshot.forEach((doc) => {
-                    const p = doc.data();
-                    const html = `
-                        <div class="card">
-                            <img src="${p.image}" loading="lazy">
-                            <div class="card-body">
-                                <h3>${p.name}</h3>
-                                <p style="color: #666; font-size: 0.9rem;">${p.vehicle || 'Universal'}</p>
-                                <div style="display:flex; justify-content:space-between; margin-top:10px; align-items:center;">
-                                    <span class="price">R$ ${p.price.toFixed(2)}</span>
-                                    <span style="font-size:0.8rem;">Estoque: ${p.stock}</span>
-                                </div>
+                empty.classList.remove('hidden');
+                return;
+            }
+            empty.classList.add('hidden');
+
+            container.innerHTML = data.map(p => `
+                <div class="product-card">
+                    <div class="card-img-box" onclick="openDetail(${p.id})">
+                        <img src="${p.image}" class="card-img" loading="lazy">
+                        ${p.stock <= 5 && p.stock > 0 ? `<span style="position:absolute; top:8px; right:8px; background:var(--danger); color:white; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">POUCAS UNIDADES</span>` : ''}
+                        ${p.stock === 0 ? `<div style="position:absolute; inset:0; background:rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; color:white; font-weight:bold;">ESGOTADO</div>` : ''}
+                    </div>
+                    <div class="card-body">
+                        <div class="card-cat">${p.category}</div>
+                        <h3 class="card-title">${p.name}</h3>
+                        <div class="card-meta">
+                            <span><i data-lucide="tag" size="10" style="display:inline"></i> ${p.sku}</span>
+                            <span><i data-lucide="car" size="10" style="display:inline"></i> ${p.vehicleBrand}</span>
+                        </div>
+                        <div class="card-price">
+                            ${formatMoney(p.price)}
+                            <button onclick="addToCart(${p.id})" class="btn-cart-mini" ${p.stock === 0 ? 'disabled style="opacity:0.5"' : ''}>
+                                <i data-lucide="plus" size="20"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        // --- DETALHES ---
+        window.openDetail = function(id) {
+            const p = window.products.find(x => x.id === id);
+            if(!p) return;
+            document.getElementById('detailImg').src = p.image;
+            document.getElementById('detailName').innerText = p.name;
+            document.getElementById('detailSku').innerText = `SKU: ${p.sku} | Fornecedor: ${p.supplier || '-'}`;
+            document.getElementById('detailCat').innerText = p.category;
+            document.getElementById('detailDesc').innerText = p.description || 'Sem descrição.';
+            document.getElementById('detailPrice').innerText = formatMoney(p.price);
+            document.getElementById('detailVehicleSpecs').innerHTML = `
+                <li><strong>Marca:</strong> ${p.vehicleBrand}</li>
+                <li><strong>Modelo:</strong> ${p.vehicleModel || 'Universal'}</li>
+                <li><strong>Ano:</strong> ${p.vehicleYear || 'Todos'}</li>
+                <li><strong>Estoque:</strong> ${p.stock} un.</li>
+            `;
+            const btn = document.getElementById('detailBtnAdd');
+            if(p.stock === 0) {
+                btn.disabled = true; btn.innerText = "Esgotado"; btn.style.background = "#94a3b8";
+            } else {
+                btn.disabled = false; btn.innerText = "Adicionar ao Carrinho"; btn.style.background = "var(--primary)";
+                btn.onclick = () => { addToCart(p.id); closeProductDetail(); };
+            }
+            document.getElementById('productDetailModal').classList.add('active');
+        }
+        window.closeProductDetail = function() { document.getElementById('productDetailModal').classList.remove('active'); }
+
+        // --- CARRINHO ---
+        window.toggleCart = function() {
+            document.getElementById('cartDrawer').classList.toggle('open');
+            document.getElementById('drawerOverlay').classList.toggle('open');
+        }
+
+        window.addToCart = function(id) {
+            const prod = window.products.find(p => p.id === id);
+            const item = window.cart.find(i => i.id === id);
+            
+            if (item) {
+                if (item.quantity >= prod.stock) return showToast("Estoque máximo atingido!", "error");
+                item.quantity++;
+            } else {
+                const newItem = { ...prod, quantity: 1 };
+                window.cart.push(newItem);
+            }
+            
+            saveCartLocal();
+            updateCartUI();
+            showToast("Adicionado ao carrinho!");
+        }
+
+        window.changeCartQty = function(id, delta) {
+            const item = window.cart.find(i => i.id === id);
+            const prod = window.products.find(p => p.id === id);
+            if (!item) return;
+
+            if (delta > 0) {
+                if (item.quantity >= prod.stock) return showToast("Estoque limite atingido!", "error");
+                item.quantity++;
+            } else {
+                if (item.quantity > 1) {
+                    item.quantity--;
+                } else {
+                    if(confirm("Remover este item?")) {
+                        window.cart = window.cart.filter(i => i.id !== id);
+                    }
+                }
+            }
+            saveCartLocal();
+            updateCartUI();
+        }
+
+        window.saveCartLocal = function() {
+            localStorage.setItem('dupecas_cart', JSON.stringify(window.cart));
+        }
+
+        window.updateCartUI = function() {
+            const container = document.getElementById('cartItems');
+            const totalEl = document.getElementById('cartTotal');
+            const badge = document.getElementById('cartCountBadge');
+            const count = window.cart.reduce((a, b) => a + b.quantity, 0);
+            
+            badge.innerText = count;
+            badge.classList.toggle('hidden', count === 0);
+
+            if (window.cart.length === 0) {
+                container.innerHTML = `<div class="text-center py-10 text-muted"><i data-lucide="shopping-bag" size="48"></i><p>Carrinho vazio</p></div>`;
+                totalEl.innerText = formatMoney(0);
+            } else {
+                let total = 0;
+                container.innerHTML = window.cart.map(item => {
+                    total += item.price * item.quantity;
+                    return `
+                    <div style="display:flex; gap:10px; margin-bottom:1rem; border-bottom:1px solid #eee; padding-bottom:1rem; align-items: center;">
+                        <img src="${item.image}" style="width:50px; height:50px; object-fit:cover; border-radius:4px;">
+                        <div style="flex:1;">
+                            <div class="font-bold text-sm">${item.name}</div>
+                            <div class="text-muted text-xs mb-1">${formatMoney(item.price)} un.</div>
+                            <div class="qty-controls" style="display:inline-flex;">
+                                <button class="qty-btn" onclick="changeCartQty(${item.id}, -1)">-</button>
+                                <span class="qty-val">${item.quantity}</span>
+                                <button class="qty-btn" onclick="changeCartQty(${item.id}, 1)">+</button>
                             </div>
                         </div>
-                    `;
-                    container.innerHTML += html;
-                });
+                        <div style="text-align:right;">
+                            <div class="font-bold text-primary">${formatMoney(item.price * item.quantity)}</div>
+                            <button onclick="removeFromCart(${item.id})" class="text-danger" style="font-size:0.8rem; margin-top:5px;"><i data-lucide="trash-2" size="16"></i></button>
+                        </div>
+                    </div>`;
+                }).join('');
+                totalEl.innerText = formatMoney(total);
+            }
+            lucide.createIcons();
+        }
 
-                if(querySnapshot.empty) {
-                    container.innerHTML = '<p>Nenhum produto encontrado.</p>';
+        window.removeFromCart = function(id) {
+            window.cart = window.cart.filter(i => i.id !== id);
+            saveCartLocal();
+            updateCartUI();
+        }
+
+        window.checkout = async function() {
+            if (window.cart.length === 0) return showToast("Carrinho vazio!", "error");
+            const name = document.getElementById('clientName').value;
+            const phone = document.getElementById('clientPhone').value;
+
+            if(!name || !phone) return showToast("Preencha nome e telefone!", "error");
+            
+            const total = window.cart.reduce((a, b) => a + (b.price * b.quantity), 0);
+            const newOrder = {
+                id: Date.now(),
+                timestamp: Date.now(), 
+                date: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR'),
+                customer: name,
+                phone: phone,
+                total: total,
+                status: 'Pendente',
+                items: JSON.parse(JSON.stringify(window.cart))
+            };
+            
+            // Salva pedido no Firebase
+            window.orders.unshift(newOrder);
+            await DBService.put('orders', newOrder);
+
+            // Atualiza estoque no Firebase
+            for (const item of window.cart) {
+                const prod = window.products.find(p => p.id === item.id);
+                if(prod) {
+                    prod.stock -= item.quantity;
+                    await DBService.put('products', prod);
                 }
+            }
+            
+            const msg = `*PEDIDO #${newOrder.id}*\n👤 *${name}*\n📞 ${phone}\n\n` +
+                        window.cart.map(i => `📦 ${i.quantity}x ${i.name}`).join('\n') + 
+                        `\n\n💰 *Total: ${formatMoney(total)}*` +
+                        `\n\n⚠️ *Aviso:* O seu pedido ficará reservado por 72h. Após esse prazo, caso não confirmado, será cancelado automaticamente.`;
+            
+            window.cart = [];
+            localStorage.removeItem('dupecas_cart');
+            
+            updateCartUI();
+            toggleCart();
+            renderProducts();
+            window.open(`https://wa.me/558799094280?text=${encodeURIComponent(msg)}`, '_blank');
+        }
 
-            } catch (error) {
-                console.error(error);
-                container.innerHTML = '<p style="color:red">Erro ao carregar produtos. Verifique o console.</p>';
+        // --- ADMIN LOGIN ---
+        window.openLogin = function() { document.getElementById('loginModal').classList.add('active'); }
+        window.closeLogin = function() { document.getElementById('loginModal').classList.remove('active'); }
+        
+        window.handleLogin = function(e) {
+            e.preventDefault();
+            if (document.getElementById('adminPass').value === 'admin') {
+                window.isAdmin = true;
+                // SALVA SESSÃO NO LOCALSTORAGE
+                localStorage.setItem('dupecas_admin_logged', 'true');
+                
+                document.getElementById('adminView').classList.remove('hidden');
+                document.getElementById('storeView').classList.add('hidden');
+                closeLogin();
+                loadAdminDashboard();
+                checkExpiredOrders();
+            } else showToast("Senha incorreta!", "error");
+        }
+
+        window.logoutAdmin = function() {
+            window.isAdmin = false;
+            // LIMPA SESSÃO
+            localStorage.removeItem('dupecas_admin_logged');
+            
+            document.getElementById('adminView').classList.add('hidden');
+            document.getElementById('storeView').classList.remove('hidden');
+        }
+
+        // --- SISTEMA DE EXPIRAÇÃO 72H ---
+        window.checkExpiredOrders = async function() {
+            const now = Date.now();
+            const limit = 72 * 60 * 60 * 1000; 
+            let updated = false;
+
+            for (const order of window.orders) {
+                if ((order.status === 'Pendente' || !order.status) && order.timestamp && (now - order.timestamp > limit)) {
+                    await cancelOrderLogic(order.id, true); 
+                    updated = true;
+                }
+            }
+            if(updated) {
+                showToast("Pedidos expirados (72h) foram cancelados e retornados ao estoque.");
+                renderOrdersTable();
+                loadData(); 
             }
         }
 
-        // Carrega ao iniciar
-        loadProducts();
+        // --- ADMIN SIDEBAR ---
+        window.toggleSidebarMobile = function() { document.getElementById('adminSidebar').classList.toggle('active'); }
+        window.initSidebarState = function() {
+            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            if (isCollapsed) {
+                document.getElementById('adminSidebar').classList.add('collapsed');
+                document.getElementById('collapseIcon').setAttribute('data-lucide', 'chevrons-right');
+            }
+        }
+        window.toggleSidebarCollapse = function() {
+            const sidebar = document.getElementById('adminSidebar');
+            const icon = document.getElementById('collapseIcon');
+            sidebar.classList.toggle('collapsed');
+            const isCollapsed = sidebar.classList.contains('collapsed');
+            localStorage.setItem('sidebarCollapsed', isCollapsed);
+            if(isCollapsed) { icon.setAttribute('data-lucide', 'chevrons-right'); } else { icon.setAttribute('data-lucide', 'chevrons-left'); }
+            lucide.createIcons();
+        }
 
+        window.setAdminTab = function(tab) {
+            document.querySelectorAll('.admin-tab').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tab}`).classList.remove('hidden');
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            if (tab === 'dashboard') loadAdminDashboard();
+            if (tab === 'products') renderAdminTable();
+            if (tab === 'orders') renderOrdersTable();
+            if (tab === 'reports') switchReport('sales');
+            if (tab === 'brands') renderBrandsList();
+        }
+
+        let salesChartRef;
+        window.loadAdminDashboard = function() {
+            const totalVal = window.products.reduce((a, b) => a + (b.price * b.stock), 0);
+            // FILTRA PEDIDOS CANCELADOS PARA O TOTAL DE VENDAS
+            const validOrders = window.orders.filter(o => o.status !== 'Cancelado');
+            
+            document.getElementById('kpiSales').innerText = formatMoney(validOrders.reduce((a,b)=>a+b.total, 0));
+            document.getElementById('kpiOrderCount').innerText = validOrders.length;
+            document.getElementById('kpiStockVal').innerText = formatMoney(totalVal);
+
+            const ctx = document.getElementById('salesChart');
+            if(salesChartRef) salesChartRef.destroy();
+            
+            const dataSales = [1200, 1900, 3000, 5000, 2000, 3000, validOrders.reduce((a,b)=>a+b.total, 0)];
+            salesChartRef = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
+                    datasets: [{ label: 'Vendas (R$)', data: dataSales, borderColor: '#2563eb', backgroundColor: 'rgba(37, 99, 235, 0.1)', fill: true, tension: 0.4 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        window.renderAdminTable = function(filter = '') {
+            const filtered = window.products.filter(p => (p.name + p.sku + p.vehicleBrand).toLowerCase().includes(filter.toLowerCase()));
+            const tbody = document.getElementById('adminTableBody');
+            tbody.innerHTML = filtered.map(p => `
+                <tr>
+                    <td><img src="${p.image}" style="width:40px; height:40px; object-fit:cover; border-radius:4px;"></td>
+                    <td><div class="font-bold">${p.name}</div><div class="text-sm text-muted">${p.sku}</div></td>
+                    <td>${p.vehicleBrand}</td>
+                    <td>${formatMoney(p.price)}</td>
+                    <td style="font-weight:bold; color:${p.stock<5 ? 'red':'green'}">${p.stock}</td>
+                    <td style="text-align:center;">
+                        <button onclick="editProduct(${p.id})" class="btn-icon"><i data-lucide="edit-3" size="16"></i></button>
+                        <button onclick="deleteProduct(${p.id})" class="btn-icon" style="color:var(--danger)"><i data-lucide="trash-2" size="16"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+            document.getElementById('adminMobileList').innerHTML = filtered.map(p => `
+                <div class="admin-card-item">
+                    <img src="${p.image}" class="admin-card-img">
+                    <div style="flex:1;">
+                        <div style="font-weight:700;">${p.name}</div>
+                        <div style="font-size:0.8rem; color:var(--text-muted);">${p.sku} | ${formatMoney(p.price)}</div>
+                    </div>
+                    <div style="display:flex; gap:0.5rem;">
+                        <button onclick="editProduct(${p.id})" class="btn-icon"><i data-lucide="edit-3" size="18"></i></button>
+                        <button onclick="deleteProduct(${p.id})" class="btn-icon" style="color:var(--danger)"><i data-lucide="trash-2" size="18"></i></button>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+        window.filterAdminTable = function(val) { renderAdminTable(val); }
+
+        window.switchReport = function(type) {
+            document.querySelectorAll('.report-tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            const container = document.getElementById('report-content');
+            let html = '';
+            if(type === 'sales') {
+                html = `<h4 class="font-bold mb-4">Relatório de Vendas</h4><table class="data-table"><thead><tr><th>Data</th><th>Cliente</th><th>Total</th></tr></thead><tbody>${window.orders.filter(o => o.status !== 'Cancelado').map(o => `<tr><td>${o.date}</td><td>${o.customer}</td><td>${formatMoney(o.total)}</td></tr>`).join('')}</tbody></table>`;
+            } else if (type === 'stock') { 
+                const low = window.products.filter(p => p.stock < 5); 
+                html = `<h4 class="font-bold mb-4">Estoque Crítico (<5)</h4><table class="data-table"><thead><tr><th>Produto</th><th>SKU</th><th>Estoque</th></tr></thead><tbody>${low.map(p => `<tr><td>${p.name}</td><td>${p.sku}</td><td style="color:red;font-weight:bold;">${p.stock}</td></tr>`).join('')}</tbody></table>`; 
+            } else if (type === 'full-inventory') {
+                const grandTotal = window.products.reduce((a,b)=>a+(b.price*b.stock), 0);
+                html = `<h4 class="font-bold mb-4">Inventário Completo</h4><div class="mb-4 font-bold text-lg text-primary">Valor Total em Estoque: ${formatMoney(grandTotal)}</div><div class="data-table-wrapper"><table class="data-table"><thead><tr><th>Produto</th><th>Preço Unit.</th><th>Qtd.</th><th>Valor Total</th></tr></thead><tbody>${window.products.map(p => `<tr><td>${p.name} <br><span class="text-xs text-muted">${p.sku}</span></td><td>${formatMoney(p.price)}</td><td>${p.stock}</td><td class="font-bold">${formatMoney(p.price * p.stock)}</td></tr>`).join('')}</tbody></table></div>`;
+            } else if (type === 'financial') { 
+                const totalInvested = window.products.reduce((a,b)=>a+(b.price*b.stock),0); 
+                html = `<h4 class="font-bold mb-4">Financeiro</h4><div class="p-4 bg-body rounded border">Total em Estoque: <span class="font-bold text-lg">${formatMoney(totalInvested)}</span></div>`; 
+            } else if (type === 'compatibility') { 
+                html = `<h4 class="font-bold mb-4">Marcas Cadastradas</h4><div style="height:300px;"><canvas id="chartBrands"></canvas></div>`; 
+                setTimeout(() => { const ctx = document.getElementById('chartBrands'); const counts = {}; window.products.forEach(p => counts[p.vehicleBrand] = (counts[p.vehicleBrand] || 0) + 1); new Chart(ctx, { type: 'bar', data: { labels: Object.keys(counts), datasets: [{ label: 'Produtos', data: Object.values(counts), backgroundColor: '#2563eb' }] } }); }, 100); 
+            }
+            container.innerHTML = html;
+        }
+
+        window.renderBrandsList = function() {
+            document.getElementById('brandsList').innerHTML = window.brands.map(b => `
+                <li style="padding:0.5rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
+                    ${b} ${b !== 'Todas' ? `<button onclick="removeBrand('${b}')" style="color:red;">X</button>` : ''}
+                </li>
+            `).join('');
+        }
+        window.addBrand = async function() {
+            const val = document.getElementById('newBrandInput').value;
+            if(val && !window.brands.includes(val)) { 
+                window.brands.push(val); 
+                window.brands.sort(); 
+                await DBService.put('brands', { name: val }); 
+                renderBrandsList(); 
+                renderBrandsFilter(); 
+                showToast("Marca adicionada!"); 
+            }
+            document.getElementById('newBrandInput').value = '';
+        }
+        window.removeBrand = async function(name) { 
+            if(confirm('Remover marca?')) { 
+                window.brands = window.brands.filter(b => b !== name); 
+                await DBService.delete('brands', name); 
+                renderBrandsList(); 
+                renderBrandsFilter(); 
+            } 
+        }
+
+        window.openProductForm = function() { 
+            ['prodId','prodName','prodSku','prodCat','prodSupplier','prodPrice','prodStock','prodDesc','prodVehModel','prodVehYear','prodVehVersion','prodImgUrl'].forEach(id => document.getElementById(id).value = ''); 
+            document.getElementById('prodVehBrand').value = 'Todas'; 
+            document.getElementById('formPreview').style.display = 'none'; 
+            document.getElementById('uploadPlaceholder').style.display = 'block'; 
+            window.currentImageFile = null; 
+            document.getElementById('fileInput').value = ''; 
+            document.getElementById('productFormModal').classList.add('active'); 
+        }
+        window.closeProductForm = function() { document.getElementById('productFormModal').classList.remove('active'); }
+
+        window.editProduct = function(id) {
+            const p = window.products.find(x => x.id === id);
+            document.getElementById('prodId').value = p.id;
+            document.getElementById('prodName').value = p.name;
+            document.getElementById('prodSku').value = p.sku;
+            document.getElementById('prodCat').value = p.category;
+            document.getElementById('prodSupplier').value = p.supplier || '';
+            document.getElementById('prodPrice').value = p.price;
+            document.getElementById('prodStock').value = p.stock;
+            document.getElementById('prodVehBrand').value = p.vehicleBrand;
+            document.getElementById('prodVehModel').value = p.vehicleModel;
+            document.getElementById('prodVehYear').value = p.vehicleYear || '';
+            document.getElementById('prodVehVersion').value = p.vehicleVersion || '';
+            document.getElementById('prodDesc').value = p.description || "";
+            document.getElementById('prodImgUrl').value = p.image;
+            document.getElementById('formPreview').src = p.image;
+            document.getElementById('formPreview').style.display = 'block';
+            document.getElementById('uploadPlaceholder').style.display = 'none';
+            window.currentImageFile = null;
+            document.getElementById('productFormModal').classList.add('active');
+        }
+
+        window.handleImageUpload = function(input) {
+            if(input.files && input.files[0]) {
+                window.currentImageFile = input.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) { 
+                    document.getElementById('formPreview').src = e.target.result; 
+                    document.getElementById('formPreview').style.display = 'block'; 
+                    document.getElementById('uploadPlaceholder').style.display = 'none'; 
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        window.previewUrl = function(url) { if(url) { document.getElementById('formPreview').src = url; document.getElementById('formPreview').style.display = 'block'; document.getElementById('uploadPlaceholder').style.display = 'none'; window.currentImageFile = null; } }
+        
+        // --- FUNÇÃO DE SALVAMENTO COM UPLOAD NO STORAGE ---
+        window.saveProduct = async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerText;
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Salvando (Enviando Imagem)...";
+
+            let imageUrl = document.getElementById('formPreview').src;
+
+            // Se existe novo arquivo, faz upload
+            if (window.currentImageFile) {
+                try {
+                    const storageRef = ref(storage, `produtos/${Date.now()}_${window.currentImageFile.name}`);
+                    const snapshot = await uploadBytes(storageRef, window.currentImageFile);
+                    imageUrl = await getDownloadURL(snapshot.ref);
+                } catch (error) {
+                    console.error("Erro no upload:", error);
+                    showToast("Erro ao enviar imagem.", "error");
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = originalBtnText;
+                    return;
+                }
+            } else {
+                const urlInput = document.getElementById('prodImgUrl').value;
+                if(urlInput && urlInput.trim() !== "") {
+                    imageUrl = urlInput;
+                }
+            }
+
+            const id = document.getElementById('prodId').value;
+            const newProd = {
+                id: id ? parseInt(id) : Date.now(),
+                name: document.getElementById('prodName').value,
+                sku: document.getElementById('prodSku').value,
+                category: document.getElementById('prodCat').value,
+                supplier: document.getElementById('prodSupplier').value,
+                price: parseFloat(document.getElementById('prodPrice').value),
+                stock: parseInt(document.getElementById('prodStock').value),
+                vehicleBrand: document.getElementById('prodVehBrand').value,
+                vehicleModel: document.getElementById('prodVehModel').value,
+                vehicleYear: document.getElementById('prodVehYear').value,
+                vehicleVersion: document.getElementById('prodVehVersion').value,
+                description: document.getElementById('prodDesc').value,
+                image: imageUrl
+            };
+            
+            await DBService.put('products', newProd);
+            
+            if(id) { 
+                const idx = window.products.findIndex(p => p.id == id); 
+                window.products[idx] = newProd; 
+            } else { 
+                window.products.push(newProd); 
+            }
+            
+            submitBtn.disabled = false;
+            submitBtn.innerText = originalBtnText;
+
+            closeProductForm();
+            renderAdminTable();
+            showToast("Produto Salvo com Sucesso!");
+        }
+
+        window.deleteProduct = async function(id) { 
+            if(confirm("Excluir?")) { 
+                window.products = window.products.filter(p => p.id !== id); 
+                await DBService.delete('products', id); 
+                renderAdminTable(); 
+                showToast("Produto Excluído"); 
+            } 
+        }
+        
+        // --- GESTÃO DE PEDIDOS ---
+        window.renderOrdersTable = function() {
+            const tbody = document.getElementById('ordersTableBody');
+            document.getElementById('orderCountBadge').innerText = window.orders.length;
+            if(window.orders.length === 0) { 
+                document.getElementById('noOrdersMsg').classList.remove('hidden'); 
+                tbody.innerHTML = ''; 
+            } else { 
+                document.getElementById('noOrdersMsg').classList.add('hidden'); 
+                tbody.innerHTML = window.orders.map(o => {
+                    const statusClass = `status-${o.status || 'Pendente'}`;
+                    const statusText = o.status || 'Pendente';
+                    return `
+                    <tr>
+                        <td>#${o.id.toString().slice(-6)}</td>
+                        <td>${o.date}</td>
+                        <td>${o.customer}<br><span class="text-xs text-muted">${o.phone}</span></td>
+                        <td class="font-bold">${formatMoney(o.total)}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td style="display:flex; gap:0.5rem; justify-content:center;">
+                            <button onclick="openOrderDetail(${o.id})" title="Ver Detalhes" class="btn-icon text-primary"><i data-lucide="eye" size="16"></i></button>
+                            ${statusText !== 'Cancelado' ? 
+                                `<button onclick="openEditOrder(${o.id})" title="Editar Pedido" class="btn-icon text-warning"><i data-lucide="edit" size="16"></i></button>
+                                 <button onclick="confirmOrder(${o.id})" title="Concluir/Entregar" class="btn-icon text-success"><i data-lucide="check" size="16"></i></button>
+                                 <button onclick="cancelOrder(${o.id})" title="Cancelar e Estornar Estoque" class="btn-icon text-danger"><i data-lucide="ban" size="16"></i></button>` 
+                            : ''}
+                        </td>
+                    </tr>`;
+                }).join(''); 
+                lucide.createIcons();
+            }
+        }
+
+        window.openOrderDetail = function(orderId) {
+            const o = window.orders.find(x => x.id === orderId);
+            if(!o) return;
+            
+            const html = `
+                <div style="background:var(--bg-body); padding:1rem; border-radius:8px; margin-bottom:1rem;">
+                    <p><strong>Cliente:</strong> ${o.customer}</p>
+                    <p><strong>Contato:</strong> ${o.phone}</p>
+                    <p><strong>Data:</strong> ${o.date}</p>
+                    <p><strong>Status:</strong> ${o.status || 'Pendente'}</p>
+                </div>
+                <h4 style="font-weight:bold; margin-bottom:0.5rem;">Itens do Pedido:</h4>
+                <div style="max-height:200px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; margin-bottom:1rem;">
+                    <table style="width:100%; font-size:0.9rem;">
+                        ${o.items.map(i => `
+                            <tr style="border-bottom:1px solid var(--border);">
+                                <td style="padding:0.5rem;"><img src="${i.image}" width="30"></td>
+                                <td style="padding:0.5rem;">${i.quantity}x ${i.name}</td>
+                                <td style="padding:0.5rem; text-align:right;">${formatMoney(i.price * i.quantity)}</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                </div>
+                <div style="text-align:right; font-size:1.25rem; font-weight:800; color:var(--primary);">
+                    Total: ${formatMoney(o.total)}
+                </div>
+            `;
+            document.getElementById('orderDetailContent').innerHTML = html;
+            document.getElementById('orderDetailModal').classList.add('active');
+        }
+        window.closeOrderDetail = function() { document.getElementById('orderDetailModal').classList.remove('active'); }
+
+        window.confirmOrder = async function(id) {
+            const o = window.orders.find(x => x.id === id);
+            if(o) {
+                o.status = 'Entregue';
+                await DBService.put('orders', o);
+                renderOrdersTable();
+                showToast("Pedido marcado como Entregue");
+            }
+        }
+
+        window.cancelOrderLogic = async function(id, isAuto = false) {
+            const o = window.orders.find(x => x.id === id);
+            if(!o || o.status === 'Cancelado') return;
+
+            // Retorna itens ao estoque
+            for (const item of o.items) {
+                const prod = window.products.find(p => p.id === item.id);
+                if (prod) {
+                    prod.stock += item.quantity;
+                    await DBService.put('products', prod);
+                }
+            }
+
+            o.status = 'Cancelado';
+            await DBService.put('orders', o);
+            if(!isAuto) {
+                renderOrdersTable();
+                loadAdminDashboard(); 
+                showToast("Pedido cancelado e estoque restaurado.");
+            }
+        }
+
+        window.cancelOrder = function(id) {
+            if(confirm("Tem certeza? Isso irá cancelar o pedido e devolver os produtos para o estoque.")) {
+                cancelOrderLogic(id);
+            }
+        }
+
+        // --- SISTEMA DE EDIÇÃO DE PEDIDOS (NOVO) ---
+        let editingOrder = null;
+
+        window.openEditOrder = function(id) {
+            const originalOrder = window.orders.find(o => o.id === id);
+            if(!originalOrder) return;
+            // Cria uma cópia profunda para não alterar direto
+            editingOrder = JSON.parse(JSON.stringify(originalOrder));
+            renderEditModal();
+            document.getElementById('orderEditModal').classList.add('active');
+        }
+
+        window.closeEditOrder = function() {
+            editingOrder = null;
+            document.getElementById('orderEditModal').classList.remove('active');
+        }
+
+        window.renderEditModal = function() {
+            const list = document.getElementById('editOrderItemsList');
+            if(!editingOrder.items.length) {
+                list.innerHTML = `<div class="text-muted text-center py-4">Sem itens</div>`;
+            } else {
+                list.innerHTML = editingOrder.items.map(i => `
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:0.5rem 0;">
+                        <div style="flex:1;">
+                            <div class="font-bold">${i.name}</div>
+                            <div class="text-xs text-muted">${formatMoney(i.price)} un.</div>
+                        </div>
+                        <div class="qty-controls" style="margin:0 10px;">
+                            <button class="qty-btn" onclick="editChangeQty(${i.id}, -1)">-</button>
+                            <span class="qty-val">${i.quantity}</span>
+                            <button class="qty-btn" onclick="editChangeQty(${i.id}, 1)">+</button>
+                        </div>
+                        <button onclick="editRemoveItem(${i.id})" class="text-danger"><i data-lucide="trash-2" size="16"></i></button>
+                    </div>
+                `).join('');
+            }
+            // Recalcula total
+            editingOrder.total = editingOrder.items.reduce((a,b)=> a + (b.price * b.quantity), 0);
+            document.getElementById('editOrderTotal').innerText = formatMoney(editingOrder.total);
+            lucide.createIcons();
+        }
+
+        window.editChangeQty = function(id, delta) {
+            const item = editingOrder.items.find(i => i.id === id);
+            if(!item) return;
+            if(delta > 0) item.quantity++;
+            else {
+                if(item.quantity > 1) item.quantity--;
+            }
+            renderEditModal();
+        }
+
+        window.editRemoveItem = function(id) {
+            editingOrder.items = editingOrder.items.filter(i => i.id !== id);
+            renderEditModal();
+        }
+
+        window.searchProdForOrder = function(val) {
+            const resDiv = document.getElementById('editProdResults');
+            if(val.length < 2) { resDiv.style.display = 'none'; return; }
+            
+            const results = window.products.filter(p => p.name.toLowerCase().includes(val.toLowerCase()) || p.sku.toLowerCase().includes(val.toLowerCase()));
+            
+            if(results.length > 0) {
+                resDiv.style.display = 'block';
+                resDiv.innerHTML = results.map(p => `
+                    <div onclick="addProdToOrder(${p.id})" style="padding:0.5rem; border-bottom:1px solid #eee; cursor:pointer; hover:bg-gray-100;">
+                        <div class="font-bold text-sm">${p.name}</div>
+                        <div class="text-xs text-muted">Estoque: ${p.stock} | ${formatMoney(p.price)}</div>
+                    </div>
+                `).join('');
+            } else {
+                resDiv.style.display = 'none';
+            }
+        }
+
+        window.addProdToOrder = function(prodId) {
+            const p = window.products.find(x => x.id === prodId);
+            if(!p) return;
+            
+            // Verifica se já existe
+            const existing = editingOrder.items.find(i => i.id === prodId);
+            if(existing) {
+                existing.quantity++;
+            } else {
+                editingOrder.items.push({
+                    id: p.id,
+                    name: p.name,
+                    price: p.price,
+                    image: p.image,
+                    quantity: 1
+                });
+            }
+            document.getElementById('editSearchProd').value = '';
+            document.getElementById('editProdResults').style.display = 'none';
+            renderEditModal();
+        }
+
+        window.saveOrderChanges = async function() {
+            const originalOrder = window.orders.find(o => o.id === editingOrder.id);
+            if(!originalOrder) return;
+
+            // 1. DEVOLVE TUDO DO PEDIDO ORIGINAL PRO ESTOQUE
+            for (const item of originalOrder.items) {
+                const prod = window.products.find(p => p.id === item.id);
+                if(prod) {
+                    prod.stock += item.quantity;
+                }
+            }
+
+            // 2. RETIRA TUDO DO NOVO PEDIDO DO ESTOQUE
+            for (const item of editingOrder.items) {
+                const prod = window.products.find(p => p.id === item.id);
+                if(prod) {
+                    if(prod.stock < item.quantity) {
+                        alert(`Estoque insuficiente para ${prod.name}. Operação cancelada.`);
+                        // Recarrega dados para desfazer bagunça local
+                        loadData(); 
+                        return;
+                    }
+                    prod.stock -= item.quantity;
+                }
+            }
+
+            // 3. SALVA PRODUTOS ATUALIZADOS E O PEDIDO
+            for (const p of window.products) {
+                await DBService.put('products', p);
+            }
+            
+            // Atualiza objeto original
+            originalOrder.items = editingOrder.items;
+            originalOrder.total = editingOrder.total;
+            
+            await DBService.put('orders', originalOrder);
+            
+            closeEditOrder();
+            renderOrdersTable();
+            loadAdminDashboard();
+            showToast("Pedido atualizado com sucesso!");
+        }
+
+        // --- ZERAR SISTEMA COM SENHA ---
+        window.resetSystem = async function() { 
+            const pwd = prompt("Digite a senha de segurança para APAGAR TODO O BANCO DE DADOS NA NUVEM:");
+            if (pwd === "dupeca2026") {
+                if(confirm("TEM CERTEZA ABSOLUTA? Isso é irreversível.")) { 
+                    await DBService.clear('products'); 
+                    await DBService.clear('orders'); 
+                    await DBService.clear('brands'); 
+                    localStorage.removeItem('dupecas_cart');
+                    location.reload(); 
+                }
+            } else {
+                alert("Senha incorreta! Ação bloqueada.");
+            }
+        }
+        
+        // --- BACKUP E EXPORT ---
+        window.exportData = function(type) {
+            let content = "", mime = "text/plain";
+            if(type === 'csv') { 
+                content = "ID,Nome,SKU,Preco,Estoque\n" + window.products.map(p => `${p.id},${p.name},${p.sku},${p.price},${p.stock}`).join("\n"); 
+                mime = "text/csv"; 
+            } else { 
+                const backupData = { timestamp: Date.now(), products: window.products, orders: window.orders, brands: window.brands.map(b => ({ name: b })) }; 
+                content = JSON.stringify(backupData, null, 2); 
+                mime = "application/json"; 
+            }
+            downloadFile(content, `backup_dupecas_${Date.now()}.${type}`, mime);
+        }
+
+        function downloadFile(content, name, type) { const a = document.createElement("a"); const file = new Blob(['\uFEFF'+content], {type: type}); a.href = URL.createObjectURL(file); a.download = name; a.click(); }
+
+        window.restoreBackup = function(input) {
+            const file = input.files[0];
+            if (!file) return;
+            if(!confirm("CUIDADO: Isso APAGARÁ o banco atual no Firebase e substituirá pelo backup. Deseja continuar?")) { input.value = ''; return; }
+            
+            const modal = document.getElementById('restoreModal');
+            const progressBar = document.getElementById('restoreProgress');
+            const statusText = document.getElementById('restoreStatus');
+            modal.classList.add('active');
+            progressBar.style.width = '0%';
+            
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!data.products) throw new Error("Arquivo inválido.");
+                    
+                    statusText.innerText = "Limpando Banco Online...";
+                    progressBar.style.width = '10%';
+                    
+                    // Limpa tudo antes
+                    await DBService.clear('products');
+                    await DBService.clear('orders');
+                    await DBService.clear('brands');
+
+                    const totalItems = (data.products?.length || 0) + (data.orders?.length || 0) + (data.brands?.length || 0);
+                    let processed = 0;
+                    
+                    const updateProgress = () => { 
+                        processed++; 
+                        const pct = Math.min(10 + Math.floor((processed / totalItems) * 90), 100); 
+                        progressBar.style.width = pct + '%'; 
+                        statusText.innerText = `Enviando item ${processed} de ${totalItems}...`; 
+                    };
+                    
+                    if(data.products) { for(const p of data.products) { await DBService.put('products', p); updateProgress(); } }
+                    if(data.orders) { for(const o of data.orders) { await DBService.put('orders', o); updateProgress(); } }
+                    if(data.brands) { for(const b of data.brands) { let bt = (typeof b === 'string') ? { name: b } : b; await DBService.put('brands', bt); updateProgress(); } }
+                    
+                    progressBar.style.width = '100%'; 
+                    statusText.innerText = "Concluído!"; 
+                    setTimeout(() => location.reload(), 1000);
+                } catch (err) { 
+                    modal.classList.remove('active'); 
+                    alert("Erro na restauração: " + err.message); 
+                    console.error(err);
+                    input.value = ''; 
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        window.bulkUpdateImages = async function() {
+            const txt = document.getElementById('bulkImgInput').value;
+            const lines = txt.split('\n');
+            let count = 0;
+            for (const l of lines) { 
+                const [id, url] = l.split(','); 
+                if (id && url) { 
+                    const prod = window.products.find(x => x.id == id.trim()); 
+                    if (prod) { 
+                        prod.image = url.trim(); 
+                        await DBService.put('products', prod); 
+                        count++; 
+                    } 
+                } 
+            }
+            showToast(`${count} imagens atualizadas na nuvem!`);
+            renderAdminTable();
+        }
+        
+        window.toggleTheme = function() { 
+            document.body.classList.toggle('dark-mode'); 
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light'); 
+        }
     </script>
 </body>
 </html>
