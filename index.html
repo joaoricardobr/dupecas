@@ -10,7 +10,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* (ESTILOS ORIGINAIS MANTIDOS) */
         :root {
             --primary: #2563eb;        
             --primary-dark: #1e40af;   
@@ -155,6 +154,30 @@
         .admin-grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
         .admin-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
         
+        /* IMPROVED SEARCH DROPDOWN CONTRAST */
+        #editProdResults { 
+            position: absolute; 
+            width: 100%; 
+            max-height: 200px; 
+            overflow-y: auto; 
+            background: var(--bg-card); 
+            border: 1px solid var(--primary); 
+            border-radius: 4px; 
+            z-index: 2000; 
+            box-shadow: var(--shadow-lg);
+        }
+        .search-result-item { 
+            padding: 10px; 
+            border-bottom: 1px solid var(--border); 
+            cursor: pointer; 
+            background: var(--bg-card); 
+            color: var(--text-main); 
+        }
+        .search-result-item:hover { 
+            background: var(--primary-light); 
+            color: var(--primary-dark);
+        }
+
         @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes spin { 100% { transform: rotate(360deg); } }
         .animate-spin-slow { animation: spin 2s linear infinite; }
@@ -269,10 +292,10 @@
                     <div id="editOrderItemsList"></div>
                 </div>
 
-                <div style="border:1px solid var(--border); border-radius:8px; padding:1rem; background: var(--bg-body);">
+                <div style="border:1px solid var(--border); border-radius:8px; padding:1rem; background: var(--bg-body); position: relative;">
                     <h4 style="font-weight:700; margin-bottom:0.5rem;">Adicionar Produto</h4>
                     <input type="text" id="editSearchProd" placeholder="Buscar produto para adicionar..." oninput="searchProdForOrder(this.value)">
-                    <div id="editProdResults" style="max-height: 150px; overflow-y: auto; display: none; background: white; border: 1px solid var(--border); border-radius: 4px;"></div>
+                    <div id="editProdResults" style="display: none;"></div>
                 </div>
 
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1rem;">
@@ -505,7 +528,7 @@
             <header class="flex justify-between items-center mb-6">
                 <button class="md:hidden btn-icon" onclick="toggleSidebarMobile()"><i data-lucide="menu"></i></button>
                 <h2 id="pageTitle" style="font-size: 1.5rem; font-weight: 800; color: var(--text-main);">Visão Geral</h2>
-                <div style="width: 40px;"></div>
+                <button onclick="toggleTheme()" class="btn-icon" title="Alternar Tema"><i data-lucide="moon"></i></button>
             </header>
 
             <div id="tab-dashboard" class="admin-tab">
@@ -553,6 +576,28 @@
                         <button onclick="printReport()" class="btn btn-secondary btn-sm"><i data-lucide="printer"></i> PDF/Imprimir</button>
                     </div>
                 </div>
+                
+                <div style="background: var(--bg-card); padding: 1rem; border: 1px solid var(--border); border-radius: 0.5rem; margin-bottom: 1rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end;">
+                    <div style="flex:1; min-width: 150px;">
+                        <label>Data Inicial</label>
+                        <input type="date" id="repStart" style="margin:0;">
+                    </div>
+                    <div style="flex:1; min-width: 150px;">
+                        <label>Data Final</label>
+                        <input type="date" id="repEnd" style="margin:0;">
+                    </div>
+                    <div style="flex:1; min-width: 150px;">
+                        <label>Status</label>
+                        <select id="repStatus" style="margin:0;">
+                            <option value="">Todos</option>
+                            <option value="Pendente">Pendente</option>
+                            <option value="Entregue">Entregue</option>
+                            <option value="Cancelado">Cancelado</option>
+                        </select>
+                    </div>
+                    <button onclick="applyReportFilters()" class="btn btn-primary">Filtrar</button>
+                </div>
+
                 <div class="report-tabs">
                     <button class="report-tab-btn active" onclick="switchReport('sales')">Vendas Detalhadas</button>
                     <button class="report-tab-btn" onclick="switchReport('stock')">Estoque Baixo</button>
@@ -802,6 +847,7 @@
         window.pixKey = localStorage.getItem('dupecas_pix_key') || "teste 123456789";
         window.visibleProductsLimit = 30; // Global limit
         window.adminViewMode = 'list'; // 'list' or 'grid'
+        window.currentReportType = 'sales';
 
         // --- FUNÇÕES GLOBAIS ---
         window.showToast = function(msg, type = 'success') {
@@ -993,6 +1039,7 @@
                 <li><strong>Marca:</strong> ${p.vehicleBrand}</li>
                 <li><strong>Modelo:</strong> ${p.vehicleModel || 'Universal'}</li>
                 <li><strong>Ano:</strong> ${p.vehicleYear || 'Todos'}</li>
+                <li><strong>Versão:</strong> ${p.vehicleVersion || '-'}</li>
                 <li><strong>Estoque:</strong> ${p.stock} un.</li>
             `;
             const btn = document.getElementById('detailBtnAdd');
@@ -1117,7 +1164,6 @@
             window.orders.unshift(newOrder);
             await DBService.put('orders', newOrder);
 
-            // Verifica se cliente já existe, se não cria um básico
             const existingClient = window.clients.find(c => c.phone === phone);
             if (!existingClient) {
                 const newClient = {
@@ -1220,7 +1266,6 @@
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
             event.currentTarget.classList.add('active');
             
-            // Auto close mobile menu
             if(window.innerWidth <= 768) {
                 document.getElementById('adminSidebar').classList.remove('active');
             }
@@ -1263,33 +1308,27 @@
             });
         }
 
-        // --- GESTÃO DE CLIENTES (COMPLETA) ---
+        // --- GESTÃO DE CLIENTES ---
         window.renderClientsTable = function() {
             const container = document.getElementById('adminClientsContainer');
-            
             if(window.adminViewMode === 'list') {
                 container.innerHTML = `
                     <div class="data-table-wrapper">
                         <table class="data-table">
-                            <thead>
-                                <tr><th>Nome</th><th>Contato</th><th>Cidade/UF</th><th>Ações</th></tr>
-                            </thead>
-                            <tbody>
-                                ${window.clients.map(c => `
-                                    <tr>
-                                        <td>${c.name}</td>
-                                        <td>${c.phone}<br><span class="text-xs text-muted">${c.email}</span></td>
-                                        <td>${c.address?.city || '-'} / ${c.address?.state || '-'}</td>
-                                        <td>
-                                            <button onclick="editClient(${c.id})" class="btn-icon text-primary"><i data-lucide="edit"></i></button>
-                                            <button onclick="deleteClient(${c.id})" class="btn-icon text-danger"><i data-lucide="trash-2"></i></button>
-                                        </td>
-                                    </tr>
-                                `).join('')}
+                            <thead><tr><th>Nome</th><th>Contato</th><th>Cidade/UF</th><th>Ações</th></tr></thead>
+                            <tbody>${window.clients.map(c => `
+                                <tr>
+                                    <td>${c.name}</td>
+                                    <td>${c.phone}<br><span class="text-xs text-muted">${c.email}</span></td>
+                                    <td>${c.address?.city || '-'} / ${c.address?.state || '-'}</td>
+                                    <td>
+                                        <button onclick="editClient(${c.id})" class="btn-icon text-primary"><i data-lucide="edit"></i></button>
+                                        <button onclick="deleteClient(${c.id})" class="btn-icon text-danger"><i data-lucide="trash-2"></i></button>
+                                    </td>
+                                </tr>`).join('')}
                             </tbody>
                         </table>
-                    </div>
-                `;
+                    </div>`;
             } else {
                  container.innerHTML = `
                     <div class="admin-grid-view">
@@ -1305,8 +1344,7 @@
                                 </div>
                             </div>
                         `).join('')}
-                    </div>
-                 `;
+                    </div>`;
             }
             lucide.createIcons();
         }
@@ -1335,17 +1373,9 @@
                     state: document.getElementById('cliState').value,
                 }
             };
-
             await DBService.put('clients', client);
-            if(id) {
-                const idx = window.clients.findIndex(c => c.id == id);
-                window.clients[idx] = client;
-            } else {
-                window.clients.push(client);
-            }
-            closeClientForm();
-            renderClientsTable();
-            showToast("Cliente salvo!");
+            if(id) { const idx = window.clients.findIndex(c => c.id == id); window.clients[idx] = client; } else { window.clients.push(client); }
+            closeClientForm(); renderClientsTable(); showToast("Cliente salvo!");
         }
 
         window.editClient = function(id) {
@@ -1379,35 +1409,52 @@
         // --- RELATÓRIOS E EXPORTAÇÃO ---
         let currentReportData = [];
 
+        window.applyReportFilters = function() {
+            switchReport(window.currentReportType);
+        }
+
         window.switchReport = function(type) {
+            window.currentReportType = type;
             document.querySelectorAll('.report-tab-btn').forEach(b => b.classList.remove('active'));
             event.target.classList.add('active');
             const container = document.getElementById('report-content');
+            const startStr = document.getElementById('repStart').value;
+            const endStr = document.getElementById('repEnd').value;
+            const statusFilter = document.getElementById('repStatus').value;
+
+            // Convert date strings to timestamps for comparison
+            const startTs = startStr ? new Date(startStr + "T00:00:00").getTime() : 0;
+            const endTs = endStr ? new Date(endStr + "T23:59:59").getTime() : Infinity;
+
             let html = '';
             
             if(type === 'sales') {
-                // Flatten order items for detailed report
                 currentReportData = [];
-                window.orders.filter(o => o.status !== 'Cancelado').forEach(o => {
-                    o.items.forEach(i => {
-                        const prodDetails = window.products.find(p => p.id === i.id) || {};
-                        currentReportData.push({
-                            Data: o.date,
-                            Pedido_ID: o.id,
-                            Cliente: o.customer,
-                            Status: o.status,
-                            Produto: i.name,
-                            SKU: prodDetails.sku || 'N/A',
-                            Marca: prodDetails.vehicleBrand || 'N/A',
-                            Qtd: i.quantity,
-                            Preco_Unit: i.price,
-                            Total_Item: i.price * i.quantity
-                        });
-                    });
+                window.orders.forEach(o => {
+                    const oTs = o.timestamp || 0; // fallback if timestamp missing
+                    if (oTs >= startTs && oTs <= endTs) {
+                        if (!statusFilter || o.status === statusFilter) {
+                            o.items.forEach(i => {
+                                const prodDetails = window.products.find(p => p.id === i.id) || {};
+                                currentReportData.push({
+                                    Data: o.date,
+                                    Pedido_ID: o.id,
+                                    Cliente: o.customer,
+                                    Status: o.status,
+                                    Produto: i.name,
+                                    SKU: prodDetails.sku || 'N/A',
+                                    Marca: prodDetails.vehicleBrand || 'N/A',
+                                    Qtd: i.quantity,
+                                    Preco_Unit: i.price,
+                                    Total_Item: i.price * i.quantity
+                                });
+                            });
+                        }
+                    }
                 });
 
                 html = `
-                    <h4 class="font-bold mb-4">Vendas Detalhadas (Por Produto)</h4>
+                    <h4 class="font-bold mb-4">Vendas Detalhadas</h4>
                     <table class="data-table">
                         <thead><tr><th>Data</th><th>Pedido</th><th>Cliente</th><th>Produto</th><th>SKU</th><th>Qtd</th><th>Total</th></tr></thead>
                         <tbody>${currentReportData.map(r => `<tr><td>${r.Data}</td><td>${r.Pedido_ID}</td><td>${r.Cliente}</td><td>${r.Produto}</td><td>${r.SKU}</td><td>${r.Qtd}</td><td>${formatMoney(r.Total_Item)}</td></tr>`).join('')}</tbody>
@@ -1425,17 +1472,12 @@
                 }));
                 const grandTotal = window.products.reduce((a,b)=>a+(b.price*b.stock), 0);
                 html = `<h4 class="font-bold mb-4">Inventário Completo</h4><div class="mb-4 font-bold text-lg text-primary">Valor Total em Estoque: ${formatMoney(grandTotal)}</div><div class="data-table-wrapper"><table class="data-table"><thead><tr><th>Produto</th><th>Preço Unit.</th><th>Qtd.</th><th>Valor Total</th></tr></thead><tbody>${window.products.map(p => `<tr><td>${p.name} <br><span class="text-xs text-muted">${p.sku}</span></td><td>${formatMoney(p.price)}</td><td>${p.stock}</td><td class="font-bold">${formatMoney(p.price * p.stock)}</td></tr>`).join('')}</tbody></table></div>`;
-            
-            } else if (type === 'financial') { 
-                currentReportData = []; // No CSV for simple summary
-                const totalInvested = window.products.reduce((a,b)=>a+(b.price*b.stock),0); 
-                html = `<h4 class="font-bold mb-4">Financeiro</h4><div class="p-4 bg-body rounded border">Total em Estoque: <span class="font-bold text-lg">${formatMoney(totalInvested)}</span></div>`; 
             }
             container.innerHTML = html;
         }
 
         window.exportCurrentReport = function(format) {
-            if(!currentReportData || currentReportData.length === 0) return alert("Nenhum dado para exportar neste relatório.");
+            if(!currentReportData || currentReportData.length === 0) return alert("Nenhum dado para exportar. Aplique filtros ou selecione outro relatório.");
             
             const headers = Object.keys(currentReportData[0]);
             let content = "";
@@ -1447,7 +1489,6 @@
                 mime = "text/csv";
                 ext = format;
             } else if (format === 'xls') {
-                // Simple HTML Table for Excel
                 content = `<table border="1"><thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${currentReportData.map(row => `<tr>${headers.map(h => `<td>${row[h]}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
                 mime = "application/vnd.ms-excel";
                 ext = "xls";
@@ -1488,28 +1529,24 @@
                 container.innerHTML = `
                     <div class="data-table-wrapper">
                         <table class="data-table">
-                            <thead>
-                                <tr><th>ID</th><th>Data</th><th>Cliente</th><th>Total</th><th>Status</th><th>Ações</th></tr>
-                            </thead>
-                            <tbody>
-                                ${window.orders.map(o => {
-                                    const statusClass = `status-${o.status || 'Pendente'}`;
-                                    return `
-                                    <tr>
-                                        <td>#${o.id.toString().slice(-6)}</td>
-                                        <td>${o.date}</td>
-                                        <td>${o.customer}<br><span class="text-xs text-muted">${o.phone}</span></td>
-                                        <td class="font-bold">${formatMoney(o.total)}</td>
-                                        <td><span class="status-badge ${statusClass}">${o.status || 'Pendente'}</span></td>
-                                        <td style="display:flex; gap:0.5rem; justify-content:center;">
-                                            <button onclick="printOrder(${o.id})" title="Imprimir" class="btn-icon"><i data-lucide="printer"></i></button>
-                                            <button onclick="shareOrder(${o.id})" title="Compartilhar" class="btn-icon"><i data-lucide="share-2"></i></button>
-                                            <button onclick="openOrderDetail(${o.id})" class="btn-icon text-primary"><i data-lucide="eye"></i></button>
-                                            ${o.status !== 'Cancelado' ? `<button onclick="openEditOrder(${o.id})" class="btn-icon text-warning"><i data-lucide="edit"></i></button>` : ''}
-                                        </td>
-                                    </tr>`;
-                                }).join('')}
-                            </tbody>
+                            <thead><tr><th>ID</th><th>Data</th><th>Cliente</th><th>Total</th><th>Status</th><th>Ações</th></tr></thead>
+                            <tbody>${window.orders.map(o => {
+                                const statusClass = `status-${o.status || 'Pendente'}`;
+                                return `
+                                <tr>
+                                    <td>#${o.id.toString().slice(-6)}</td>
+                                    <td>${o.date}</td>
+                                    <td>${o.customer}<br><span class="text-xs text-muted">${o.phone}</span></td>
+                                    <td class="font-bold">${formatMoney(o.total)}</td>
+                                    <td><span class="status-badge ${statusClass}">${o.status || 'Pendente'}</span></td>
+                                    <td style="display:flex; gap:0.5rem; justify-content:center;">
+                                        <button onclick="printOrder(${o.id})" title="Imprimir" class="btn-icon"><i data-lucide="printer"></i></button>
+                                        <button onclick="shareOrder(${o.id})" title="Compartilhar" class="btn-icon"><i data-lucide="share-2"></i></button>
+                                        <button onclick="openOrderDetail(${o.id})" class="btn-icon text-primary"><i data-lucide="eye"></i></button>
+                                        ${o.status !== 'Cancelado' ? `<button onclick="openEditOrder(${o.id})" class="btn-icon text-warning"><i data-lucide="edit"></i></button>` : ''}
+                                    </td>
+                                </tr>`;
+                            }).join('')}</tbody>
                         </table>
                     </div>`;
             } else {
@@ -1543,39 +1580,34 @@
                     <div style="text-align:center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px;">
                         <h2 style="margin:0; font-size: 1.2rem;">DUPEÇAS</h2>
                         <p style="margin:0; font-size: 0.8rem;">Duarte Peças</p>
-                        <p style="margin:0; font-size: 0.8rem;">Av. Sete de Setembro, 105 - Petrolina/PE</p>
                         <p style="margin:0; font-size: 0.8rem;">(87) 9909-4280</p>
                     </div>
                     <div style="font-size: 0.9rem; margin-bottom: 10px;">
                         <strong>PEDIDO: #${o.id}</strong><br>
                         Data: ${o.date}<br>
-                        ---------------------------------<br>
-                        <strong>CLIENTE:</strong><br>
-                        Nome: ${o.customer}<br>
-                        Tel: ${o.phone}<br>
-                        ${o.email ? `Email: ${o.email}<br>` : ''}
-                        ${o.cpf ? `CPF: ${o.cpf}<br>` : ''}
+                        <strong>CLIENTE:</strong> ${o.customer} (${o.phone})
                     </div>
                     <table style="width: 100%; font-size: 0.8rem; border-collapse: collapse;">
                         <tr style="border-bottom: 1px solid #000;">
-                            <th style="text-align:left;">Item</th>
+                            <th style="text-align:left;">Item / Detalhes</th>
                             <th style="text-align:right;">Qtd</th>
                             <th style="text-align:right;">R$</th>
                         </tr>
-                        ${o.items.map(i => `
+                        ${o.items.map(i => {
+                            const p = window.products.find(prod => prod.id === i.id) || {};
+                            return `
                             <tr>
-                                <td>${i.name}</td>
-                                <td style="text-align:right;">${i.quantity}</td>
-                                <td style="text-align:right;">${(i.price * i.quantity).toFixed(2)}</td>
-                            </tr>
-                        `).join('')}
+                                <td style="padding-top:5px;"><strong>${i.name}</strong><br>
+                                    SKU: ${p.sku || '-'}<br>
+                                    Marca: ${p.vehicleBrand || '-'} ${p.vehicleModel || '-'}
+                                </td>
+                                <td style="text-align:right; vertical-align:top;">${i.quantity}</td>
+                                <td style="text-align:right; vertical-align:top;">${(i.price * i.quantity).toFixed(2)}</td>
+                            </tr>`;
+                        }).join('')}
                     </table>
                     <div style="border-top: 1px dashed #000; margin-top: 10px; padding-top: 5px; text-align: right; font-weight: bold; font-size: 1.1rem;">
                         TOTAL: ${formatMoney(o.total)}
-                    </div>
-                    <div style="margin-top: 20px; text-align: center; font-size: 0.7rem;">
-                        *** NÃO É DOCUMENTO FISCAL ***<br>
-                        Obrigado pela preferência!
                     </div>
                 </div>
             `;
@@ -1586,7 +1618,7 @@
             if(!o) return;
             const content = window.generateOrderHTML(o);
             const win = window.open('', '', 'height=600,width=400');
-            win.document.write('<html><head><title>Imprimir Pedido</title></head><body>');
+            win.document.write('<html><head><title>Imprimir</title></head><body>');
             win.document.write(content);
             win.document.write('</body></html>');
             win.document.close();
@@ -1596,17 +1628,12 @@
         window.shareOrder = async function(id) {
             const o = window.orders.find(x => x.id === id);
             if(!o) return;
-            const text = `PEDIDO DUPEÇAS #${o.id}\nCliente: ${o.customer}\nTotal: ${formatMoney(o.total)}\nItens: ${o.items.length}`;
-            if (navigator.share) {
-                try {
-                    await navigator.share({ title: 'Pedido Dupeças', text: text });
-                } catch (err) { console.log('Share failed', err); }
-            } else {
-                alert("Copie os dados:\n" + text);
-            }
+            const text = `PEDIDO #${o.id}\nCliente: ${o.customer}\nTotal: ${formatMoney(o.total)}`;
+            if (navigator.share) await navigator.share({ title: 'Pedido Dupeças', text: text });
+            else alert("Copie os dados:\n" + text);
         }
 
-        // --- EDIÇÃO AVANÇADA DE PEDIDOS (MANTIDO) ---
+        // --- EDIÇÃO AVANÇADA DE PEDIDOS (CORRIGIDO) ---
         let editingOrder = null;
 
         window.openEditOrder = function(id) {
@@ -1669,9 +1696,9 @@
             if(results.length > 0) {
                 resDiv.style.display = 'block';
                 resDiv.innerHTML = results.map(p => `
-                    <div onclick="addProdToOrder(${p.id})" style="padding:0.5rem; border-bottom:1px solid #eee; cursor:pointer;">
+                    <div class="search-result-item" onclick="addProdToOrder(${p.id})">
                         <div class="font-bold text-sm">${p.name}</div>
-                        <div class="text-xs text-muted">Estoque: ${p.stock} | ${formatMoney(p.price)}</div>
+                        <div class="text-xs text-muted">SKU: ${p.sku} | Estoque: ${p.stock} | ${formatMoney(p.price)}</div>
                     </div>
                 `).join('');
             } else resDiv.style.display = 'none';
@@ -1762,13 +1789,19 @@
                 <h4 style="font-weight:bold; margin-bottom:0.5rem;">Itens do Pedido:</h4>
                 <div style="max-height:200px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; margin-bottom:1rem;">
                     <table style="width:100%; font-size:0.9rem;">
-                        ${o.items.map(i => `
+                        ${o.items.map(i => {
+                            const p = window.products.find(prod => prod.id === i.id) || {};
+                            return `
                             <tr style="border-bottom:1px solid var(--border);">
                                 <td style="padding:0.5rem;"><img src="${i.image}" width="30"></td>
-                                <td style="padding:0.5rem;">${i.quantity}x ${i.name}</td>
-                                <td style="padding:0.5rem; text-align:right;">${formatMoney(i.price * i.quantity)}</td>
-                            </tr>
-                        `).join('')}
+                                <td style="padding:0.5rem;">
+                                    <strong>${i.name}</strong><br>
+                                    <span class="text-muted text-xs">SKU: ${p.sku || '-'} | Marca: ${p.vehicleBrand || '-'}</span>
+                                </td>
+                                <td style="padding:0.5rem; text-align:right;">${i.quantity} x ${formatMoney(i.price)}</td>
+                                <td style="padding:0.5rem; text-align:right; font-weight:bold;">${formatMoney(i.price * i.quantity)}</td>
+                            </tr>`;
+                        }).join('')}
                     </table>
                 </div>
                 <div style="text-align:right; font-size:1.25rem; font-weight:800; color:var(--primary);">
@@ -1798,7 +1831,6 @@
         }
         window.cancelOrder = function(id) { if(confirm("Cancelar pedido e devolver estoque?")) cancelOrderLogic(id); }
 
-        // --- CONFIGURAÇÕES E IMAGENS ---
         window.saveSettings = function() {
             const key = document.getElementById('configPixKey').value;
             window.pixKey = key;
