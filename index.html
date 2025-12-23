@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-PT">
 <head>
@@ -10,11 +11,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
+        /* (CSS MANTIDO IGUAL - ADICIONADO ESTILOS PARA MODAL DE EDIÇÃO) */
         :root {
             --primary: #2563eb;        
             --primary-dark: #1e40af;   
             --primary-light: #eff6ff; 
-            --secondary: #0f172a;        
+            --secondary: #0f172a;       
             --bg-body: #f8fafc;
             --bg-card: #ffffff;
             --text-main: #1e293b;
@@ -150,34 +152,6 @@
         .toast { background: var(--secondary); color: white; padding: 12px 20px; border-radius: 8px; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 10px; animation: slideInRight 0.3s ease-out; max-width: 300px; font-size: 0.9rem; }
         .toast.success { border-left: 4px solid var(--success); }
         .toast.error { border-left: 4px solid var(--danger); }
-        /* Grid Views for Admin */
-        .admin-grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
-        .admin-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
-        
-        /* IMPROVED SEARCH DROPDOWN CONTRAST */
-        #editProdResults { 
-            position: absolute; 
-            width: 100%; 
-            max-height: 200px; 
-            overflow-y: auto; 
-            background: var(--bg-card); 
-            border: 1px solid var(--primary); 
-            border-radius: 4px; 
-            z-index: 2000; 
-            box-shadow: var(--shadow-lg);
-        }
-        .search-result-item { 
-            padding: 10px; 
-            border-bottom: 1px solid var(--border); 
-            cursor: pointer; 
-            background: var(--bg-card); 
-            color: var(--text-main); 
-        }
-        .search-result-item:hover { 
-            background: var(--primary-light); 
-            color: var(--primary-dark);
-        }
-
         @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes spin { 100% { transform: rotate(360deg); } }
         .animate-spin-slow { animation: spin 2s linear infinite; }
@@ -191,6 +165,8 @@
             .promo-grid { grid-template-columns: 1fr; }
             .mobile-card-table { display: block; }
             .desktop-table-view { display: none; }
+            .admin-card-item { background: var(--bg-card); border-radius: 0.75rem; padding: 1rem; margin-bottom: 1rem; border: 1px solid var(--border); display: flex; gap: 1rem; align-items: center; }
+            .admin-card-img { width: 60px; height: 60px; border-radius: 0.5rem; object-fit: cover; }
         }
         @media (min-width: 769px) {
             .mobile-card-table { display: none; }
@@ -240,62 +216,22 @@
         </div>
     </div>
 
-    <div id="clientFormModal" class="modal-overlay" style="z-index: 1600;" onclick="if(event.target === this) closeClientForm()">
-        <div class="modal" style="max-width: 600px;">
-            <div class="close-modal" onclick="closeClientForm()"><i data-lucide="x"></i></div>
-            <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem;">Cadastro de Cliente</h3>
-            <form onsubmit="saveClient(event)" style="display: flex; flex-direction: column; gap: 1rem;">
-                <input type="hidden" id="cliId">
-                <input type="text" id="cliName" placeholder="Nome Completo *" required>
-                <div class="flex gap-4">
-                    <input type="text" id="cliCpf" placeholder="CPF">
-                    <input type="email" id="cliEmail" placeholder="E-mail">
-                </div>
-                <input type="tel" id="cliPhone" placeholder="Telefone/WhatsApp *" required>
-                <h4 style="font-weight:700; font-size:0.9rem; margin-top:0.5rem;">Endereço</h4>
-                <div class="flex gap-4">
-                    <input type="text" id="cliCep" placeholder="CEP" style="width: 120px;">
-                    <input type="text" id="cliAddress" placeholder="Logradouro" style="flex:1;">
-                </div>
-                <div class="flex gap-4">
-                    <input type="text" id="cliNum" placeholder="Nº" style="width: 80px;">
-                    <input type="text" id="cliDistrict" placeholder="Bairro" style="flex:1;">
-                </div>
-                <div class="flex gap-4">
-                    <input type="text" id="cliCity" placeholder="Cidade" style="flex:1;">
-                    <input type="text" id="cliState" placeholder="UF" style="width: 60px;">
-                </div>
-                <button type="submit" class="btn btn-primary w-full">Salvar Cliente</button>
-            </form>
-        </div>
-    </div>
-
     <div id="orderEditModal" class="modal-overlay" style="z-index: 1500;" onclick="if(event.target === this) closeEditOrder()">
         <div class="modal" style="max-width: 800px;">
             <div class="close-modal" onclick="closeEditOrder()"><i data-lucide="x"></i></div>
-            <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem;">Editar / Novo Pedido</h3>
+            <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem;">Editar Pedido</h3>
             
             <div style="display:flex; flex-direction:column; gap:1rem; height: 100%;">
                 
-                <div style="background: var(--bg-body); padding: 1rem; border-radius: 8px; border: 1px solid var(--border);">
-                    <h4 style="font-weight:700; margin-bottom:0.5rem;">Dados do Cliente</h4>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <input type="text" id="editClientName" placeholder="Nome do Cliente" style="margin-bottom:0;">
-                        <input type="text" id="editClientPhone" placeholder="Telefone / WhatsApp" style="margin-bottom:0;">
-                        <input type="text" id="editClientEmail" placeholder="E-mail (opcional)" style="margin-bottom:0;">
-                        <input type="text" id="editClientCpf" placeholder="CPF (opcional)" style="margin-bottom:0;">
-                    </div>
-                </div>
-
                 <div style="flex:1; border:1px solid var(--border); border-radius:8px; padding:1rem; overflow-y:auto; max-height: 250px;">
                     <h4 style="font-weight:700; margin-bottom:0.5rem;">Itens no Pedido</h4>
                     <div id="editOrderItemsList"></div>
                 </div>
 
-                <div style="border:1px solid var(--border); border-radius:8px; padding:1rem; background: var(--bg-body); position: relative;">
+                <div style="border:1px solid var(--border); border-radius:8px; padding:1rem; background: var(--bg-body);">
                     <h4 style="font-weight:700; margin-bottom:0.5rem;">Adicionar Produto</h4>
                     <input type="text" id="editSearchProd" placeholder="Buscar produto para adicionar..." oninput="searchProdForOrder(this.value)">
-                    <div id="editProdResults" style="display: none;"></div>
+                    <div id="editProdResults" style="max-height: 150px; overflow-y: auto; display: none; background: white; border: 1px solid var(--border); border-radius: 4px;"></div>
                 </div>
 
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1rem;">
@@ -407,12 +343,9 @@
 
         <main class="container">
             <div id="resultsCount" style="margin-bottom: 1rem; font-weight: 600; color: var(--text-muted); font-size: 0.9rem;"></div>
-            <div id="productsContainer" class="products-grid"></div>
+            <div id="productsContainer" class="products-grid">
+                </div>
             
-            <div id="loadMoreBtn" class="hidden" style="text-align: center; margin-top: 2rem;">
-                <button onclick="loadMoreProducts()" class="btn btn-secondary">Ver mais produtos</button>
-            </div>
-
             <div id="emptyState" class="hidden text-center py-20">
                 <div style="background: var(--bg-body); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
                     <i data-lucide="package-search" size="40" color="#94a3b8"></i>
@@ -500,9 +433,6 @@
                     <i data-lucide="shopping-bag"></i> <span class="menu-text">Pedidos</span> 
                     <span id="orderCountBadge" class="badge-count" style="background: var(--danger); font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; margin-left: auto;">0</span>
                 </div>
-                <div class="menu-item" onclick="setAdminTab('clients')">
-                    <i data-lucide="users"></i> <span class="menu-text">Clientes</span>
-                </div>
                 <div class="menu-item" onclick="setAdminTab('reports')">
                     <i data-lucide="pie-chart"></i> <span class="menu-text">Relatórios</span>
                 </div>
@@ -528,7 +458,7 @@
             <header class="flex justify-between items-center mb-6">
                 <button class="md:hidden btn-icon" onclick="toggleSidebarMobile()"><i data-lucide="menu"></i></button>
                 <h2 id="pageTitle" style="font-size: 1.5rem; font-weight: 800; color: var(--text-main);">Visão Geral</h2>
-                <button onclick="toggleTheme()" class="btn-icon" title="Alternar Tema"><i data-lucide="moon"></i></button>
+                <div style="width: 40px;"></div>
             </header>
 
             <div id="tab-dashboard" class="admin-tab">
@@ -555,56 +485,41 @@
             <div id="tab-products" class="admin-tab hidden">
                 <div class="flex flex-col md:flex-row justify-between gap-4 mb-6">
                     <input type="text" placeholder="Filtrar por nome, SKU, veículo..." oninput="filterAdminTable(this.value)" style="margin: 0; max-width: 300px;">
-                    <div class="flex gap-2">
-                        <div class="flex bg-body rounded border p-1">
-                            <button onclick="setAdminViewMode('products', 'grid')" class="btn-icon"><i data-lucide="grid"></i></button>
-                            <button onclick="setAdminViewMode('products', 'list')" class="btn-icon"><i data-lucide="list"></i></button>
-                        </div>
-                        <button onclick="openProductForm()" class="btn btn-primary"><i data-lucide="plus"></i> Novo Produto</button>
-                    </div>
+                    <button onclick="openProductForm()" class="btn btn-primary"><i data-lucide="plus"></i> Novo Produto</button>
                 </div>
-                <div id="adminProductsContainer"></div>
+                <div id="adminMobileList" class="mobile-card-table"></div>
+                <div class="desktop-table-view data-table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Imagem</th>
+                                <th>Produto / SKU</th>
+                                <th>Aplicação</th>
+                                <th>Preço</th>
+                                <th>Estoque</th>
+                                <th style="text-align: center;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminTableBody"></tbody>
+                    </table>
+                </div>
             </div>
 
             <div id="tab-reports" class="admin-tab hidden">
-                <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+                <div class="flex justify-between items-center mb-4">
                     <h3 class="font-bold text-lg">Central de Relatórios</h3>
                     <div class="flex gap-2">
-                        <button onclick="exportCurrentReport('txt')" class="btn btn-secondary btn-sm">TXT</button>
-                        <button onclick="exportCurrentReport('csv')" class="btn btn-secondary btn-sm">CSV</button>
-                        <button onclick="exportCurrentReport('xls')" class="btn btn-secondary btn-sm">Excel</button>
-                        <button onclick="printReport()" class="btn btn-secondary btn-sm"><i data-lucide="printer"></i> PDF/Imprimir</button>
+                        <button onclick="exportCurrentReport('csv')" class="btn btn-secondary"><i data-lucide="sheet"></i> CSV</button>
                     </div>
                 </div>
-                
-                <div style="background: var(--bg-card); padding: 1rem; border: 1px solid var(--border); border-radius: 0.5rem; margin-bottom: 1rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end;">
-                    <div style="flex:1; min-width: 150px;">
-                        <label>Data Inicial</label>
-                        <input type="date" id="repStart" style="margin:0;">
-                    </div>
-                    <div style="flex:1; min-width: 150px;">
-                        <label>Data Final</label>
-                        <input type="date" id="repEnd" style="margin:0;">
-                    </div>
-                    <div style="flex:1; min-width: 150px;">
-                        <label>Status</label>
-                        <select id="repStatus" style="margin:0;">
-                            <option value="">Todos</option>
-                            <option value="Pendente">Pendente</option>
-                            <option value="Entregue">Entregue</option>
-                            <option value="Cancelado">Cancelado</option>
-                        </select>
-                    </div>
-                    <button onclick="applyReportFilters()" class="btn btn-primary">Filtrar</button>
-                </div>
-
                 <div class="report-tabs">
-                    <button class="report-tab-btn active" onclick="switchReport('sales')">Vendas Detalhadas</button>
+                    <button class="report-tab-btn active" onclick="switchReport('sales')">Vendas</button>
                     <button class="report-tab-btn" onclick="switchReport('stock')">Estoque Baixo</button>
                     <button class="report-tab-btn" onclick="switchReport('full-inventory')">Inventário Completo</button>
                     <button class="report-tab-btn" onclick="switchReport('financial')">Financeiro</button>
+                    <button class="report-tab-btn" onclick="switchReport('compatibility')">Compatibilidade</button>
                 </div>
-                <div id="report-content" class="bg-card border rounded p-4" style="background: var(--bg-card); padding: 1.5rem; overflow-x: auto;"></div>
+                <div id="report-content" class="bg-card border rounded p-4" style="background: var(--bg-card); padding: 1.5rem;"></div>
             </div>
 
             <div id="tab-brands" class="admin-tab hidden">
@@ -619,44 +534,19 @@
             </div>
 
             <div id="tab-orders" class="admin-tab hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-lg">Gerenciamento de Pedidos</h3>
-                    <div class="flex gap-2">
-                        <div class="flex bg-body rounded border p-1">
-                            <button onclick="setAdminViewMode('orders', 'grid')" class="btn-icon"><i data-lucide="grid"></i></button>
-                            <button onclick="setAdminViewMode('orders', 'list')" class="btn-icon"><i data-lucide="list"></i></button>
-                        </div>
-                        <button onclick="openEditOrder('new')" class="btn btn-primary"><i data-lucide="plus-circle"></i> Novo Pedido</button>
-                    </div>
+                <div class="data-table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>ID</th><th>Data</th><th>Cliente</th><th>Total</th><th>Status</th><th>Ações</th></tr>
+                        </thead>
+                        <tbody id="ordersTableBody"></tbody>
+                    </table>
                 </div>
-                <div id="adminOrdersContainer"></div>
                 <div id="noOrdersMsg" class="hidden" style="padding: 2rem; text-align: center; color: var(--text-muted);">Nenhum pedido registrado ainda.</div>
-            </div>
-
-            <div id="tab-clients" class="admin-tab hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-lg">Gerenciamento de Clientes</h3>
-                    <div class="flex gap-2">
-                         <div class="flex bg-body rounded border p-1">
-                            <button onclick="setAdminViewMode('clients', 'grid')" class="btn-icon"><i data-lucide="grid"></i></button>
-                            <button onclick="setAdminViewMode('clients', 'list')" class="btn-icon"><i data-lucide="list"></i></button>
-                        </div>
-                        <button onclick="openClientForm()" class="btn btn-primary"><i data-lucide="user-plus"></i> Novo Cliente</button>
-                    </div>
-                </div>
-                <div id="adminClientsContainer"></div>
             </div>
 
             <div id="tab-settings" class="admin-tab hidden">
                 <div style="display: grid; gap: 1.5rem; max-width: 800px;">
-                    
-                    <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border);">
-                        <h3 style="font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="settings-2"></i> Dados de Pagamento</h3>
-                        <p class="text-sm text-muted mb-2">Chave PIX que será enviada no WhatsApp.</p>
-                        <input type="text" id="configPixKey" placeholder="Chave PIX" value="teste 123456789">
-                        <button onclick="saveSettings()" class="btn btn-primary">Salvar Configurações</button>
-                    </div>
-
                     <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border);">
                         <h3 style="font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="cloud"></i> Sincronização e Backup (Firebase)</h3>
                         <p class="text-sm text-muted mb-4">Gerenciamento de dados na nuvem.</p>
@@ -671,8 +561,7 @@
 
                     <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border);">
                         <h3 style="font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="image"></i> Atualização em Massa</h3>
-                        <p class="text-sm text-muted mb-2">Formato: ID,URL_DA_IMAGEM (uma por linha)</p>
-                        <textarea id="bulkImgInput" rows="4" placeholder="Ex: 1715456,https://link.com/img.jpg"></textarea>
+                        <textarea id="bulkImgInput" rows="4" placeholder="Ex: ID,https://link-da-imagem.jpg"></textarea>
                         <button onclick="bulkUpdateImages()" class="btn btn-primary w-full">Processar Imagens</button>
                     </div>
                     <div style="background: #fef2f2; padding: 1.5rem; border-radius: 1rem; border: 1px solid #fecaca;">
@@ -784,11 +673,12 @@
     </div>
 
     <script type="module">
+        // Importa Firebase diretamente da CDN (Versão Modular)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
 
-        // CONFIGURAÇÃO DO FIREBASE
+        // CONFIGURAÇÃO FORNECIDA PELO USUÁRIO
         const firebaseConfig = {
             apiKey: "AIzaSyA1bJpcVTG8C7W6SDqYTUW2MGEgagiKN-E",
             authDomain: "dupecas-77955.firebaseapp.com",
@@ -799,10 +689,12 @@
             measurementId: "G-10HENTDJ8R"
         };
 
+        // Inicializa Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const analytics = getAnalytics(app);
 
+        // --- SERVIÇO DE BANCO DE DADOS (FIRESTORE) ---
         const DBService = {
             async getAll(collectionName) {
                 try {
@@ -813,18 +705,23 @@
                     return [];
                 }
             },
+
             async put(collectionName, data) {
                 const idString = String(data.id || Date.now());
                 await setDoc(doc(db, collectionName, idString), data);
                 return data;
             },
+
             async delete(collectionName, id) {
                 await deleteDoc(doc(db, collectionName, String(id)));
             },
+
             async clear(collectionName) {
                 const q = await getDocs(collection(db, collectionName));
                 const batch = writeBatch(db);
-                q.forEach((doc) => { batch.delete(doc.ref); });
+                q.forEach((doc) => {
+                    batch.delete(doc.ref);
+                });
                 await batch.commit();
             }
         };
@@ -834,21 +731,17 @@
         const DEFAULT_BRANDS = ["Todas", "Audi", "BMW", "BYD", "Chevrolet", "Citroën", "Fiat", "Ford", "Honda", "Hyundai", "Jeep", "Kia", "Mercedes-Benz", "Mitsubishi", "Nissan", "Peugeot", "Renault", "Toyota", "Volkswagen", "Volvo", "Yamaha"].map(b => ({ name: b }));
         const INITIAL_PRODUCTS = [
             { id: 1, name: "Óleo Sintético 5W30", category: "Óleos", price: 45.90, stock: 50, image: "https://images.pexels.com/photos/4489749/pexels-photo-4489749.jpeg?auto=compress&cs=tinysrgb&w=600", sku: "OL5W30", vehicleBrand: "Todas", vehicleModel: "Universal", description: "Proteção máxima." },
+            { id: 2, name: "Filtro de Óleo", category: "Filtros", price: 25.00, stock: 100, image: "https://images.pexels.com/photos/2244746/pexels-photo-2244746.jpeg?auto=compress&cs=tinysrgb&w=600", sku: "FIL001", vehicleBrand: "Volkswagen", vehicleModel: "Gol", description: "Alta retenção." },
         ];
 
         // --- VARIÁVEIS GLOBAIS ---
         window.products = [];
         window.cart = []; 
         window.orders = [];
-        window.clients = [];
         window.brands = [];
         window.currentFilter = 'Todos';
         window.isAdmin = false;
-        window.pixKey = localStorage.getItem('dupecas_pix_key') || "teste 123456789";
-        window.visibleProductsLimit = 30; // Global limit
-        window.adminViewMode = 'list'; // 'list' or 'grid'
-        window.currentReportType = 'sales';
-
+        
         // --- FUNÇÕES GLOBAIS ---
         window.showToast = function(msg, type = 'success') {
             const container = document.getElementById('toastContainer');
@@ -866,9 +759,9 @@
         // --- CARREGAMENTO INICIAL ---
         window.onload = async function() {
             lucide.createIcons();
-            document.getElementById('configPixKey').value = window.pixKey;
             await loadData();
             
+            // VERIFICA SESSÃO ADMIN
             if (localStorage.getItem('dupecas_admin_logged') === 'true') {
                 window.isAdmin = true;
                 document.getElementById('adminView').classList.remove('hidden');
@@ -888,7 +781,6 @@
             window.products = await DBService.getAll('products');
             window.brands = await DBService.getAll('brands');
             window.orders = await DBService.getAll('orders');
-            window.clients = await DBService.getAll('clients');
             
             const localCart = localStorage.getItem('dupecas_cart');
             window.cart = localCart ? JSON.parse(localCart) : [];
@@ -907,11 +799,13 @@
         }
         window.loadData = loadData; 
 
-        // --- FILTROS E PRODUTOS ---
+        // --- FILTROS ---
         window.renderBrandsFilter = function() {
+            const select = document.getElementById('filterBrand');
+            const formSelect = document.getElementById('prodVehBrand');
             const html = window.brands.map(b => `<option value="${b}">${b}</option>`).join('');
-            if(document.getElementById('filterBrand')) document.getElementById('filterBrand').innerHTML = html;
-            if(document.getElementById('prodVehBrand')) document.getElementById('prodVehBrand').innerHTML = html;
+            if(select) select.innerHTML = html;
+            if(formSelect) formSelect.innerHTML = html;
         }
 
         window.renderCategories = function() {
@@ -925,7 +819,6 @@
         window.setCategoryFilter = function(cat) { 
             window.currentFilter = cat; 
             document.getElementById('searchInput').value = '';
-            window.visibleProductsLimit = 30;
             window.renderCategories(); 
             window.applyFilters(); 
         }
@@ -940,7 +833,6 @@
             document.getElementById('filterYear').value = '';
             document.getElementById('filterSku').value = '';
             window.currentFilter = 'Todos';
-            window.visibleProductsLimit = 30;
             window.renderCategories();
             window.applyFilters();
         }
@@ -975,26 +867,17 @@
             const container = document.getElementById('productsContainer');
             const empty = document.getElementById('emptyState');
             const countEl = document.getElementById('resultsCount');
-            const loadMoreBtn = document.getElementById('loadMoreBtn');
 
             if(countEl) countEl.innerText = `Exibindo ${data.length} produto(s)`;
 
             if(data.length === 0) {
                 container.innerHTML = '';
                 empty.classList.remove('hidden');
-                loadMoreBtn.classList.add('hidden');
                 return;
             }
             empty.classList.add('hidden');
 
-            const displayData = data.slice(0, window.visibleProductsLimit);
-            if (displayData.length < data.length) {
-                loadMoreBtn.classList.remove('hidden');
-            } else {
-                loadMoreBtn.classList.add('hidden');
-            }
-
-            container.innerHTML = displayData.map(p => `
+            container.innerHTML = data.map(p => `
                 <div class="product-card">
                     <div class="card-img-box" onclick="openDetail(${p.id})">
                         <img src="${p.image}" class="card-img" loading="lazy">
@@ -1020,12 +903,7 @@
             lucide.createIcons();
         }
 
-        window.loadMoreProducts = function() {
-            window.visibleProductsLimit += 30;
-            window.applyFilters();
-        }
-
-        // --- DETALHES, CARRINHO E CHECKOUT ---
+        // --- DETALHES ---
         window.openDetail = function(id) {
             const p = window.products.find(x => x.id === id);
             if(!p) return;
@@ -1039,7 +917,6 @@
                 <li><strong>Marca:</strong> ${p.vehicleBrand}</li>
                 <li><strong>Modelo:</strong> ${p.vehicleModel || 'Universal'}</li>
                 <li><strong>Ano:</strong> ${p.vehicleYear || 'Todos'}</li>
-                <li><strong>Versão:</strong> ${p.vehicleVersion || '-'}</li>
                 <li><strong>Estoque:</strong> ${p.stock} un.</li>
             `;
             const btn = document.getElementById('detailBtnAdd');
@@ -1053,6 +930,7 @@
         }
         window.closeProductDetail = function() { document.getElementById('productDetailModal').classList.remove('active'); }
 
+        // --- CARRINHO ---
         window.toggleCart = function() {
             document.getElementById('cartDrawer').classList.toggle('open');
             document.getElementById('drawerOverlay').classList.toggle('open');
@@ -1061,12 +939,15 @@
         window.addToCart = function(id) {
             const prod = window.products.find(p => p.id === id);
             const item = window.cart.find(i => i.id === id);
+            
             if (item) {
                 if (item.quantity >= prod.stock) return showToast("Estoque máximo atingido!", "error");
                 item.quantity++;
             } else {
-                window.cart.push({ ...prod, quantity: 1 });
+                const newItem = { ...prod, quantity: 1 };
+                window.cart.push(newItem);
             }
+            
             saveCartLocal();
             updateCartUI();
             showToast("Adicionado ao carrinho!");
@@ -1093,7 +974,9 @@
             updateCartUI();
         }
 
-        window.saveCartLocal = function() { localStorage.setItem('dupecas_cart', JSON.stringify(window.cart)); }
+        window.saveCartLocal = function() {
+            localStorage.setItem('dupecas_cart', JSON.stringify(window.cart));
+        }
 
         window.updateCartUI = function() {
             const container = document.getElementById('cartItems');
@@ -1154,30 +1037,16 @@
                 date: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR'),
                 customer: name,
                 phone: phone,
-                email: "",
-                cpf: "",
                 total: total,
                 status: 'Pendente',
                 items: JSON.parse(JSON.stringify(window.cart))
             };
             
+            // Salva pedido no Firebase
             window.orders.unshift(newOrder);
             await DBService.put('orders', newOrder);
 
-            const existingClient = window.clients.find(c => c.phone === phone);
-            if (!existingClient) {
-                const newClient = {
-                    id: Date.now(),
-                    name: name,
-                    phone: phone,
-                    email: "",
-                    cpf: "",
-                    address: { cep: "", street: "", num: "", district: "", city: "", state: "" }
-                };
-                window.clients.push(newClient);
-                await DBService.put('clients', newClient);
-            }
-
+            // Atualiza estoque no Firebase
             for (const item of window.cart) {
                 const prod = window.products.find(p => p.id === item.id);
                 if(prod) {
@@ -1189,8 +1058,7 @@
             const msg = `*PEDIDO #${newOrder.id}*\n👤 *${name}*\n📞 ${phone}\n\n` +
                         window.cart.map(i => `📦 ${i.quantity}x ${i.name}`).join('\n') + 
                         `\n\n💰 *Total: ${formatMoney(total)}*` +
-                        `\n\n🔑 *Chave PIX:* ${window.pixKey}` +
-                        `\n\n⚠️ *Aviso:* O seu pedido ficará reservado por 72h.`;
+                        `\n\n⚠️ *Aviso:* O seu pedido ficará reservado por 72h. Após esse prazo, caso não confirmado, será cancelado automaticamente.`;
             
             window.cart = [];
             localStorage.removeItem('dupecas_cart');
@@ -1201,7 +1069,7 @@
             window.open(`https://wa.me/558799094280?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
-        // --- ADMIN SISTEMA E PEDIDOS ---
+        // --- ADMIN LOGIN ---
         window.openLogin = function() { document.getElementById('loginModal').classList.add('active'); }
         window.closeLogin = function() { document.getElementById('loginModal').classList.remove('active'); }
         
@@ -1209,7 +1077,9 @@
             e.preventDefault();
             if (document.getElementById('adminPass').value === 'admin') {
                 window.isAdmin = true;
+                // SALVA SESSÃO NO LOCALSTORAGE
                 localStorage.setItem('dupecas_admin_logged', 'true');
+                
                 document.getElementById('adminView').classList.remove('hidden');
                 document.getElementById('storeView').classList.add('hidden');
                 closeLogin();
@@ -1220,11 +1090,14 @@
 
         window.logoutAdmin = function() {
             window.isAdmin = false;
+            // LIMPA SESSÃO
             localStorage.removeItem('dupecas_admin_logged');
+            
             document.getElementById('adminView').classList.add('hidden');
             document.getElementById('storeView').classList.remove('hidden');
         }
 
+        // --- SISTEMA DE EXPIRAÇÃO 72H ---
         window.checkExpiredOrders = async function() {
             const now = Date.now();
             const limit = 72 * 60 * 60 * 1000; 
@@ -1237,12 +1110,13 @@
                 }
             }
             if(updated) {
-                showToast("Pedidos expirados foram cancelados.");
+                showToast("Pedidos expirados (72h) foram cancelados e retornados ao estoque.");
                 renderOrdersTable();
                 loadData(); 
             }
         }
 
+        // --- ADMIN SIDEBAR ---
         window.toggleSidebarMobile = function() { document.getElementById('adminSidebar').classList.toggle('active'); }
         window.initSidebarState = function() {
             const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
@@ -1253,10 +1127,11 @@
         }
         window.toggleSidebarCollapse = function() {
             const sidebar = document.getElementById('adminSidebar');
+            const icon = document.getElementById('collapseIcon');
             sidebar.classList.toggle('collapsed');
             const isCollapsed = sidebar.classList.contains('collapsed');
             localStorage.setItem('sidebarCollapsed', isCollapsed);
-            document.getElementById('collapseIcon').setAttribute('data-lucide', isCollapsed ? 'chevrons-right' : 'chevrons-left');
+            if(isCollapsed) { icon.setAttribute('data-lucide', 'chevrons-right'); } else { icon.setAttribute('data-lucide', 'chevrons-left'); }
             lucide.createIcons();
         }
 
@@ -1265,29 +1140,17 @@
             document.getElementById(`tab-${tab}`).classList.remove('hidden');
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
             event.currentTarget.classList.add('active');
-            
-            if(window.innerWidth <= 768) {
-                document.getElementById('adminSidebar').classList.remove('active');
-            }
-
             if (tab === 'dashboard') loadAdminDashboard();
             if (tab === 'products') renderAdminTable();
             if (tab === 'orders') renderOrdersTable();
-            if (tab === 'clients') renderClientsTable();
             if (tab === 'reports') switchReport('sales');
             if (tab === 'brands') renderBrandsList();
-        }
-
-        window.setAdminViewMode = function(section, mode) {
-            window.adminViewMode = mode;
-            if(section === 'products') renderAdminTable();
-            if(section === 'orders') renderOrdersTable();
-            if(section === 'clients') renderClientsTable();
         }
 
         let salesChartRef;
         window.loadAdminDashboard = function() {
             const totalVal = window.products.reduce((a, b) => a + (b.price * b.stock), 0);
+            // FILTRA PEDIDOS CANCELADOS PARA O TOTAL DE VENDAS
             const validOrders = window.orders.filter(o => o.status !== 'Cancelado');
             
             document.getElementById('kpiSales').innerText = formatMoney(validOrders.reduce((a,b)=>a+b.total, 0));
@@ -1308,652 +1171,61 @@
             });
         }
 
-        // --- GESTÃO DE CLIENTES ---
-        window.renderClientsTable = function() {
-            const container = document.getElementById('adminClientsContainer');
-            if(window.adminViewMode === 'list') {
-                container.innerHTML = `
-                    <div class="data-table-wrapper">
-                        <table class="data-table">
-                            <thead><tr><th>Nome</th><th>Contato</th><th>Cidade/UF</th><th>Ações</th></tr></thead>
-                            <tbody>${window.clients.map(c => `
-                                <tr>
-                                    <td>${c.name}</td>
-                                    <td>${c.phone}<br><span class="text-xs text-muted">${c.email}</span></td>
-                                    <td>${c.address?.city || '-'} / ${c.address?.state || '-'}</td>
-                                    <td>
-                                        <button onclick="editClient(${c.id})" class="btn-icon text-primary"><i data-lucide="edit"></i></button>
-                                        <button onclick="deleteClient(${c.id})" class="btn-icon text-danger"><i data-lucide="trash-2"></i></button>
-                                    </td>
-                                </tr>`).join('')}
-                            </tbody>
-                        </table>
-                    </div>`;
-            } else {
-                 container.innerHTML = `
-                    <div class="admin-grid-view">
-                        ${window.clients.map(c => `
-                            <div class="admin-card">
-                                <div class="font-bold">${c.name}</div>
-                                <div class="text-sm"><i data-lucide="phone" size="14"></i> ${c.phone}</div>
-                                <div class="text-sm"><i data-lucide="mail" size="14"></i> ${c.email || '-'}</div>
-                                <div class="text-sm text-muted">${c.address?.city || '-'} - ${c.address?.state || '-'}</div>
-                                <div class="flex gap-2 mt-auto">
-                                    <button onclick="editClient(${c.id})" class="btn btn-secondary w-full">Editar</button>
-                                    <button onclick="deleteClient(${c.id})" class="btn btn-danger w-full">Excluir</button>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>`;
-            }
-            lucide.createIcons();
-        }
-
-        window.openClientForm = function() {
-            ['cliId', 'cliName', 'cliCpf', 'cliEmail', 'cliPhone', 'cliCep', 'cliAddress', 'cliNum', 'cliDistrict', 'cliCity', 'cliState'].forEach(id => document.getElementById(id).value = '');
-            document.getElementById('clientFormModal').classList.add('active');
-        }
-        window.closeClientForm = function() { document.getElementById('clientFormModal').classList.remove('active'); }
-
-        window.saveClient = async function(e) {
-            e.preventDefault();
-            const id = document.getElementById('cliId').value;
-            const client = {
-                id: id ? parseInt(id) : Date.now(),
-                name: document.getElementById('cliName').value,
-                cpf: document.getElementById('cliCpf').value,
-                email: document.getElementById('cliEmail').value,
-                phone: document.getElementById('cliPhone').value,
-                address: {
-                    cep: document.getElementById('cliCep').value,
-                    street: document.getElementById('cliAddress').value,
-                    num: document.getElementById('cliNum').value,
-                    district: document.getElementById('cliDistrict').value,
-                    city: document.getElementById('cliCity').value,
-                    state: document.getElementById('cliState').value,
-                }
-            };
-            await DBService.put('clients', client);
-            if(id) { const idx = window.clients.findIndex(c => c.id == id); window.clients[idx] = client; } else { window.clients.push(client); }
-            closeClientForm(); renderClientsTable(); showToast("Cliente salvo!");
-        }
-
-        window.editClient = function(id) {
-            const c = window.clients.find(x => x.id === id);
-            if(!c) return;
-            document.getElementById('cliId').value = c.id;
-            document.getElementById('cliName').value = c.name;
-            document.getElementById('cliCpf').value = c.cpf || '';
-            document.getElementById('cliEmail').value = c.email || '';
-            document.getElementById('cliPhone').value = c.phone;
-            if(c.address) {
-                document.getElementById('cliCep').value = c.address.cep || '';
-                document.getElementById('cliAddress').value = c.address.street || '';
-                document.getElementById('cliNum').value = c.address.num || '';
-                document.getElementById('cliDistrict').value = c.address.district || '';
-                document.getElementById('cliCity').value = c.address.city || '';
-                document.getElementById('cliState').value = c.address.state || '';
-            }
-            document.getElementById('clientFormModal').classList.add('active');
-        }
-
-        window.deleteClient = async function(id) {
-            if(confirm("Excluir cliente permanentemente?")) {
-                window.clients = window.clients.filter(c => c.id !== id);
-                await DBService.delete('clients', id);
-                renderClientsTable();
-                showToast("Cliente excluído.");
-            }
-        }
-
-        // --- RELATÓRIOS E EXPORTAÇÃO ---
-        let currentReportData = [];
-
-        window.applyReportFilters = function() {
-            switchReport(window.currentReportType);
-        }
-
-        window.switchReport = function(type) {
-            window.currentReportType = type;
-            document.querySelectorAll('.report-tab-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            const container = document.getElementById('report-content');
-            const startStr = document.getElementById('repStart').value;
-            const endStr = document.getElementById('repEnd').value;
-            const statusFilter = document.getElementById('repStatus').value;
-
-            // Convert date strings to timestamps for comparison
-            const startTs = startStr ? new Date(startStr + "T00:00:00").getTime() : 0;
-            const endTs = endStr ? new Date(endStr + "T23:59:59").getTime() : Infinity;
-
-            let html = '';
-            
-            if(type === 'sales') {
-                currentReportData = [];
-                window.orders.forEach(o => {
-                    const oTs = o.timestamp || 0; // fallback if timestamp missing
-                    if (oTs >= startTs && oTs <= endTs) {
-                        if (!statusFilter || o.status === statusFilter) {
-                            o.items.forEach(i => {
-                                const prodDetails = window.products.find(p => p.id === i.id) || {};
-                                currentReportData.push({
-                                    Data: o.date,
-                                    Pedido_ID: o.id,
-                                    Cliente: o.customer,
-                                    Status: o.status,
-                                    Produto: i.name,
-                                    SKU: prodDetails.sku || 'N/A',
-                                    Marca: prodDetails.vehicleBrand || 'N/A',
-                                    Qtd: i.quantity,
-                                    Preco_Unit: i.price,
-                                    Total_Item: i.price * i.quantity
-                                });
-                            });
-                        }
-                    }
-                });
-
-                html = `
-                    <h4 class="font-bold mb-4">Vendas Detalhadas</h4>
-                    <table class="data-table">
-                        <thead><tr><th>Data</th><th>Pedido</th><th>Cliente</th><th>Produto</th><th>SKU</th><th>Qtd</th><th>Total</th></tr></thead>
-                        <tbody>${currentReportData.map(r => `<tr><td>${r.Data}</td><td>${r.Pedido_ID}</td><td>${r.Cliente}</td><td>${r.Produto}</td><td>${r.SKU}</td><td>${r.Qtd}</td><td>${formatMoney(r.Total_Item)}</td></tr>`).join('')}</tbody>
-                    </table>`;
-            
-            } else if (type === 'stock') { 
-                currentReportData = window.products.filter(p => p.stock < 5).map(p => ({
-                    Produto: p.name, SKU: p.sku, Estoque: p.stock, Preco: p.price
-                }));
-                html = `<h4 class="font-bold mb-4">Estoque Crítico (<5)</h4><table class="data-table"><thead><tr><th>Produto</th><th>SKU</th><th>Estoque</th></tr></thead><tbody>${currentReportData.map(p => `<tr><td>${p.Produto}</td><td>${p.SKU}</td><td style="color:red;font-weight:bold;">${p.Estoque}</td></tr>`).join('')}</tbody></table>`; 
-            
-            } else if (type === 'full-inventory') {
-                currentReportData = window.products.map(p => ({
-                    Produto: p.name, SKU: p.sku, Categoria: p.category, Marca: p.vehicleBrand, Estoque: p.stock, Custo: p.price
-                }));
-                const grandTotal = window.products.reduce((a,b)=>a+(b.price*b.stock), 0);
-                html = `<h4 class="font-bold mb-4">Inventário Completo</h4><div class="mb-4 font-bold text-lg text-primary">Valor Total em Estoque: ${formatMoney(grandTotal)}</div><div class="data-table-wrapper"><table class="data-table"><thead><tr><th>Produto</th><th>Preço Unit.</th><th>Qtd.</th><th>Valor Total</th></tr></thead><tbody>${window.products.map(p => `<tr><td>${p.name} <br><span class="text-xs text-muted">${p.sku}</span></td><td>${formatMoney(p.price)}</td><td>${p.stock}</td><td class="font-bold">${formatMoney(p.price * p.stock)}</td></tr>`).join('')}</tbody></table></div>`;
-            }
-            container.innerHTML = html;
-        }
-
-        window.exportCurrentReport = function(format) {
-            if(!currentReportData || currentReportData.length === 0) return alert("Nenhum dado para exportar. Aplique filtros ou selecione outro relatório.");
-            
-            const headers = Object.keys(currentReportData[0]);
-            let content = "";
-            let mime = "text/plain";
-            let ext = "txt";
-
-            if (format === 'csv' || format === 'txt') {
-                content = headers.join(",") + "\n" + currentReportData.map(row => headers.map(h => row[h]).join(",")).join("\n");
-                mime = "text/csv";
-                ext = format;
-            } else if (format === 'xls') {
-                content = `<table border="1"><thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${currentReportData.map(row => `<tr>${headers.map(h => `<td>${row[h]}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
-                mime = "application/vnd.ms-excel";
-                ext = "xls";
-            }
-
-            const a = document.createElement("a");
-            const file = new Blob(['\uFEFF'+content], {type: mime});
-            a.href = URL.createObjectURL(file);
-            a.download = `relatorio_dupecas_${Date.now()}.${ext}`;
-            a.click();
-        }
-
-        window.printReport = function() {
-            const content = document.getElementById('report-content').innerHTML;
-            const win = window.open('', '', 'height=600,width=800');
-            win.document.write('<html><head><title>Imprimir Relatório</title>');
-            win.document.write('<style>body{font-family:sans-serif;} table{width:100%;border-collapse:collapse;} th,td{border:1px solid #ddd;padding:8px;text-align:left;} th{background:#f0f0f0;}</style>');
-            win.document.write('</head><body>');
-            win.document.write(content);
-            win.document.write('</body></html>');
-            win.document.close();
-            win.print();
-        }
-
-        // --- MANIPULAÇÃO DE PEDIDOS ---
-        window.renderOrdersTable = function() {
-            const container = document.getElementById('adminOrdersContainer');
-            document.getElementById('orderCountBadge').innerText = window.orders.length;
-            
-            if(window.orders.length === 0) { 
-                document.getElementById('noOrdersMsg').classList.remove('hidden'); 
-                container.innerHTML = ''; 
-                return;
-            }
-            document.getElementById('noOrdersMsg').classList.add('hidden'); 
-
-            if(window.adminViewMode === 'list') {
-                container.innerHTML = `
-                    <div class="data-table-wrapper">
-                        <table class="data-table">
-                            <thead><tr><th>ID</th><th>Data</th><th>Cliente</th><th>Total</th><th>Status</th><th>Ações</th></tr></thead>
-                            <tbody>${window.orders.map(o => {
-                                const statusClass = `status-${o.status || 'Pendente'}`;
-                                return `
-                                <tr>
-                                    <td>#${o.id.toString().slice(-6)}</td>
-                                    <td>${o.date}</td>
-                                    <td>${o.customer}<br><span class="text-xs text-muted">${o.phone}</span></td>
-                                    <td class="font-bold">${formatMoney(o.total)}</td>
-                                    <td><span class="status-badge ${statusClass}">${o.status || 'Pendente'}</span></td>
-                                    <td style="display:flex; gap:0.5rem; justify-content:center;">
-                                        <button onclick="printOrder(${o.id})" title="Imprimir" class="btn-icon"><i data-lucide="printer"></i></button>
-                                        <button onclick="shareOrder(${o.id})" title="Compartilhar" class="btn-icon"><i data-lucide="share-2"></i></button>
-                                        <button onclick="openOrderDetail(${o.id})" class="btn-icon text-primary"><i data-lucide="eye"></i></button>
-                                        ${o.status !== 'Cancelado' ? `<button onclick="openEditOrder(${o.id})" class="btn-icon text-warning"><i data-lucide="edit"></i></button>` : ''}
-                                    </td>
-                                </tr>`;
-                            }).join('')}</tbody>
-                        </table>
-                    </div>`;
-            } else {
-                container.innerHTML = `
-                    <div class="admin-grid-view">
-                        ${window.orders.map(o => {
-                             const statusClass = `status-${o.status || 'Pendente'}`;
-                             return `
-                            <div class="admin-card">
-                                <div class="flex justify-between items-center">
-                                    <span class="font-bold">#${o.id.toString().slice(-6)}</span>
-                                    <span class="status-badge ${statusClass}">${o.status}</span>
-                                </div>
-                                <div>${o.customer}</div>
-                                <div class="text-sm text-muted">${o.date}</div>
-                                <div class="font-bold text-lg">${formatMoney(o.total)}</div>
-                                <div class="flex gap-2 mt-2">
-                                    <button onclick="printOrder(${o.id})" class="btn btn-secondary flex-1"><i data-lucide="printer"></i></button>
-                                    <button onclick="openOrderDetail(${o.id})" class="btn btn-primary flex-1">Ver</button>
-                                </div>
-                            </div>`;
-                        }).join('')}
-                    </div>`;
-            }
-            lucide.createIcons();
-        }
-
-        window.generateOrderHTML = function(o) {
-            return `
-                <div style="font-family: monospace; width: 300px; padding: 20px; border: 1px solid #000; background: white;">
-                    <div style="text-align:center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px;">
-                        <h2 style="margin:0; font-size: 1.2rem;">DUPEÇAS</h2>
-                        <p style="margin:0; font-size: 0.8rem;">Duarte Peças</p>
-                        <p style="margin:0; font-size: 0.8rem;">Av. Sete de Setembro, 105 - Petrolina/PE</p>
-                        <p style="margin:0; font-size: 0.8rem;">(87) 9909-4280</p>
-                    </div>
-                    <div style="font-size: 0.9rem; margin-bottom: 10px;">
-                        <strong>PEDIDO: #${o.id}</strong><br>
-                        Data: ${o.date}<br>
-                        <strong>CLIENTE:</strong> ${o.customer} (${o.phone})
-                    </div>
-                    <table style="width: 100%; font-size: 0.8rem; border-collapse: collapse;">
-                        <tr style="border-bottom: 1px solid #000;">
-                            <th style="text-align:left;">Item / Detalhes</th>
-                            <th style="text-align:right;">Qtd</th>
-                            <th style="text-align:right;">R$</th>
-                        </tr>
-                        ${o.items.map(i => {
-                            const p = window.products.find(prod => prod.id === i.id) || {};
-                            return `
-                            <tr>
-                                <td style="padding-top:5px;"><strong>${i.name}</strong><br>
-                                    SKU: ${p.sku || '-'}<br>
-                                    Marca: ${p.vehicleBrand || '-'} ${p.vehicleModel || '-'}
-                                </td>
-                                <td style="text-align:right; vertical-align:top;">${i.quantity}</td>
-                                <td style="text-align:right; vertical-align:top;">${(i.price * i.quantity).toFixed(2)}</td>
-                            </tr>`;
-                        }).join('')}
-                    </table>
-                    <div style="border-top: 1px dashed #000; margin-top: 10px; padding-top: 5px; text-align: right; font-weight: bold; font-size: 1.1rem;">
-                        TOTAL: ${formatMoney(o.total)}
-                    </div>
-                </div>
-            `;
-        }
-
-        window.printOrder = function(id) {
-            const o = window.orders.find(x => x.id === id);
-            if(!o) return;
-            const content = window.generateOrderHTML(o);
-            const win = window.open('', '', 'height=600,width=400');
-            win.document.write('<html><head><title>Imprimir</title></head><body>');
-            win.document.write(content);
-            win.document.write('</body></html>');
-            win.document.close();
-            win.print();
-        }
-
-        window.shareOrder = async function(id) {
-            const o = window.orders.find(x => x.id === id);
-            if(!o) return;
-            const text = `PEDIDO #${o.id}\nCliente: ${o.customer}\nTotal: ${formatMoney(o.total)}`;
-            if (navigator.share) await navigator.share({ title: 'Pedido Dupeças', text: text });
-            else alert("Copie os dados:\n" + text);
-        }
-
-        // --- EDIÇÃO AVANÇADA DE PEDIDOS (CORRIGIDO) ---
-        let editingOrder = null;
-
-        window.openEditOrder = function(id) {
-            if(id === 'new') {
-                editingOrder = {
-                    id: Date.now(),
-                    date: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR'),
-                    status: 'Pendente',
-                    customer: '', phone: '', email: '', cpf: '',
-                    items: [], total: 0
-                };
-            } else {
-                const originalOrder = window.orders.find(o => o.id === id);
-                if(!originalOrder) return;
-                editingOrder = JSON.parse(JSON.stringify(originalOrder));
-            }
-            renderEditModal();
-            document.getElementById('orderEditModal').classList.add('active');
-        }
-
-        window.closeEditOrder = function() {
-            editingOrder = null;
-            document.getElementById('orderEditModal').classList.remove('active');
-        }
-
-        window.renderEditModal = function() {
-            document.getElementById('editClientName').value = editingOrder.customer || '';
-            document.getElementById('editClientPhone').value = editingOrder.phone || '';
-            document.getElementById('editClientEmail').value = editingOrder.email || '';
-            document.getElementById('editClientCpf').value = editingOrder.cpf || '';
-
-            const list = document.getElementById('editOrderItemsList');
-            if(!editingOrder.items.length) {
-                list.innerHTML = `<div class="text-muted text-center py-4">Sem itens</div>`;
-            } else {
-                list.innerHTML = editingOrder.items.map(i => `
-                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:0.5rem 0;">
-                        <div style="flex:1;">
-                            <div class="font-bold">${i.name}</div>
-                            <div class="text-xs text-muted">${formatMoney(i.price)} un.</div>
-                        </div>
-                        <div class="qty-controls" style="margin:0 10px;">
-                            <button class="qty-btn" onclick="editChangeQty(${i.id}, -1)">-</button>
-                            <span class="qty-val">${i.quantity}</span>
-                            <button class="qty-btn" onclick="editChangeQty(${i.id}, 1)">+</button>
-                        </div>
-                        <button onclick="editRemoveItem(${i.id})" class="text-danger"><i data-lucide="trash-2" size="16"></i></button>
-                    </div>
-                `).join('');
-            }
-            editingOrder.total = editingOrder.items.reduce((a,b)=> a + (b.price * b.quantity), 0);
-            document.getElementById('editOrderTotal').innerText = formatMoney(editingOrder.total);
-            lucide.createIcons();
-        }
-
-        window.searchProdForOrder = function(val) {
-            const resDiv = document.getElementById('editProdResults');
-            if(val.length < 2) { resDiv.style.display = 'none'; return; }
-            const results = window.products.filter(p => p.name.toLowerCase().includes(val.toLowerCase()) || p.sku.toLowerCase().includes(val.toLowerCase()));
-            if(results.length > 0) {
-                resDiv.style.display = 'block';
-                resDiv.innerHTML = results.map(p => `
-                    <div class="search-result-item" onclick="addProdToOrder(${p.id})">
-                        <div class="font-bold text-sm">${p.name}</div>
-                        <div class="text-xs text-muted">SKU: ${p.sku} | Estoque: ${p.stock} | ${formatMoney(p.price)}</div>
-                    </div>
-                `).join('');
-            } else resDiv.style.display = 'none';
-        }
-
-        window.addProdToOrder = function(prodId) {
-            const p = window.products.find(x => x.id === prodId);
-            if(!p) return;
-            const existing = editingOrder.items.find(i => i.id === prodId);
-            if(existing) existing.quantity++;
-            else editingOrder.items.push({ id: p.id, name: p.name, price: p.price, image: p.image, quantity: 1 });
-            
-            document.getElementById('editSearchProd').value = '';
-            document.getElementById('editProdResults').style.display = 'none';
-            renderEditModal();
-        }
-
-        window.editChangeQty = function(id, delta) {
-            const item = editingOrder.items.find(i => i.id === id);
-            if(!item) return;
-            if(delta > 0) item.quantity++;
-            else if(item.quantity > 1) item.quantity--;
-            renderEditModal();
-        }
-
-        window.editRemoveItem = function(id) {
-            editingOrder.items = editingOrder.items.filter(i => i.id !== id);
-            renderEditModal();
-        }
-
-        window.saveOrderChanges = async function() {
-            editingOrder.customer = document.getElementById('editClientName').value;
-            editingOrder.phone = document.getElementById('editClientPhone').value;
-            editingOrder.email = document.getElementById('editClientEmail').value;
-            editingOrder.cpf = document.getElementById('editClientCpf').value;
-
-            if(!editingOrder.customer || !editingOrder.phone) return alert("Nome e Telefone são obrigatórios!");
-
-            const originalOrder = window.orders.find(o => o.id === editingOrder.id);
-            if(originalOrder) {
-                for (const item of originalOrder.items) {
-                    const prod = window.products.find(p => p.id === item.id);
-                    if(prod) prod.stock += item.quantity;
-                }
-            } else {
-                window.orders.unshift(editingOrder);
-            }
-
-            for (const item of editingOrder.items) {
-                const prod = window.products.find(p => p.id === item.id);
-                if(prod) {
-                    if(prod.stock < item.quantity) {
-                        alert(`Estoque insuficiente para ${prod.name}.`);
-                        await loadData(); 
-                        return;
-                    }
-                    prod.stock -= item.quantity;
-                }
-            }
-
-            for (const p of window.products) await DBService.put('products', p);
-            
-            if(originalOrder) {
-                Object.assign(originalOrder, editingOrder); 
-                await DBService.put('orders', editingOrder);
-            } else {
-                await DBService.put('orders', editingOrder);
-            }
-            
-            closeEditOrder();
-            renderOrdersTable();
-            loadAdminDashboard();
-            showToast("Pedido salvo com sucesso!");
-        }
-
-        window.openOrderDetail = function(orderId) {
-            const o = window.orders.find(x => x.id === orderId);
-            if(!o) return;
-            const html = `
-                <div style="background:var(--bg-body); padding:1rem; border-radius:8px; margin-bottom:1rem;">
-                    <p><strong>Cliente:</strong> ${o.customer}</p>
-                    <p><strong>Contato:</strong> ${o.phone}</p>
-                    ${o.email ? `<p><strong>Email:</strong> ${o.email}</p>` : ''}
-                    ${o.cpf ? `<p><strong>CPF:</strong> ${o.cpf}</p>` : ''}
-                    <p><strong>Data:</strong> ${o.date}</p>
-                    <p><strong>Status:</strong> ${o.status || 'Pendente'}</p>
-                </div>
-                <h4 style="font-weight:bold; margin-bottom:0.5rem;">Itens do Pedido:</h4>
-                <div style="max-height:200px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; margin-bottom:1rem;">
-                    <table style="width:100%; font-size:0.9rem;">
-                        ${o.items.map(i => {
-                            const p = window.products.find(prod => prod.id === i.id) || {};
-                            return `
-                            <tr style="border-bottom:1px solid var(--border);">
-                                <td style="padding:0.5rem;"><img src="${i.image}" width="30"></td>
-                                <td style="padding:0.5rem;">
-                                    <strong>${i.name}</strong><br>
-                                    <span class="text-muted text-xs">SKU: ${p.sku || '-'} | Marca: ${p.vehicleBrand || '-'}</span>
-                                </td>
-                                <td style="padding:0.5rem; text-align:right;">${i.quantity} x ${formatMoney(i.price)}</td>
-                                <td style="padding:0.5rem; text-align:right; font-weight:bold;">${formatMoney(i.price * i.quantity)}</td>
-                            </tr>`;
-                        }).join('')}
-                    </table>
-                </div>
-                <div style="text-align:right; font-size:1.25rem; font-weight:800; color:var(--primary);">
-                    Total: ${formatMoney(o.total)}
-                </div>
-            `;
-            document.getElementById('orderDetailContent').innerHTML = html;
-            document.getElementById('orderDetailModal').classList.add('active');
-        }
-        window.closeOrderDetail = function() { document.getElementById('orderDetailModal').classList.remove('active'); }
-
-        window.confirmOrder = async function(id) {
-            const o = window.orders.find(x => x.id === id);
-            if(o) { o.status = 'Entregue'; await DBService.put('orders', o); renderOrdersTable(); showToast("Entregue!"); }
-        }
-
-        window.cancelOrderLogic = async function(id, isAuto = false) {
-            const o = window.orders.find(x => x.id === id);
-            if(!o || o.status === 'Cancelado') return;
-            for (const item of o.items) {
-                const prod = window.products.find(p => p.id === item.id);
-                if (prod) { prod.stock += item.quantity; await DBService.put('products', prod); }
-            }
-            o.status = 'Cancelado';
-            await DBService.put('orders', o);
-            if(!isAuto) { renderOrdersTable(); loadAdminDashboard(); showToast("Cancelado e estornado."); }
-        }
-        window.cancelOrder = function(id) { if(confirm("Cancelar pedido e devolver estoque?")) cancelOrderLogic(id); }
-
-        window.saveSettings = function() {
-            const key = document.getElementById('configPixKey').value;
-            window.pixKey = key;
-            localStorage.setItem('dupecas_pix_key', key);
-            showToast("Configurações salvas!");
-        }
-
-        window.bulkUpdateImages = async function() {
-            const txt = document.getElementById('bulkImgInput').value;
-            if(!txt) return;
-            const lines = txt.split('\n');
-            let count = 0;
-            for (const l of lines) { 
-                const parts = l.split(',');
-                if(parts.length >= 2) {
-                    const id = parts[0].trim();
-                    const url = parts.slice(1).join(',').trim(); 
-                    const prod = window.products.find(x => x.id == id);
-                    if (prod && url) { 
-                        prod.image = url; 
-                        await DBService.put('products', prod); 
-                        count++; 
-                    } 
-                }
-            }
-            showToast(`${count} imagens atualizadas!`);
-            renderAdminTable();
-        }
-
-        window.resetSystem = async function() { 
-            const pwd = prompt("Digite a senha de segurança:");
-            if (pwd === "dupeca2026") {
-                if(confirm("TEM CERTEZA? ISSO APAGA TUDO.")) { 
-                    await DBService.clear('products'); 
-                    await DBService.clear('orders'); 
-                    await DBService.clear('brands'); 
-                    await DBService.clear('clients');
-                    localStorage.removeItem('dupecas_cart');
-                    location.reload(); 
-                }
-            } else alert("Senha incorreta.");
-        }
-        
-        window.exportData = function(type) {
-            let content = "", mime = "text/plain";
-            if(type === 'csv') { 
-                content = "ID,Nome,SKU,Preco,Estoque\n" + window.products.map(p => `${p.id},${p.name},${p.sku},${p.price},${p.stock}`).join("\n"); 
-                mime = "text/csv"; 
-            } else { 
-                const backupData = { timestamp: Date.now(), products: window.products, orders: window.orders, clients: window.clients, brands: window.brands.map(b => ({ name: b })) }; 
-                content = JSON.stringify(backupData, null, 2); 
-                mime = "application/json"; 
-            }
-            const a = document.createElement("a"); const file = new Blob(['\uFEFF'+content], {type: mime}); a.href = URL.createObjectURL(file); a.download = `backup_${Date.now()}.${type}`; a.click();
-        }
-
-        window.restoreBackup = function(input) {
-            const file = input.files[0];
-            if (!file || !confirm("Isso SUBSTITUIRÁ o banco atual. Continuar?")) return;
-            document.getElementById('restoreModal').classList.add('active');
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    await DBService.clear('products'); await DBService.clear('orders'); await DBService.clear('brands'); await DBService.clear('clients');
-                    if(data.products) for(const p of data.products) await DBService.put('products', p);
-                    if(data.orders) for(const o of data.orders) await DBService.put('orders', o);
-                    if(data.clients) for(const c of data.clients) await DBService.put('clients', c);
-                    if(data.brands) for(const b of data.brands) await DBService.put('brands', typeof b === 'string' ? {name:b} : b);
-                    location.reload();
-                } catch (err) { alert("Erro: " + err.message); document.getElementById('restoreModal').classList.remove('active'); }
-            };
-            reader.readAsText(file);
-        }
-
         window.renderAdminTable = function(filter = '') {
-            const container = document.getElementById('adminProductsContainer');
             const filtered = window.products.filter(p => (p.name + p.sku + p.vehicleBrand).toLowerCase().includes(filter.toLowerCase()));
-            
-            if(window.adminViewMode === 'list') {
-                container.innerHTML = `
-                <div class="desktop-table-view data-table-wrapper" style="display:block;">
-                    <table class="data-table">
-                        <thead><tr><th>Imagem</th><th>Produto / SKU</th><th>Aplicação</th><th>Preço</th><th>Estoque</th><th style="text-align: center;">Ações</th></tr></thead>
-                        <tbody>
-                            ${filtered.map(p => `
-                                <tr>
-                                    <td><img src="${p.image}" style="width:40px; height:40px; object-fit:cover; border-radius:4px;"></td>
-                                    <td><div class="font-bold">${p.name}</div><div class="text-sm text-muted">${p.sku}</div></td>
-                                    <td>${p.vehicleBrand}</td>
-                                    <td>${formatMoney(p.price)}</td>
-                                    <td style="font-weight:bold; color:${p.stock<5 ? 'red':'green'}">${p.stock}</td>
-                                    <td style="text-align:center;">
-                                        <button onclick="editProduct(${p.id})" class="btn-icon"><i data-lucide="edit-3" size="16"></i></button>
-                                        <button onclick="deleteProduct(${p.id})" class="btn-icon" style="color:var(--danger)"><i data-lucide="trash-2" size="16"></i></button>
-                                    </td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>`;
-            } else {
-                container.innerHTML = `
-                    <div class="admin-grid-view">
-                        ${filtered.map(p => `
-                            <div class="admin-card">
-                                <img src="${p.image}" style="width:100%; height:150px; object-fit:cover; border-radius:4px;">
-                                <div class="font-bold">${p.name}</div>
-                                <div class="text-sm text-muted">${p.sku} | ${formatMoney(p.price)}</div>
-                                <div class="font-bold" style="color:${p.stock<5 ? 'red':'green'}">Estoque: ${p.stock}</div>
-                                <div class="flex gap-2 mt-auto">
-                                    <button onclick="editProduct(${p.id})" class="btn btn-secondary w-full">Editar</button>
-                                    <button onclick="deleteProduct(${p.id})" class="btn btn-danger w-full">Excluir</button>
-                                </div>
-                            </div>
-                        `).join('')}
+            const tbody = document.getElementById('adminTableBody');
+            tbody.innerHTML = filtered.map(p => `
+                <tr>
+                    <td><img src="${p.image}" style="width:40px; height:40px; object-fit:cover; border-radius:4px;"></td>
+                    <td><div class="font-bold">${p.name}</div><div class="text-sm text-muted">${p.sku}</div></td>
+                    <td>${p.vehicleBrand}</td>
+                    <td>${formatMoney(p.price)}</td>
+                    <td style="font-weight:bold; color:${p.stock<5 ? 'red':'green'}">${p.stock}</td>
+                    <td style="text-align:center;">
+                        <button onclick="editProduct(${p.id})" class="btn-icon"><i data-lucide="edit-3" size="16"></i></button>
+                        <button onclick="deleteProduct(${p.id})" class="btn-icon" style="color:var(--danger)"><i data-lucide="trash-2" size="16"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+            document.getElementById('adminMobileList').innerHTML = filtered.map(p => `
+                <div class="admin-card-item">
+                    <img src="${p.image}" class="admin-card-img">
+                    <div style="flex:1;">
+                        <div style="font-weight:700;">${p.name}</div>
+                        <div style="font-size:0.8rem; color:var(--text-muted);">${p.sku} | ${formatMoney(p.price)}</div>
                     </div>
-                `;
-            }
+                    <div style="display:flex; gap:0.5rem;">
+                        <button onclick="editProduct(${p.id})" class="btn-icon"><i data-lucide="edit-3" size="18"></i></button>
+                        <button onclick="deleteProduct(${p.id})" class="btn-icon" style="color:var(--danger)"><i data-lucide="trash-2" size="18"></i></button>
+                    </div>
+                </div>
+            `).join('');
             lucide.createIcons();
         }
         window.filterAdminTable = function(val) { renderAdminTable(val); }
+
+        window.switchReport = function(type) {
+            document.querySelectorAll('.report-tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            const container = document.getElementById('report-content');
+            let html = '';
+            if(type === 'sales') {
+                html = `<h4 class="font-bold mb-4">Relatório de Vendas</h4><table class="data-table"><thead><tr><th>Data</th><th>Cliente</th><th>Total</th></tr></thead><tbody>${window.orders.filter(o => o.status !== 'Cancelado').map(o => `<tr><td>${o.date}</td><td>${o.customer}</td><td>${formatMoney(o.total)}</td></tr>`).join('')}</tbody></table>`;
+            } else if (type === 'stock') { 
+                const low = window.products.filter(p => p.stock < 5); 
+                html = `<h4 class="font-bold mb-4">Estoque Crítico (<5)</h4><table class="data-table"><thead><tr><th>Produto</th><th>SKU</th><th>Estoque</th></tr></thead><tbody>${low.map(p => `<tr><td>${p.name}</td><td>${p.sku}</td><td style="color:red;font-weight:bold;">${p.stock}</td></tr>`).join('')}</tbody></table>`; 
+            } else if (type === 'full-inventory') {
+                const grandTotal = window.products.reduce((a,b)=>a+(b.price*b.stock), 0);
+                html = `<h4 class="font-bold mb-4">Inventário Completo</h4><div class="mb-4 font-bold text-lg text-primary">Valor Total em Estoque: ${formatMoney(grandTotal)}</div><div class="data-table-wrapper"><table class="data-table"><thead><tr><th>Produto</th><th>Preço Unit.</th><th>Qtd.</th><th>Valor Total</th></tr></thead><tbody>${window.products.map(p => `<tr><td>${p.name} <br><span class="text-xs text-muted">${p.sku}</span></td><td>${formatMoney(p.price)}</td><td>${p.stock}</td><td class="font-bold">${formatMoney(p.price * p.stock)}</td></tr>`).join('')}</tbody></table></div>`;
+            } else if (type === 'financial') { 
+                const totalInvested = window.products.reduce((a,b)=>a+(b.price*b.stock),0); 
+                html = `<h4 class="font-bold mb-4">Financeiro</h4><div class="p-4 bg-body rounded border">Total em Estoque: <span class="font-bold text-lg">${formatMoney(totalInvested)}</span></div>`; 
+            } else if (type === 'compatibility') { 
+                html = `<h4 class="font-bold mb-4">Marcas Cadastradas</h4><div style="height:300px;"><canvas id="chartBrands"></canvas></div>`; 
+                setTimeout(() => { const ctx = document.getElementById('chartBrands'); const counts = {}; window.products.forEach(p => counts[p.vehicleBrand] = (counts[p.vehicleBrand] || 0) + 1); new Chart(ctx, { type: 'bar', data: { labels: Object.keys(counts), datasets: [{ label: 'Produtos', data: Object.values(counts), backgroundColor: '#2563eb' }] } }); }, 100); 
+            }
+            container.innerHTML = html;
+        }
 
         window.renderBrandsList = function() {
             document.getElementById('brandsList').innerHTML = window.brands.map(b => `
@@ -1965,14 +1237,22 @@
         window.addBrand = async function() {
             const val = document.getElementById('newBrandInput').value;
             if(val && !window.brands.includes(val)) { 
-                window.brands.push(val); window.brands.sort(); 
+                window.brands.push(val); 
+                window.brands.sort(); 
                 await DBService.put('brands', { name: val }); 
-                renderBrandsList(); renderBrandsFilter(); showToast("Marca adicionada!"); 
+                renderBrandsList(); 
+                renderBrandsFilter(); 
+                showToast("Marca adicionada!"); 
             }
             document.getElementById('newBrandInput').value = '';
         }
         window.removeBrand = async function(name) { 
-            if(confirm('Remover marca?')) { window.brands = window.brands.filter(b => b !== name); await DBService.delete('brands', name); renderBrandsList(); renderBrandsFilter(); } 
+            if(confirm('Remover marca?')) { 
+                window.brands = window.brands.filter(b => b !== name); 
+                await DBService.delete('brands', name); 
+                renderBrandsList(); 
+                renderBrandsFilter(); 
+            } 
         }
 
         window.openProductForm = function() { 
@@ -2023,9 +1303,18 @@
                 description: document.getElementById('prodDesc').value,
                 image: document.getElementById('formPreview').src
             };
+            
             await DBService.put('products', newProd);
-            if(id) { const idx = window.products.findIndex(p => p.id == id); window.products[idx] = newProd; } else { window.products.push(newProd); }
-            closeProductForm(); renderAdminTable(); showToast("Produto Salvo!");
+            
+            if(id) { 
+                const idx = window.products.findIndex(p => p.id == id); 
+                window.products[idx] = newProd; 
+            } else { 
+                window.products.push(newProd); 
+            }
+            closeProductForm();
+            renderAdminTable();
+            showToast("Produto Salvo no Firebase!");
         }
 
         window.handleImageUpload = function(input) {
@@ -2038,9 +1327,362 @@
         window.previewUrl = function(url) { if(url) { document.getElementById('formPreview').src = url; document.getElementById('formPreview').style.display = 'block'; document.getElementById('uploadPlaceholder').style.display = 'none'; } }
         
         window.deleteProduct = async function(id) { 
-            if(confirm("Excluir?")) { window.products = window.products.filter(p => p.id !== id); await DBService.delete('products', id); renderAdminTable(); showToast("Produto Excluído"); } 
+            if(confirm("Excluir?")) { 
+                window.products = window.products.filter(p => p.id !== id); 
+                await DBService.delete('products', id); 
+                renderAdminTable(); 
+                showToast("Produto Excluído"); 
+            } 
+        }
+        
+        // --- GESTÃO DE PEDIDOS ---
+        window.renderOrdersTable = function() {
+            const tbody = document.getElementById('ordersTableBody');
+            document.getElementById('orderCountBadge').innerText = window.orders.length;
+            if(window.orders.length === 0) { 
+                document.getElementById('noOrdersMsg').classList.remove('hidden'); 
+                tbody.innerHTML = ''; 
+            } else { 
+                document.getElementById('noOrdersMsg').classList.add('hidden'); 
+                tbody.innerHTML = window.orders.map(o => {
+                    const statusClass = `status-${o.status || 'Pendente'}`;
+                    const statusText = o.status || 'Pendente';
+                    return `
+                    <tr>
+                        <td>#${o.id.toString().slice(-6)}</td>
+                        <td>${o.date}</td>
+                        <td>${o.customer}<br><span class="text-xs text-muted">${o.phone}</span></td>
+                        <td class="font-bold">${formatMoney(o.total)}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td style="display:flex; gap:0.5rem; justify-content:center;">
+                            <button onclick="openOrderDetail(${o.id})" title="Ver Detalhes" class="btn-icon text-primary"><i data-lucide="eye" size="16"></i></button>
+                            ${statusText !== 'Cancelado' ? 
+                                `<button onclick="openEditOrder(${o.id})" title="Editar Pedido" class="btn-icon text-warning"><i data-lucide="edit" size="16"></i></button>
+                                 <button onclick="confirmOrder(${o.id})" title="Concluir/Entregar" class="btn-icon text-success"><i data-lucide="check" size="16"></i></button>
+                                 <button onclick="cancelOrder(${o.id})" title="Cancelar e Estornar Estoque" class="btn-icon text-danger"><i data-lucide="ban" size="16"></i></button>` 
+                            : ''}
+                        </td>
+                    </tr>`;
+                }).join(''); 
+                lucide.createIcons();
+            }
         }
 
+        window.openOrderDetail = function(orderId) {
+            const o = window.orders.find(x => x.id === orderId);
+            if(!o) return;
+            
+            const html = `
+                <div style="background:var(--bg-body); padding:1rem; border-radius:8px; margin-bottom:1rem;">
+                    <p><strong>Cliente:</strong> ${o.customer}</p>
+                    <p><strong>Contato:</strong> ${o.phone}</p>
+                    <p><strong>Data:</strong> ${o.date}</p>
+                    <p><strong>Status:</strong> ${o.status || 'Pendente'}</p>
+                </div>
+                <h4 style="font-weight:bold; margin-bottom:0.5rem;">Itens do Pedido:</h4>
+                <div style="max-height:200px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; margin-bottom:1rem;">
+                    <table style="width:100%; font-size:0.9rem;">
+                        ${o.items.map(i => `
+                            <tr style="border-bottom:1px solid var(--border);">
+                                <td style="padding:0.5rem;"><img src="${i.image}" width="30"></td>
+                                <td style="padding:0.5rem;">${i.quantity}x ${i.name}</td>
+                                <td style="padding:0.5rem; text-align:right;">${formatMoney(i.price * i.quantity)}</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                </div>
+                <div style="text-align:right; font-size:1.25rem; font-weight:800; color:var(--primary);">
+                    Total: ${formatMoney(o.total)}
+                </div>
+            `;
+            document.getElementById('orderDetailContent').innerHTML = html;
+            document.getElementById('orderDetailModal').classList.add('active');
+        }
+        window.closeOrderDetail = function() { document.getElementById('orderDetailModal').classList.remove('active'); }
+
+        window.confirmOrder = async function(id) {
+            const o = window.orders.find(x => x.id === id);
+            if(o) {
+                o.status = 'Entregue';
+                await DBService.put('orders', o);
+                renderOrdersTable();
+                showToast("Pedido marcado como Entregue");
+            }
+        }
+
+        window.cancelOrderLogic = async function(id, isAuto = false) {
+            const o = window.orders.find(x => x.id === id);
+            if(!o || o.status === 'Cancelado') return;
+
+            // Retorna itens ao estoque
+            for (const item of o.items) {
+                const prod = window.products.find(p => p.id === item.id);
+                if (prod) {
+                    prod.stock += item.quantity;
+                    await DBService.put('products', prod);
+                }
+            }
+
+            o.status = 'Cancelado';
+            await DBService.put('orders', o);
+            if(!isAuto) {
+                renderOrdersTable();
+                loadAdminDashboard(); 
+                showToast("Pedido cancelado e estoque restaurado.");
+            }
+        }
+
+        window.cancelOrder = function(id) {
+            if(confirm("Tem certeza? Isso irá cancelar o pedido e devolver os produtos para o estoque.")) {
+                cancelOrderLogic(id);
+            }
+        }
+
+        // --- SISTEMA DE EDIÇÃO DE PEDIDOS (NOVO) ---
+        let editingOrder = null;
+
+        window.openEditOrder = function(id) {
+            const originalOrder = window.orders.find(o => o.id === id);
+            if(!originalOrder) return;
+            // Cria uma cópia profunda para não alterar direto
+            editingOrder = JSON.parse(JSON.stringify(originalOrder));
+            renderEditModal();
+            document.getElementById('orderEditModal').classList.add('active');
+        }
+
+        window.closeEditOrder = function() {
+            editingOrder = null;
+            document.getElementById('orderEditModal').classList.remove('active');
+        }
+
+        window.renderEditModal = function() {
+            const list = document.getElementById('editOrderItemsList');
+            if(!editingOrder.items.length) {
+                list.innerHTML = `<div class="text-muted text-center py-4">Sem itens</div>`;
+            } else {
+                list.innerHTML = editingOrder.items.map(i => `
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:0.5rem 0;">
+                        <div style="flex:1;">
+                            <div class="font-bold">${i.name}</div>
+                            <div class="text-xs text-muted">${formatMoney(i.price)} un.</div>
+                        </div>
+                        <div class="qty-controls" style="margin:0 10px;">
+                            <button class="qty-btn" onclick="editChangeQty(${i.id}, -1)">-</button>
+                            <span class="qty-val">${i.quantity}</span>
+                            <button class="qty-btn" onclick="editChangeQty(${i.id}, 1)">+</button>
+                        </div>
+                        <button onclick="editRemoveItem(${i.id})" class="text-danger"><i data-lucide="trash-2" size="16"></i></button>
+                    </div>
+                `).join('');
+            }
+            // Recalcula total
+            editingOrder.total = editingOrder.items.reduce((a,b)=> a + (b.price * b.quantity), 0);
+            document.getElementById('editOrderTotal').innerText = formatMoney(editingOrder.total);
+            lucide.createIcons();
+        }
+
+        window.editChangeQty = function(id, delta) {
+            const item = editingOrder.items.find(i => i.id === id);
+            if(!item) return;
+            if(delta > 0) item.quantity++;
+            else {
+                if(item.quantity > 1) item.quantity--;
+            }
+            renderEditModal();
+        }
+
+        window.editRemoveItem = function(id) {
+            editingOrder.items = editingOrder.items.filter(i => i.id !== id);
+            renderEditModal();
+        }
+
+        window.searchProdForOrder = function(val) {
+            const resDiv = document.getElementById('editProdResults');
+            if(val.length < 2) { resDiv.style.display = 'none'; return; }
+            
+            const results = window.products.filter(p => p.name.toLowerCase().includes(val.toLowerCase()) || p.sku.toLowerCase().includes(val.toLowerCase()));
+            
+            if(results.length > 0) {
+                resDiv.style.display = 'block';
+                resDiv.innerHTML = results.map(p => `
+                    <div onclick="addProdToOrder(${p.id})" style="padding:0.5rem; border-bottom:1px solid #eee; cursor:pointer; hover:bg-gray-100;">
+                        <div class="font-bold text-sm">${p.name}</div>
+                        <div class="text-xs text-muted">Estoque: ${p.stock} | ${formatMoney(p.price)}</div>
+                    </div>
+                `).join('');
+            } else {
+                resDiv.style.display = 'none';
+            }
+        }
+
+        window.addProdToOrder = function(prodId) {
+            const p = window.products.find(x => x.id === prodId);
+            if(!p) return;
+            
+            // Verifica se já existe
+            const existing = editingOrder.items.find(i => i.id === prodId);
+            if(existing) {
+                existing.quantity++;
+            } else {
+                editingOrder.items.push({
+                    id: p.id,
+                    name: p.name,
+                    price: p.price,
+                    image: p.image,
+                    quantity: 1
+                });
+            }
+            document.getElementById('editSearchProd').value = '';
+            document.getElementById('editProdResults').style.display = 'none';
+            renderEditModal();
+        }
+
+        window.saveOrderChanges = async function() {
+            const originalOrder = window.orders.find(o => o.id === editingOrder.id);
+            if(!originalOrder) return;
+
+            // 1. DEVOLVE TUDO DO PEDIDO ORIGINAL PRO ESTOQUE
+            for (const item of originalOrder.items) {
+                const prod = window.products.find(p => p.id === item.id);
+                if(prod) {
+                    prod.stock += item.quantity;
+                }
+            }
+
+            // 2. RETIRA TUDO DO NOVO PEDIDO DO ESTOQUE
+            for (const item of editingOrder.items) {
+                const prod = window.products.find(p => p.id === item.id);
+                if(prod) {
+                    if(prod.stock < item.quantity) {
+                        alert(`Estoque insuficiente para ${prod.name}. Operação cancelada.`);
+                        // Recarrega dados para desfazer bagunça local
+                        loadData(); 
+                        return;
+                    }
+                    prod.stock -= item.quantity;
+                }
+            }
+
+            // 3. SALVA PRODUTOS ATUALIZADOS E O PEDIDO
+            for (const p of window.products) {
+                await DBService.put('products', p);
+            }
+            
+            // Atualiza objeto original
+            originalOrder.items = editingOrder.items;
+            originalOrder.total = editingOrder.total;
+            
+            await DBService.put('orders', originalOrder);
+            
+            closeEditOrder();
+            renderOrdersTable();
+            loadAdminDashboard();
+            showToast("Pedido atualizado com sucesso!");
+        }
+
+        // --- ZERAR SISTEMA COM SENHA ---
+        window.resetSystem = async function() { 
+            const pwd = prompt("Digite a senha de segurança para APAGAR TODO O BANCO DE DADOS NA NUVEM:");
+            if (pwd === "dupeca2026") {
+                if(confirm("TEM CERTEZA ABSOLUTA? Isso é irreversível.")) { 
+                    await DBService.clear('products'); 
+                    await DBService.clear('orders'); 
+                    await DBService.clear('brands'); 
+                    localStorage.removeItem('dupecas_cart');
+                    location.reload(); 
+                }
+            } else {
+                alert("Senha incorreta! Ação bloqueada.");
+            }
+        }
+        
+        // --- BACKUP E EXPORT ---
+        window.exportData = function(type) {
+            let content = "", mime = "text/plain";
+            if(type === 'csv') { 
+                content = "ID,Nome,SKU,Preco,Estoque\n" + window.products.map(p => `${p.id},${p.name},${p.sku},${p.price},${p.stock}`).join("\n"); 
+                mime = "text/csv"; 
+            } else { 
+                const backupData = { timestamp: Date.now(), products: window.products, orders: window.orders, brands: window.brands.map(b => ({ name: b })) }; 
+                content = JSON.stringify(backupData, null, 2); 
+                mime = "application/json"; 
+            }
+            downloadFile(content, `backup_dupecas_${Date.now()}.${type}`, mime);
+        }
+
+        function downloadFile(content, name, type) { const a = document.createElement("a"); const file = new Blob(['\uFEFF'+content], {type: type}); a.href = URL.createObjectURL(file); a.download = name; a.click(); }
+
+        window.restoreBackup = function(input) {
+            const file = input.files[0];
+            if (!file) return;
+            if(!confirm("CUIDADO: Isso APAGARÁ o banco atual no Firebase e substituirá pelo backup. Deseja continuar?")) { input.value = ''; return; }
+            
+            const modal = document.getElementById('restoreModal');
+            const progressBar = document.getElementById('restoreProgress');
+            const statusText = document.getElementById('restoreStatus');
+            modal.classList.add('active');
+            progressBar.style.width = '0%';
+            
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (!data.products) throw new Error("Arquivo inválido.");
+                    
+                    statusText.innerText = "Limpando Banco Online...";
+                    progressBar.style.width = '10%';
+                    
+                    // Limpa tudo antes
+                    await DBService.clear('products');
+                    await DBService.clear('orders');
+                    await DBService.clear('brands');
+
+                    const totalItems = (data.products?.length || 0) + (data.orders?.length || 0) + (data.brands?.length || 0);
+                    let processed = 0;
+                    
+                    const updateProgress = () => { 
+                        processed++; 
+                        const pct = Math.min(10 + Math.floor((processed / totalItems) * 90), 100); 
+                        progressBar.style.width = pct + '%'; 
+                        statusText.innerText = `Enviando item ${processed} de ${totalItems}...`; 
+                    };
+                    
+                    if(data.products) { for(const p of data.products) { await DBService.put('products', p); updateProgress(); } }
+                    if(data.orders) { for(const o of data.orders) { await DBService.put('orders', o); updateProgress(); } }
+                    if(data.brands) { for(const b of data.brands) { let bt = (typeof b === 'string') ? { name: b } : b; await DBService.put('brands', bt); updateProgress(); } }
+                    
+                    progressBar.style.width = '100%'; 
+                    statusText.innerText = "Concluído!"; 
+                    setTimeout(() => location.reload(), 1000);
+                } catch (err) { 
+                    modal.classList.remove('active'); 
+                    alert("Erro na restauração: " + err.message); 
+                    console.error(err);
+                    input.value = ''; 
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        window.bulkUpdateImages = async function() {
+            const txt = document.getElementById('bulkImgInput').value;
+            const lines = txt.split('\n');
+            let count = 0;
+            for (const l of lines) { 
+                const [id, url] = l.split(','); 
+                if (id && url) { 
+                    const prod = window.products.find(x => x.id == id.trim()); 
+                    if (prod) { 
+                        prod.image = url.trim(); 
+                        await DBService.put('products', prod); 
+                        count++; 
+                    } 
+                } 
+            }
+            showToast(`${count} imagens atualizadas na nuvem!`);
+            renderAdminTable();
+        }
+        
         window.toggleTheme = function() { 
             document.body.classList.toggle('dark-mode'); 
             localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light'); 
