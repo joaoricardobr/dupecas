@@ -1,16 +1,17 @@
+
 <!DOCTYPE html>
 <html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dupeças Duarte Peças | Sistema Integrado</title>
+    <title>Dupeças Duarte Peças | Sistema Integrado Completo</title>
     
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* (ESTILOS MANTIDOS) */
+        /* --- CSS ORIGINAL MANTIDO E EXPANDIDO --- */
         :root {
             --primary: #2563eb;        
             --primary-dark: #1e40af;   
@@ -107,6 +108,8 @@
         .products-list .product-card { flex-direction: row; height: auto; align-items: center; padding-right: 1.5rem; }
         .products-list .card-img { width: 140px; height: 140px; flex-shrink: 0; }
         .products-list .card-body { padding: 1rem 1.5rem; }
+        
+        /* ADMIN STYLES */
         .admin-layout { display: flex; height: 100vh; overflow: hidden; }
         .admin-sidebar { width: var(--sidebar-width); background: var(--secondary); color: white; display: flex; flex-direction: column; flex-shrink: 0; z-index: 100; transition: width 0.3s ease; overflow: hidden; white-space: nowrap; }
         .admin-sidebar.collapsed { width: var(--sidebar-collapsed-width); }
@@ -120,22 +123,27 @@
         .menu-item:hover, .menu-item.active { background: var(--primary); color: white; }
         .menu-item i { width: 20px; height: 20px; flex-shrink: 0; }
         .admin-main { flex: 1; background: var(--bg-body); overflow-y: auto; padding: 2rem; transition: margin 0.3s; }
-        .data-table-wrapper { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card); }
+        
+        .data-table-wrapper { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card); width: 100%; }
         .data-table { width: 100%; border-collapse: collapse; min-width: 800px; }
         .data-table th { text-align: left; padding: 1rem; background: var(--bg-body); border-bottom: 2px solid var(--border); color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 700; }
         .data-table td { padding: 1rem; border-bottom: 1px solid var(--border); font-size: 0.95rem; vertical-align: middle; background: var(--bg-card); }
         .data-table tr:hover td { background: var(--primary-light); }
+        
         .report-tabs { display: flex; gap: 0.5rem; overflow-x: auto; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
         .report-tab-btn { padding: 0.5rem 1rem; background: transparent; border: none; font-weight: 600; color: var(--text-muted); border-bottom: 2px solid transparent; transition: 0.2s; white-space: nowrap; }
         .report-tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+        
         .status-badge { padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
         .status-Pendente { background: #fef3c7; color: #d97706; }
         .status-Entregue { background: #dcfce7; color: #16a34a; }
         .status-Cancelado { background: #fee2e2; color: #b91c1c; }
+        
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 1rem; }
         .modal-overlay.active { display: flex; }
         .modal { background: var(--bg-card); width: 100%; max-width: 900px; border-radius: 1rem; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); animation: scaleIn 0.2s; max-height: 90vh; overflow-y: auto; position: relative; border: 1px solid var(--border); }
         .close-modal { position: absolute; top: 1rem; right: 1rem; background: var(--bg-body); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid var(--border); }
+        
         .cart-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 100%; max-width: 450px; background: var(--bg-card); z-index: 200; transform: translateX(100%); transition: 0.3s; display: flex; flex-direction: column; box-shadow: -10px 0 30px rgba(0,0,0,0.2); }
         .cart-drawer.open { transform: translateX(0); }
         .cart-header { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--secondary); color: white; }
@@ -143,45 +151,39 @@
         .cart-footer { padding: 2rem; border-top: 1px solid var(--border); background: var(--bg-body); }
         .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 150; display: none; }
         .drawer-overlay.open { display: block; }
+        
         .qty-controls { display: flex; align-items: center; gap: 0.5rem; background: var(--bg-body); border: 1px solid var(--border); border-radius: 4px; padding: 2px; }
         .qty-btn { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; background: white; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; font-weight: bold; color: var(--text-main); }
         .qty-btn:hover { background: var(--primary-light); color: var(--primary); }
         .qty-val { font-size: 0.9rem; font-weight: 600; min-width: 20px; text-align: center; }
+        
         .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
         .toast { background: var(--secondary); color: white; padding: 12px 20px; border-radius: 8px; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 10px; animation: slideInRight 0.3s ease-out; max-width: 300px; font-size: 0.9rem; }
         .toast.success { border-left: 4px solid var(--success); }
         .toast.error { border-left: 4px solid var(--danger); }
-        /* Grid Views for Admin */
-        .admin-grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
-        .admin-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
         
-        /* IMPROVED SEARCH DROPDOWN CONTRAST */
+        /* Universal Grid/List Styles */
+        .admin-grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+        .admin-card { 
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1rem; 
+            display: flex; flex-direction: column; gap: 0.75rem; box-shadow: var(--shadow-sm); position: relative;
+        }
+        .admin-card:hover { border-color: var(--primary); }
+        .card-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; border-bottom: 1px dashed var(--border); padding-bottom: 0.5rem; }
+        .card-label { font-weight: 600; color: var(--text-muted); font-size: 0.8rem; }
+        .card-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(30px, 1fr)); gap: 0.5rem; margin-top: 0.5rem; }
+        
         #editProdResults { 
-            position: absolute; 
-            width: 100%; 
-            max-height: 200px; 
-            overflow-y: auto; 
-            background: var(--bg-card); 
-            border: 1px solid var(--primary); 
-            border-radius: 4px; 
-            z-index: 2000; 
-            box-shadow: var(--shadow-lg);
+            position: absolute; width: 100%; max-height: 200px; overflow-y: auto; background: var(--bg-card); 
+            border: 1px solid var(--primary); border-radius: 4px; z-index: 2000; box-shadow: var(--shadow-lg);
         }
-        .search-result-item { 
-            padding: 10px; 
-            border-bottom: 1px solid var(--border); 
-            cursor: pointer; 
-            background: var(--bg-card); 
-            color: var(--text-main); 
-        }
-        .search-result-item:hover { 
-            background: var(--primary-light); 
-            color: var(--primary-dark);
-        }
+        .search-result-item { padding: 10px; border-bottom: 1px solid var(--border); cursor: pointer; background: var(--bg-card); color: var(--text-main); }
+        .search-result-item:hover { background: var(--primary-light); color: var(--primary-dark); }
 
         @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes spin { 100% { transform: rotate(360deg); } }
         .animate-spin-slow { animation: spin 2s linear infinite; }
+
         @media (max-width: 768px) {
             .admin-sidebar { position: fixed; top: 0; left: 0; bottom: 0; transform: translateX(-100%); width: 85%; }
             .admin-sidebar.active { transform: translateX(0); }
@@ -190,12 +192,9 @@
             .search-wrapper { margin: 0 1rem; }
             .admin-main { padding: 1rem; }
             .promo-grid { grid-template-columns: 1fr; }
-            .mobile-card-table { display: block; }
-            .desktop-table-view { display: none; }
+            .admin-grid-view { grid-template-columns: 1fr; } 
         }
         @media (min-width: 769px) {
-            .mobile-card-table { display: none; }
-            .desktop-table-view { display: table; }
             .btn-toggle-mobile { display: none; }
         }
         @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -253,19 +252,6 @@
                     <input type="email" id="cliEmail" placeholder="E-mail">
                 </div>
                 <input type="tel" id="cliPhone" placeholder="Telefone/WhatsApp *" required>
-                <h4 style="font-weight:700; font-size:0.9rem; margin-top:0.5rem;">Endereço</h4>
-                <div class="flex gap-4">
-                    <input type="text" id="cliCep" placeholder="CEP" style="width: 120px;">
-                    <input type="text" id="cliAddress" placeholder="Logradouro" style="flex:1;">
-                </div>
-                <div class="flex gap-4">
-                    <input type="text" id="cliNum" placeholder="Nº" style="width: 80px;">
-                    <input type="text" id="cliDistrict" placeholder="Bairro" style="flex:1;">
-                </div>
-                <div class="flex gap-4">
-                    <input type="text" id="cliCity" placeholder="Cidade" style="flex:1;">
-                    <input type="text" id="cliState" placeholder="UF" style="width: 60px;">
-                </div>
                 <button type="submit" class="btn btn-primary w-full">Salvar Cliente</button>
             </form>
         </div>
@@ -393,10 +379,10 @@
 
                 <div class="flex gap-2 items-center w-full md:w-auto justify-end overflow-x-auto">
                     <select id="sortOrder" onchange="applyFilters()" style="margin: 0; width: auto; padding: 0.5rem 2rem 0.5rem 1rem; border-radius: 99px; font-size: 0.9rem;">
-                        <option value="relevant">Relevância</option>
+                        <option value="az">A-Z</option>
+                        <option value="za">Z-A</option>
                         <option value="asc">Menor Preço</option>
                         <option value="desc">Maior Preço</option>
-                        <option value="az">A-Z</option>
                     </select>
                     <div class="flex bg-body rounded border p-1 hide-mobile">
                         <button onclick="setView('grid')" class="btn-icon"><i data-lucide="grid" size="18"></i></button>
@@ -442,14 +428,6 @@
                     <p style="font-size: 0.9rem; line-height: 1.6; color: #94a3b8; margin-bottom: 1.5rem;">
                         Referência em autopeças em Petrolina e região. Qualidade, preço justo e o melhor atendimento para o seu veículo.
                     </p>
-                    <div class="flex gap-2">
-                        <a href="https://www.google.com/maps/search/?api=1&query=Dupeças+Duarte+Peças+Petrolina" target="_blank" class="btn btn-primary btn-sm">
-                            <i data-lucide="map"></i> Rotas
-                        </a>
-                        <a href="tel:558799094280" class="btn btn-secondary btn-sm" style="background: rgba(255,255,255,0.1); border:none; color: white;">
-                            <i data-lucide="phone"></i> Ligar
-                        </a>
-                    </div>
                 </div>
                 <div>
                     <h4 style="color: white; font-weight: 700; margin-bottom: 1.25rem;">Contato & Endereço</h4>
@@ -556,12 +534,28 @@
             <div id="tab-products" class="admin-tab hidden">
                 <div class="flex flex-col md:flex-row justify-between gap-4 mb-6">
                     <input type="text" placeholder="Filtrar por nome, SKU, veículo..." oninput="filterAdminTable(this.value)" style="margin: 0; max-width: 300px;">
-                    <div class="flex gap-2">
+                    <div class="flex gap-2 items-center">
+                         <!-- Filtros e Paginação -->
+                        <select id="adminProdLimit" onchange="renderAdminTable()" style="margin:0; width:auto;">
+                            <option value="25">25 itens</option>
+                            <option value="50">50 itens</option>
+                            <option value="100">100 itens</option>
+                            <option value="200">200 itens</option>
+                            <option value="300">300 itens</option>
+                            <option value="all">Todos</option>
+                        </select>
+                        <select id="adminProdSort" onchange="renderAdminTable()" style="margin:0; width:auto;">
+                            <option value="az">A-Z</option>
+                            <option value="za">Z-A</option>
+                            <option value="recent">Mais Recentes</option>
+                            <option value="oldest">Mais Antigos</option>
+                            <option value="lowstock">Estoque Baixo</option>
+                        </select>
                         <div class="flex bg-body rounded border p-1">
                             <button onclick="setAdminViewMode('products', 'grid')" class="btn-icon"><i data-lucide="grid"></i></button>
                             <button onclick="setAdminViewMode('products', 'list')" class="btn-icon"><i data-lucide="list"></i></button>
                         </div>
-                        <button onclick="openProductForm()" class="btn btn-primary"><i data-lucide="plus"></i> Novo Produto</button>
+                        <button onclick="openProductForm()" class="btn btn-primary"><i data-lucide="plus"></i> Novo</button>
                     </div>
                 </div>
                 <div id="adminProductsContainer"></div>
@@ -571,9 +565,6 @@
                 <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
                     <h3 class="font-bold text-lg">Central de Relatórios</h3>
                     <div class="flex gap-2">
-                        <button onclick="exportCurrentReport('txt')" class="btn btn-secondary btn-sm">TXT</button>
-                        <button onclick="exportCurrentReport('csv')" class="btn btn-secondary btn-sm">CSV</button>
-                        <button onclick="exportCurrentReport('xls')" class="btn btn-secondary btn-sm">Excel</button>
                         <button onclick="printReport()" class="btn btn-secondary btn-sm"><i data-lucide="printer"></i> PDF/Imprimir</button>
                     </div>
                 </div>
@@ -587,15 +578,6 @@
                         <label>Data Final</label>
                         <input type="date" id="repEnd" style="margin:0;">
                     </div>
-                    <div style="flex:1; min-width: 150px;">
-                        <label>Status</label>
-                        <select id="repStatus" style="margin:0;">
-                            <option value="">Todos</option>
-                            <option value="Pendente">Pendente</option>
-                            <option value="Entregue">Entregue</option>
-                            <option value="Cancelado">Cancelado</option>
-                        </select>
-                    </div>
                     <button onclick="applyReportFilters()" class="btn btn-primary">Filtrar</button>
                 </div>
 
@@ -605,7 +587,7 @@
                     <button class="report-tab-btn" onclick="switchReport('full-inventory')">Inventário Completo</button>
                     <button class="report-tab-btn" onclick="switchReport('financial')">Financeiro</button>
                 </div>
-                <div id="report-content" class="bg-card border rounded p-4" style="background: var(--bg-card); padding: 1.5rem; overflow-x: auto;"></div>
+                <div id="report-content"></div>
             </div>
 
             <div id="tab-brands" class="admin-tab hidden">
@@ -796,10 +778,9 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc, writeBatch, query, orderBy, limit, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc, writeBatch, query, orderBy, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
 
-        // CONFIGURAÇÃO DO FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyA1bJpcVTG8C7W6SDqYTUW2MGEgagiKN-E",
             authDomain: "dupecas-77955.firebaseapp.com",
@@ -826,7 +807,7 @@
             },
             async put(collectionName, data) {
                 const idString = String(data.id || Date.now());
-                await setDoc(doc(db, collectionName, idString), data, { merge: true }); // MERGE ATIVADO
+                await setDoc(doc(db, collectionName, idString), data, { merge: true });
                 return data;
             },
             async delete(collectionName, id) {
@@ -839,16 +820,12 @@
                 await Promise.all(deletePromises);
             },
             async saveCloudBackup(data) {
-                // Salva backup e mantem apenas os 3 ultimos
                 await addDoc(collection(db, 'system_backups'), { timestamp: Date.now(), content: JSON.stringify(data) });
                 const q = query(collection(db, 'system_backups'), orderBy('timestamp', 'asc'));
                 const snapshot = await getDocs(q);
                 if(snapshot.size > 3) {
-                    // Remove os mais antigos
                     const toDelete = snapshot.size - 3;
-                    for(let i=0; i<toDelete; i++) {
-                        await deleteDoc(snapshot.docs[i].ref);
-                    }
+                    for(let i=0; i<toDelete; i++) await deleteDoc(snapshot.docs[i].ref);
                 }
             },
             async getCloudBackups() {
@@ -857,15 +834,8 @@
                 return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
             }
         };
+        
         window.DBService = DBService;
-
-        // Dados Iniciais
-        const DEFAULT_BRANDS = ["Todas", "Audi", "BMW", "BYD", "Chevrolet", "Citroën", "Fiat", "Ford", "Honda", "Hyundai", "Jeep", "Kia", "Mercedes-Benz", "Mitsubishi", "Nissan", "Peugeot", "Renault", "Toyota", "Volkswagen", "Volvo", "Yamaha"].map(b => ({ name: b }));
-        const INITIAL_PRODUCTS = [
-            { id: 1, name: "Óleo Sintético 5W30", category: "Óleos", price: 45.90, stock: 50, image: "https://images.pexels.com/photos/4489749/pexels-photo-4489749.jpeg?auto=compress&cs=tinysrgb&w=600", sku: "OL5W30", vehicleBrand: "Todas", vehicleModel: "Universal", description: "Proteção máxima." },
-        ];
-
-        // --- VARIÁVEIS GLOBAIS ---
         window.products = [];
         window.cart = []; 
         window.orders = [];
@@ -874,11 +844,10 @@
         window.currentFilter = 'Todos';
         window.isAdmin = false;
         window.pixKey = localStorage.getItem('dupecas_pix_key') || "teste 123456789";
-        window.visibleProductsLimit = 30; 
+        window.visibleProductsLimit = 25; 
         window.adminViewMode = 'list'; 
         window.currentReportType = 'sales';
 
-        // --- FUNÇÕES GLOBAIS ---
         window.showToast = function(msg, type = 'success') {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
@@ -892,7 +861,6 @@
 
         window.formatMoney = (val) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-        // --- CARREGAMENTO INICIAL ---
         window.onload = async function() {
             lucide.createIcons();
             document.getElementById('configPixKey').value = window.pixKey;
@@ -922,21 +890,24 @@
             const localCart = localStorage.getItem('dupecas_cart');
             window.cart = localCart ? JSON.parse(localCart) : [];
 
+            // A-Z Sort Default
+            window.products.sort((a,b) => a.name.localeCompare(b.name));
+
             if (window.products.length === 0) {
+                const INITIAL_PRODUCTS = [{ id: 1, name: "Óleo Sintético 5W30", category: "Óleos", price: 45.90, stock: 50, image: "https://images.pexels.com/photos/4489749/pexels-photo-4489749.jpeg?auto=compress&cs=tinysrgb&w=600", sku: "OL5W30", vehicleBrand: "Todas", vehicleModel: "Universal", description: "Proteção máxima." }];
                 for(const p of INITIAL_PRODUCTS) await DBService.put('products', p);
                 window.products = [...INITIAL_PRODUCTS];
             }
             if (window.brands.length === 0) {
+                const DEFAULT_BRANDS = ["Todas", "Audi", "BMW", "BYD", "Chevrolet", "Citroën", "Fiat", "Ford", "Honda", "Hyundai", "Jeep", "Kia", "Mercedes-Benz", "Mitsubishi", "Nissan", "Peugeot", "Renault", "Toyota", "Volkswagen", "Volvo", "Yamaha"].map(b => ({ name: b }));
                 for(const b of DEFAULT_BRANDS) await DBService.put('brands', b);
                 window.brands = [...DEFAULT_BRANDS];
             }
-            
             let brandNames = window.brands.map(b => b.name).filter(b => b !== "Todas").sort();
             window.brands = ["Todas", ...brandNames];
         }
         window.loadData = loadData; 
 
-        // --- FILTROS E PRODUTOS ---
         window.renderBrandsFilter = function() {
             const html = window.brands.map(b => `<option value="${b}">${b}</option>`).join('');
             if(document.getElementById('filterBrand')) document.getElementById('filterBrand').innerHTML = html;
@@ -954,7 +925,7 @@
         window.setCategoryFilter = function(cat) { 
             window.currentFilter = cat; 
             document.getElementById('searchInput').value = '';
-            window.visibleProductsLimit = 30;
+            window.visibleProductsLimit = 25;
             window.renderCategories(); 
             window.applyFilters(); 
         }
@@ -969,7 +940,7 @@
             document.getElementById('filterYear').value = '';
             document.getElementById('filterSku').value = '';
             window.currentFilter = 'Todos';
-            window.visibleProductsLimit = 30;
+            window.visibleProductsLimit = 25;
             window.renderCategories();
             window.applyFilters();
         }
@@ -992,9 +963,10 @@
                        (!fSku || (p.sku || '').toLowerCase().includes(fSku));
             });
 
+            if(sort === 'az') filtered.sort((a,b) => a.name.localeCompare(b.name));
+            if(sort === 'za') filtered.sort((a,b) => b.name.localeCompare(a.name));
             if(sort === 'asc') filtered.sort((a,b) => a.price - b.price);
             if(sort === 'desc') filtered.sort((a,b) => b.price - a.price);
-            if(sort === 'az') filtered.sort((a,b) => a.name.localeCompare(b.name));
 
             window.renderProducts(filtered);
         }
@@ -1017,11 +989,8 @@
             empty.classList.add('hidden');
 
             const displayData = data.slice(0, window.visibleProductsLimit);
-            if (displayData.length < data.length) {
-                loadMoreBtn.classList.remove('hidden');
-            } else {
-                loadMoreBtn.classList.add('hidden');
-            }
+            if (displayData.length < data.length) loadMoreBtn.classList.remove('hidden');
+            else loadMoreBtn.classList.add('hidden');
 
             container.innerHTML = displayData.map(p => `
                 <div class="product-card">
@@ -1050,11 +1019,10 @@
         }
 
         window.loadMoreProducts = function() {
-            window.visibleProductsLimit += 30;
+            window.visibleProductsLimit += 25;
             window.applyFilters();
         }
 
-        // --- DETALHES, CARRINHO E CHECKOUT ---
         window.openDetail = function(id) {
             const p = window.products.find(x => x.id === id);
             if(!p) return;
@@ -1103,20 +1071,15 @@
 
         window.changeCartQty = function(id, delta) {
             const item = window.cart.find(i => i.id === id);
-            const prod = window.products.find(p => p.id === id);
             if (!item) return;
+            const prod = window.products.find(p => p.id === id);
 
             if (delta > 0) {
                 if (item.quantity >= prod.stock) return showToast("Estoque limite atingido!", "error");
                 item.quantity++;
             } else {
-                if (item.quantity > 1) {
-                    item.quantity--;
-                } else {
-                    if(confirm("Remover este item?")) {
-                        window.cart = window.cart.filter(i => i.id !== id);
-                    }
-                }
+                if (item.quantity > 1) item.quantity--;
+                else if(confirm("Remover este item?")) window.cart = window.cart.filter(i => i.id !== id);
             }
             saveCartLocal();
             updateCartUI();
@@ -1145,7 +1108,8 @@
                         <img src="${item.image}" style="width:50px; height:50px; object-fit:cover; border-radius:4px;">
                         <div style="flex:1;">
                             <div class="font-bold text-sm">${item.name}</div>
-                            <div class="text-muted text-xs mb-1">${formatMoney(item.price)} un.</div>
+                            <div class="text-xs text-muted">SKU: ${item.sku}</div>
+                            <div class="text-xs text-muted mb-1">${formatMoney(item.price)} un.</div>
                             <div class="qty-controls" style="display:inline-flex;">
                                 <button class="qty-btn" onclick="changeCartQty(${item.id}, -1)">-</button>
                                 <span class="qty-val">${item.quantity}</span>
@@ -1192,17 +1156,11 @@
             
             window.orders.unshift(newOrder);
             await DBService.put('orders', newOrder);
-
+            
+            // Auto-Save Client
             const existingClient = window.clients.find(c => c.phone === phone);
             if (!existingClient) {
-                const newClient = {
-                    id: Date.now(),
-                    name: name,
-                    phone: phone,
-                    email: "",
-                    cpf: "",
-                    address: { cep: "", street: "", num: "", district: "", city: "", state: "" }
-                };
+                const newClient = { id: Date.now(), name: name, phone: phone, email: "", cpf: "" };
                 window.clients.push(newClient);
                 await DBService.put('clients', newClient);
             }
@@ -1215,22 +1173,19 @@
                 }
             }
             
-            const msg = `*PEDIDO #${newOrder.id}*\n👤 *${name}*\n📞 ${phone}\n\n` +
-                        window.cart.map(i => `📦 ${i.quantity}x ${i.name}`).join('\n') + 
-                        `\n\n💰 *Total: ${formatMoney(total)}*` +
+            const itemsList = window.cart.map(i => `📦 ${i.quantity}x ${i.name} (SKU: ${i.sku})`).join('\n');
+            const msg = `*PEDIDO #${newOrder.id}*\n👤 *${name}*\n📞 ${phone}\n\n${itemsList}\n\n💰 *Total: ${formatMoney(total)}*` +
                         `\n\n🔑 *Chave PIX:* ${window.pixKey}` +
                         `\n\n⚠️ *Aviso:* O seu pedido ficará reservado por 72h.`;
             
             window.cart = [];
             localStorage.removeItem('dupecas_cart');
-            
             updateCartUI();
             toggleCart();
             renderProducts();
             window.open(`https://wa.me/558799094280?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
-        // --- ADMIN SISTEMA E PEDIDOS ---
         window.openLogin = function() { document.getElementById('loginModal').classList.add('active'); }
         window.closeLogin = function() { document.getElementById('loginModal').classList.remove('active'); }
         
@@ -1258,24 +1213,18 @@
             const now = Date.now();
             const limit = 72 * 60 * 60 * 1000; 
             let updated = false;
-
             for (const order of window.orders) {
                 if ((order.status === 'Pendente' || !order.status) && order.timestamp && (now - order.timestamp > limit)) {
                     await cancelOrderLogic(order.id, true); 
                     updated = true;
                 }
             }
-            if(updated) {
-                showToast("Pedidos expirados foram cancelados.");
-                renderOrdersTable();
-                loadData(); 
-            }
+            if(updated) { showToast("Pedidos expirados limpos."); renderOrdersTable(); loadData(); }
         }
 
         window.toggleSidebarMobile = function() { document.getElementById('adminSidebar').classList.toggle('active'); }
         window.initSidebarState = function() {
-            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-            if (isCollapsed) {
+            if (localStorage.getItem('sidebarCollapsed') === 'true') {
                 document.getElementById('adminSidebar').classList.add('collapsed');
                 document.getElementById('collapseIcon').setAttribute('data-lucide', 'chevrons-right');
             }
@@ -1283,9 +1232,8 @@
         window.toggleSidebarCollapse = function() {
             const sidebar = document.getElementById('adminSidebar');
             sidebar.classList.toggle('collapsed');
-            const isCollapsed = sidebar.classList.contains('collapsed');
-            localStorage.setItem('sidebarCollapsed', isCollapsed);
-            document.getElementById('collapseIcon').setAttribute('data-lucide', isCollapsed ? 'chevrons-right' : 'chevrons-left');
+            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+            document.getElementById('collapseIcon').setAttribute('data-lucide', sidebar.classList.contains('collapsed') ? 'chevrons-right' : 'chevrons-left');
             lucide.createIcons();
         }
 
@@ -1294,10 +1242,7 @@
             document.getElementById(`tab-${tab}`).classList.remove('hidden');
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
             event.currentTarget.classList.add('active');
-            
-            if(window.innerWidth <= 768) {
-                document.getElementById('adminSidebar').classList.remove('active');
-            }
+            if(window.innerWidth <= 768) document.getElementById('adminSidebar').classList.remove('active');
 
             if (tab === 'dashboard') loadAdminDashboard();
             if (tab === 'products') renderAdminTable();
@@ -1305,7 +1250,7 @@
             if (tab === 'clients') renderClientsTable();
             if (tab === 'reports') switchReport('sales');
             if (tab === 'brands') renderBrandsList();
-            if (tab === 'settings') renderCloudBackups(); // Carrega lista de backups
+            if (tab === 'settings') renderCloudBackups(); 
         }
 
         window.setAdminViewMode = function(section, mode) {
@@ -1319,859 +1264,244 @@
         window.loadAdminDashboard = function() {
             const totalVal = window.products.reduce((a, b) => a + (b.price * b.stock), 0);
             const validOrders = window.orders.filter(o => o.status !== 'Cancelado');
-            
             document.getElementById('kpiSales').innerText = formatMoney(validOrders.reduce((a,b)=>a+b.total, 0));
             document.getElementById('kpiOrderCount').innerText = validOrders.length;
             document.getElementById('kpiStockVal').innerText = formatMoney(totalVal);
 
             const ctx = document.getElementById('salesChart');
             if(salesChartRef) salesChartRef.destroy();
-            
             const dataSales = [1200, 1900, 3000, 5000, 2000, 3000, validOrders.reduce((a,b)=>a+b.total, 0)];
             salesChartRef = new Chart(ctx, {
                 type: 'line',
-                data: {
-                    labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
-                    datasets: [{ label: 'Vendas (R$)', data: dataSales, borderColor: '#2563eb', backgroundColor: 'rgba(37, 99, 235, 0.1)', fill: true, tension: 0.4 }]
-                },
+                data: { labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'], datasets: [{ label: 'Vendas (R$)', data: dataSales, borderColor: '#2563eb', backgroundColor: 'rgba(37, 99, 235, 0.1)', fill: true, tension: 0.4 }] },
                 options: { responsive: true, maintainAspectRatio: false }
             });
         }
 
-        // --- GESTÃO DE CLIENTES ---
-        window.renderClientsTable = function() {
-            const container = document.getElementById('adminClientsContainer');
-            if(window.adminViewMode === 'list') {
-                container.innerHTML = `
-                    <div class="data-table-wrapper">
-                        <table class="data-table">
-                            <thead><tr><th>Nome</th><th>Contato</th><th>Cidade/UF</th><th>Ações</th></tr></thead>
-                            <tbody>${window.clients.map(c => `
-                                <tr>
-                                    <td>${c.name}</td>
-                                    <td>${c.phone}<br><span class="text-xs text-muted">${c.email}</span></td>
-                                    <td>${c.address?.city || '-'} / ${c.address?.state || '-'}</td>
-                                    <td>
-                                        <button onclick="editClient(${c.id})" class="btn-icon text-primary"><i data-lucide="edit"></i></button>
-                                        <button onclick="deleteClient(${c.id})" class="btn-icon text-danger"><i data-lucide="trash-2"></i></button>
-                                    </td>
-                                </tr>`).join('')}
-                            </tbody>
-                        </table>
-                    </div>`;
-            } else {
-                 container.innerHTML = `
-                    <div class="admin-grid-view">
-                        ${window.clients.map(c => `
-                            <div class="admin-card">
-                                <div class="font-bold">${c.name}</div>
-                                <div class="text-sm"><i data-lucide="phone" size="14"></i> ${c.phone}</div>
-                                <div class="text-sm"><i data-lucide="mail" size="14"></i> ${c.email || '-'}</div>
-                                <div class="text-sm text-muted">${c.address?.city || '-'} - ${c.address?.state || '-'}</div>
-                                <div class="flex gap-2 mt-auto">
-                                    <button onclick="editClient(${c.id})" class="btn btn-secondary w-full">Editar</button>
-                                    <button onclick="deleteClient(${c.id})" class="btn btn-danger w-full">Excluir</button>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>`;
-            }
-            lucide.createIcons();
-        }
-
-        window.openClientForm = function() {
-            ['cliId', 'cliName', 'cliCpf', 'cliEmail', 'cliPhone', 'cliCep', 'cliAddress', 'cliNum', 'cliDistrict', 'cliCity', 'cliState'].forEach(id => document.getElementById(id).value = '');
-            document.getElementById('clientFormModal').classList.add('active');
-        }
-        window.closeClientForm = function() { document.getElementById('clientFormModal').classList.remove('active'); }
-
-        window.saveClient = async function(e) {
-            e.preventDefault();
-            const id = document.getElementById('cliId').value;
-            const client = {
-                id: id ? parseInt(id) : Date.now(),
-                name: document.getElementById('cliName').value,
-                cpf: document.getElementById('cliCpf').value,
-                email: document.getElementById('cliEmail').value,
-                phone: document.getElementById('cliPhone').value,
-                address: {
-                    cep: document.getElementById('cliCep').value,
-                    street: document.getElementById('cliAddress').value,
-                    num: document.getElementById('cliNum').value,
-                    district: document.getElementById('cliDistrict').value,
-                    city: document.getElementById('cliCity').value,
-                    state: document.getElementById('cliState').value,
-                }
-            };
-            await DBService.put('clients', client);
-            if(id) { const idx = window.clients.findIndex(c => c.id == id); window.clients[idx] = client; } else { window.clients.push(client); }
-            closeClientForm(); renderClientsTable(); showToast("Cliente salvo!");
-        }
-
-        window.editClient = function(id) {
-            const c = window.clients.find(x => x.id === id);
-            if(!c) return;
-            document.getElementById('cliId').value = c.id;
-            document.getElementById('cliName').value = c.name;
-            document.getElementById('cliCpf').value = c.cpf || '';
-            document.getElementById('cliEmail').value = c.email || '';
-            document.getElementById('cliPhone').value = c.phone;
-            if(c.address) {
-                document.getElementById('cliCep').value = c.address.cep || '';
-                document.getElementById('cliAddress').value = c.address.street || '';
-                document.getElementById('cliNum').value = c.address.num || '';
-                document.getElementById('cliDistrict').value = c.address.district || '';
-                document.getElementById('cliCity').value = c.address.city || '';
-                document.getElementById('cliState').value = c.address.state || '';
-            }
-            document.getElementById('clientFormModal').classList.add('active');
-        }
-
-        window.deleteClient = async function(id) {
-            if(confirm("Excluir cliente permanentemente?")) {
-                window.clients = window.clients.filter(c => c.id !== id);
-                await DBService.delete('clients', id);
-                renderClientsTable();
-                showToast("Cliente excluído.");
-            }
-        }
-
-        // --- RELATÓRIOS E EXPORTAÇÃO ---
-        let currentReportData = [];
-
-        window.applyReportFilters = function() {
-            switchReport(window.currentReportType);
-        }
-
-        window.switchReport = function(type) {
-            window.currentReportType = type;
-            document.querySelectorAll('.report-tab-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            const container = document.getElementById('report-content');
-            const startStr = document.getElementById('repStart').value;
-            const endStr = document.getElementById('repEnd').value;
-            const statusFilter = document.getElementById('repStatus').value;
-
-            // Convert date strings to timestamps for comparison
-            const startTs = startStr ? new Date(startStr + "T00:00:00").getTime() : 0;
-            const endTs = endStr ? new Date(endStr + "T23:59:59").getTime() : Infinity;
-
-            let html = '';
-            
-            if(type === 'sales') {
-                currentReportData = [];
-                window.orders.forEach(o => {
-                    const oTs = o.timestamp || 0; // fallback if timestamp missing
-                    if (oTs >= startTs && oTs <= endTs) {
-                        if (!statusFilter || o.status === statusFilter) {
-                            o.items.forEach(i => {
-                                const prodDetails = window.products.find(p => p.id === i.id) || {};
-                                currentReportData.push({
-                                    Data: o.date,
-                                    Pedido_ID: o.id,
-                                    Cliente: o.customer,
-                                    Status: o.status,
-                                    Produto: i.name,
-                                    SKU: prodDetails.sku || 'N/A',
-                                    Marca: prodDetails.vehicleBrand || 'N/A',
-                                    Qtd: i.quantity,
-                                    Preco_Unit: i.price,
-                                    Total_Item: i.price * i.quantity
-                                });
-                            });
-                        }
-                    }
-                });
-
-                html = `
-                    <h4 class="font-bold mb-4">Vendas Detalhadas</h4>
-                    <table class="data-table">
-                        <thead><tr><th>Data</th><th>Pedido</th><th>Cliente</th><th>Produto</th><th>SKU</th><th>Qtd</th><th>Total</th></tr></thead>
-                        <tbody>${currentReportData.map(r => `<tr><td>${r.Data}</td><td>${r.Pedido_ID}</td><td>${r.Cliente}</td><td>${r.Produto}</td><td>${r.SKU}</td><td>${r.Qtd}</td><td>${formatMoney(r.Total_Item)}</td></tr>`).join('')}</tbody>
-                    </table>`;
-            
-            } else if (type === 'stock') { 
-                currentReportData = window.products.filter(p => p.stock < 5).map(p => ({
-                    Produto: p.name, SKU: p.sku, Estoque: p.stock, Preco: p.price
-                }));
-                html = `<h4 class="font-bold mb-4">Estoque Crítico (<5)</h4><table class="data-table"><thead><tr><th>Produto</th><th>SKU</th><th>Estoque</th></tr></thead><tbody>${currentReportData.map(p => `<tr><td>${p.Produto}</td><td>${p.SKU}</td><td style="color:red;font-weight:bold;">${p.Estoque}</td></tr>`).join('')}</tbody></table>`; 
-            
-            } else if (type === 'full-inventory') {
-                currentReportData = window.products.map(p => ({
-                    Produto: p.name, SKU: p.sku, Categoria: p.category, Marca: p.vehicleBrand, Estoque: p.stock, Custo: p.price
-                }));
-                const grandTotal = window.products.reduce((a,b)=>a+(b.price*b.stock), 0);
-                html = `<h4 class="font-bold mb-4">Inventário Completo</h4><div class="mb-4 font-bold text-lg text-primary">Valor Total em Estoque: ${formatMoney(grandTotal)}</div><div class="data-table-wrapper"><table class="data-table"><thead><tr><th>Produto</th><th>Preço Unit.</th><th>Qtd.</th><th>Valor Total</th></tr></thead><tbody>${window.products.map(p => `<tr><td>${p.name} <br><span class="text-xs text-muted">${p.sku}</span></td><td>${formatMoney(p.price)}</td><td>${p.stock}</td><td class="font-bold">${formatMoney(p.price * p.stock)}</td></tr>`).join('')}</tbody></table></div>`;
-            }
-            container.innerHTML = html;
-        }
-
-        window.exportCurrentReport = function(format) {
-            if(!currentReportData || currentReportData.length === 0) return alert("Nenhum dado para exportar. Aplique filtros ou selecione outro relatório.");
-            
-            const headers = Object.keys(currentReportData[0]);
-            let content = "";
-            let mime = "text/plain";
-            let ext = "txt";
-
-            if (format === 'csv' || format === 'txt') {
-                content = headers.join(",") + "\n" + currentReportData.map(row => headers.map(h => row[h]).join(",")).join("\n");
-                mime = "text/csv";
-                ext = format;
-            } else if (format === 'xls') {
-                content = `<table border="1"><thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${currentReportData.map(row => `<tr>${headers.map(h => `<td>${row[h]}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
-                mime = "application/vnd.ms-excel";
-                ext = "xls";
-            }
-
-            const a = document.createElement("a");
-            const file = new Blob(['\uFEFF'+content], {type: mime});
-            a.href = URL.createObjectURL(file);
-            a.download = `relatorio_dupecas_${Date.now()}.${ext}`;
-            a.click();
-        }
-
-        window.printReport = function() {
-            const content = document.getElementById('report-content').innerHTML;
-            const win = window.open('', '', 'height=600,width=800');
-            win.document.write('<html><head><title>Imprimir Relatório</title>');
-            win.document.write('<style>body{font-family:sans-serif;} table{width:100%;border-collapse:collapse;} th,td{border:1px solid #ddd;padding:8px;text-align:left;} th{background:#f0f0f0;}</style>');
-            win.document.write('</head><body>');
-            win.document.write(content);
-            win.document.write('</body></html>');
-            win.document.close();
-            win.print();
-        }
-
-        // --- MANIPULAÇÃO DE PEDIDOS ---
-        window.renderOrdersTable = function() {
-            const container = document.getElementById('adminOrdersContainer');
-            document.getElementById('orderCountBadge').innerText = window.orders.length;
-            
-            if(window.orders.length === 0) { 
-                document.getElementById('noOrdersMsg').classList.remove('hidden'); 
-                container.innerHTML = ''; 
-                return;
-            }
-            document.getElementById('noOrdersMsg').classList.add('hidden'); 
-
-            if(window.adminViewMode === 'list') {
-                container.innerHTML = `
-                    <div class="data-table-wrapper">
-                        <table class="data-table">
-                            <thead><tr><th>ID</th><th>Data</th><th>Cliente</th><th>Total</th><th>Status</th><th>Ações</th></tr></thead>
-                            <tbody>${window.orders.map(o => {
-                                const statusClass = `status-${o.status || 'Pendente'}`;
-                                return `
-                                <tr>
-                                    <td>#${o.id.toString().slice(-6)}</td>
-                                    <td>${o.date}</td>
-                                    <td>${o.customer}<br><span class="text-xs text-muted">${o.phone}</span></td>
-                                    <td class="font-bold">${formatMoney(o.total)}</td>
-                                    <td><span class="status-badge ${statusClass}">${o.status || 'Pendente'}</span></td>
-                                    <td style="display:flex; gap:0.5rem; justify-content:center;">
-                                        <button onclick="printOrder(${o.id})" title="Imprimir" class="btn-icon"><i data-lucide="printer"></i></button>
-                                        <button onclick="shareOrder(${o.id})" title="Compartilhar" class="btn-icon"><i data-lucide="share-2"></i></button>
-                                        <button onclick="openOrderDetail(${o.id})" class="btn-icon text-primary"><i data-lucide="eye"></i></button>
-                                        ${o.status !== 'Cancelado' ? `<button onclick="openEditOrder(${o.id})" class="btn-icon text-warning"><i data-lucide="edit"></i></button>` : ''}
-                                    </td>
-                                </tr>`;
-                            }).join('')}</tbody>
-                        </table>
-                    </div>`;
-            } else {
-                container.innerHTML = `
-                    <div class="admin-grid-view">
-                        ${window.orders.map(o => {
-                             const statusClass = `status-${o.status || 'Pendente'}`;
-                             return `
-                            <div class="admin-card">
-                                <div class="flex justify-between items-center">
-                                    <span class="font-bold">#${o.id.toString().slice(-6)}</span>
-                                    <span class="status-badge ${statusClass}">${o.status}</span>
-                                </div>
-                                <div>${o.customer}</div>
-                                <div class="text-sm text-muted">${o.date}</div>
-                                <div class="font-bold text-lg">${formatMoney(o.total)}</div>
-                                <div class="flex gap-2 mt-2">
-                                    <button onclick="printOrder(${o.id})" class="btn btn-secondary flex-1"><i data-lucide="printer"></i></button>
-                                    <button onclick="openOrderDetail(${o.id})" class="btn btn-primary flex-1">Ver</button>
-                                </div>
-                            </div>`;
-                        }).join('')}
-                    </div>`;
-            }
-            lucide.createIcons();
-        }
-
-        window.generateOrderHTML = function(o) {
-            return `
-                <div style="font-family: monospace; width: 300px; padding: 20px; border: 1px solid #000; background: white;">
-                    <div style="text-align:center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px;">
-                        <h2 style="margin:0; font-size: 1.2rem;">DUPEÇAS</h2>
-                        <p style="margin:0; font-size: 0.8rem;">Duarte Peças</p>
-                        <p style="margin:0; font-size: 0.8rem;">Av. Sete de Setembro, 105 - Petrolina/PE</p>
-                        <p style="margin:0; font-size: 0.8rem;">(87) 9909-4280</p>
-                    </div>
-                    <div style="font-size: 0.9rem; margin-bottom: 10px;">
-                        <strong>PEDIDO: #${o.id}</strong><br>
-                        Data: ${o.date}<br>
-                        <strong>CLIENTE:</strong> ${o.customer} (${o.phone})
-                    </div>
-                    <table style="width: 100%; font-size: 0.8rem; border-collapse: collapse;">
-                        <tr style="border-bottom: 1px solid #000;">
-                            <th style="text-align:left;">Item / Detalhes</th>
-                            <th style="text-align:right;">Qtd</th>
-                            <th style="text-align:right;">R$</th>
-                        </tr>
-                        ${o.items.map(i => {
-                            const p = window.products.find(prod => prod.id === i.id) || {};
-                            return `
-                            <tr>
-                                <td style="padding-top:5px;"><strong>${i.name}</strong><br>
-                                    SKU: ${p.sku || '-'}<br>
-                                    Marca: ${p.vehicleBrand || '-'} ${p.vehicleModel || '-'}
-                                </td>
-                                <td style="text-align:right; vertical-align:top;">${i.quantity}</td>
-                                <td style="text-align:right; vertical-align:top;">${(i.price * i.quantity).toFixed(2)}</td>
-                            </tr>`;
-                        }).join('')}
-                    </table>
-                    <div style="border-top: 1px dashed #000; margin-top: 10px; padding-top: 5px; text-align: right; font-weight: bold; font-size: 1.1rem;">
-                        TOTAL: ${formatMoney(o.total)}
-                    </div>
-                </div>
-            `;
-        }
-
-        window.printOrder = function(id) {
-            const o = window.orders.find(x => x.id === id);
-            if(!o) return;
-            const content = window.generateOrderHTML(o);
-            const win = window.open('', '', 'height=600,width=400');
-            win.document.write('<html><head><title>Imprimir</title></head><body>');
-            win.document.write(content);
-            win.document.write('</body></html>');
-            win.document.close();
-            win.print();
-        }
-
-        window.shareOrder = async function(id) {
-            const o = window.orders.find(x => x.id === id);
-            if(!o) return;
-            const text = `PEDIDO #${o.id}\nCliente: ${o.customer}\nTotal: ${formatMoney(o.total)}`;
-            if (navigator.share) await navigator.share({ title: 'Pedido Dupeças', text: text });
-            else alert("Copie os dados:\n" + text);
-        }
-
-        // --- EDIÇÃO AVANÇADA DE PEDIDOS (CORRIGIDO) ---
-        let editingOrder = null;
-
-        window.openEditOrder = function(id) {
-            if(id === 'new') {
-                editingOrder = {
-                    id: Date.now(),
-                    date: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR'),
-                    status: 'Pendente',
-                    customer: '', phone: '', email: '', cpf: '',
-                    items: [], total: 0
-                };
-            } else {
-                const originalOrder = window.orders.find(o => o.id === id);
-                if(!originalOrder) return;
-                editingOrder = JSON.parse(JSON.stringify(originalOrder));
-            }
-            renderEditModal();
-            document.getElementById('orderEditModal').classList.add('active');
-        }
-
-        window.closeEditOrder = function() {
-            editingOrder = null;
-            document.getElementById('orderEditModal').classList.remove('active');
-        }
-
-        window.renderEditModal = function() {
-            document.getElementById('editClientName').value = editingOrder.customer || '';
-            document.getElementById('editClientPhone').value = editingOrder.phone || '';
-            document.getElementById('editClientEmail').value = editingOrder.email || '';
-            document.getElementById('editClientCpf').value = editingOrder.cpf || '';
-
-            const list = document.getElementById('editOrderItemsList');
-            if(!editingOrder.items.length) {
-                list.innerHTML = `<div class="text-muted text-center py-4">Sem itens</div>`;
-            } else {
-                list.innerHTML = editingOrder.items.map(i => `
-                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:0.5rem 0;">
-                        <div style="flex:1;">
-                            <div class="font-bold">${i.name}</div>
-                            <div class="text-xs text-muted">${formatMoney(i.price)} un.</div>
-                        </div>
-                        <div class="qty-controls" style="margin:0 10px;">
-                            <button class="qty-btn" onclick="editChangeQty(${i.id}, -1)">-</button>
-                            <span class="qty-val">${i.quantity}</span>
-                            <button class="qty-btn" onclick="editChangeQty(${i.id}, 1)">+</button>
-                        </div>
-                        <button onclick="editRemoveItem(${i.id})" class="text-danger"><i data-lucide="trash-2" size="16"></i></button>
-                    </div>
-                `).join('');
-            }
-            editingOrder.total = editingOrder.items.reduce((a,b)=> a + (b.price * b.quantity), 0);
-            document.getElementById('editOrderTotal').innerText = formatMoney(editingOrder.total);
-            lucide.createIcons();
-        }
-
-        window.searchProdForOrder = function(val) {
-            const resDiv = document.getElementById('editProdResults');
-            if(val.length < 2) { resDiv.style.display = 'none'; return; }
-            const results = window.products.filter(p => p.name.toLowerCase().includes(val.toLowerCase()) || p.sku.toLowerCase().includes(val.toLowerCase()));
-            if(results.length > 0) {
-                resDiv.style.display = 'block';
-                resDiv.innerHTML = results.map(p => `
-                    <div class="search-result-item" onclick="addProdToOrder(${p.id})">
-                        <div class="font-bold text-sm">${p.name}</div>
-                        <div class="text-xs text-muted">SKU: ${p.sku} | Estoque: ${p.stock} | ${formatMoney(p.price)}</div>
-                    </div>
-                `).join('');
-            } else resDiv.style.display = 'none';
-        }
-
-        window.addProdToOrder = function(prodId) {
-            const p = window.products.find(x => x.id === prodId);
-            if(!p) return;
-            const existing = editingOrder.items.find(i => i.id === prodId);
-            if(existing) existing.quantity++;
-            else editingOrder.items.push({ id: p.id, name: p.name, price: p.price, image: p.image, quantity: 1 });
-            
-            document.getElementById('editSearchProd').value = '';
-            document.getElementById('editProdResults').style.display = 'none';
-            renderEditModal();
-        }
-
-        window.editChangeQty = function(id, delta) {
-            const item = editingOrder.items.find(i => i.id === id);
-            if(!item) return;
-            if(delta > 0) item.quantity++;
-            else if(item.quantity > 1) item.quantity--;
-            renderEditModal();
-        }
-
-        window.editRemoveItem = function(id) {
-            editingOrder.items = editingOrder.items.filter(i => i.id !== id);
-            renderEditModal();
-        }
-
-        window.saveOrderChanges = async function() {
-            editingOrder.customer = document.getElementById('editClientName').value;
-            editingOrder.phone = document.getElementById('editClientPhone').value;
-            editingOrder.email = document.getElementById('editClientEmail').value;
-            editingOrder.cpf = document.getElementById('editClientCpf').value;
-
-            if(!editingOrder.customer || !editingOrder.phone) return alert("Nome e Telefone são obrigatórios!");
-
-            const originalOrder = window.orders.find(o => o.id === editingOrder.id);
-            if(originalOrder) {
-                for (const item of originalOrder.items) {
-                    const prod = window.products.find(p => p.id === item.id);
-                    if(prod) prod.stock += item.quantity;
-                }
-            } else {
-                window.orders.unshift(editingOrder);
-            }
-
-            for (const item of editingOrder.items) {
-                const prod = window.products.find(p => p.id === item.id);
-                if(prod) {
-                    if(prod.stock < item.quantity) {
-                        alert(`Estoque insuficiente para ${prod.name}.`);
-                        await loadData(); 
-                        return;
-                    }
-                    prod.stock -= item.quantity;
-                }
-            }
-
-            for (const p of window.products) await DBService.put('products', p);
-            
-            if(originalOrder) {
-                Object.assign(originalOrder, editingOrder); 
-                await DBService.put('orders', editingOrder);
-            } else {
-                await DBService.put('orders', editingOrder);
-            }
-            
-            closeEditOrder();
-            renderOrdersTable();
-            loadAdminDashboard();
-            showToast("Pedido salvo com sucesso!");
-        }
-
-        window.openOrderDetail = function(orderId) {
-            const o = window.orders.find(x => x.id === orderId);
-            if(!o) return;
-            const html = `
-                <div style="background:var(--bg-body); padding:1rem; border-radius:8px; margin-bottom:1rem;">
-                    <p><strong>Cliente:</strong> ${o.customer}</p>
-                    <p><strong>Contato:</strong> ${o.phone}</p>
-                    ${o.email ? `<p><strong>Email:</strong> ${o.email}</p>` : ''}
-                    ${o.cpf ? `<p><strong>CPF:</strong> ${o.cpf}</p>` : ''}
-                    <p><strong>Data:</strong> ${o.date}</p>
-                    <p><strong>Status:</strong> ${o.status || 'Pendente'}</p>
-                </div>
-                <h4 style="font-weight:bold; margin-bottom:0.5rem;">Itens do Pedido:</h4>
-                <div style="max-height:200px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; margin-bottom:1rem;">
-                    <table style="width:100%; font-size:0.9rem;">
-                        ${o.items.map(i => {
-                            const p = window.products.find(prod => prod.id === i.id) || {};
-                            return `
-                            <tr style="border-bottom:1px solid var(--border);">
-                                <td style="padding:0.5rem;"><img src="${i.image}" width="30"></td>
-                                <td style="padding:0.5rem;">
-                                    <strong>${i.name}</strong><br>
-                                    <span class="text-muted text-xs">SKU: ${p.sku || '-'} | Marca: ${p.vehicleBrand || '-'}</span>
-                                </td>
-                                <td style="padding:0.5rem; text-align:right;">${i.quantity} x ${formatMoney(i.price)}</td>
-                                <td style="padding:0.5rem; text-align:right; font-weight:bold;">${formatMoney(i.price * i.quantity)}</td>
-                            </tr>`;
-                        }).join('')}
-                    </table>
-                </div>
-                <div style="text-align:right; font-size:1.25rem; font-weight:800; color:var(--primary);">
-                    Total: ${formatMoney(o.total)}
-                </div>
-            `;
-            document.getElementById('orderDetailContent').innerHTML = html;
-            document.getElementById('orderDetailModal').classList.add('active');
-        }
-        window.closeOrderDetail = function() { document.getElementById('orderDetailModal').classList.remove('active'); }
-
-        window.confirmOrder = async function(id) {
-            const o = window.orders.find(x => x.id === id);
-            if(o) { o.status = 'Entregue'; await DBService.put('orders', o); renderOrdersTable(); showToast("Entregue!"); }
-        }
-
-        window.cancelOrderLogic = async function(id, isAuto = false) {
-            const o = window.orders.find(x => x.id === id);
-            if(!o || o.status === 'Cancelado') return;
-            for (const item of o.items) {
-                const prod = window.products.find(p => p.id === item.id);
-                if (prod) { prod.stock += item.quantity; await DBService.put('products', prod); }
-            }
-            o.status = 'Cancelado';
-            await DBService.put('orders', o);
-            if(!isAuto) { renderOrdersTable(); loadAdminDashboard(); showToast("Cancelado e estornado."); }
-        }
-        window.cancelOrder = function(id) { if(confirm("Cancelar pedido e devolver estoque?")) cancelOrderLogic(id); }
-
-        window.saveSettings = function() {
-            const key = document.getElementById('configPixKey').value;
-            window.pixKey = key;
-            localStorage.setItem('dupecas_pix_key', key);
-            showToast("Configurações salvas!");
-        }
-
-        // --- SISTEMA DE RESET E RESTAURAÇÃO (CORRIGIDO PARA NÃO SAIR DA TELA E MERGE) ---
-        window.bulkUpdateImages = async function() {
-            const txt = document.getElementById('bulkImgInput').value;
-            if(!txt) return;
-            const lines = txt.split('\n');
-            let count = 0;
-            try {
-                for (const l of lines) { 
-                    const parts = l.split(',');
-                    if(parts.length >= 2) {
-                        const id = parts[0].trim();
-                        const url = parts.slice(1).join(',').trim(); 
-                        const prod = window.products.find(x => x.id == id);
-                        if (prod && url) { 
-                            prod.image = url; 
-                            await DBService.put('products', prod); 
-                            count++; 
-                        } 
-                    }
-                }
-                showToast(`${count} imagens atualizadas!`);
-                renderAdminTable(); 
-            } catch (err) {
-                showToast("Erro na atualização em massa: " + err.message, "error");
-            }
-        }
-
-        window.resetSystem = async function() { 
-            const pwd = prompt("Digite a senha de segurança:");
-            if (pwd === "dupeca2026") {
-                if(confirm("TEM CERTEZA? ISSO APAGA TUDO.")) { 
-                    try {
-                        await DBService.clear('products'); 
-                        await DBService.clear('orders'); 
-                        await DBService.clear('brands'); 
-                        await DBService.clear('clients');
-                        localStorage.removeItem('dupecas_cart');
-                        
-                        window.products = [];
-                        window.orders = [];
-                        window.clients = [];
-                        window.brands = [];
-                        window.cart = [];
-                        
-                        renderAdminTable();
-                        renderOrdersTable();
-                        renderClientsTable();
-                        loadAdminDashboard();
-                        showToast("Sistema resetado com sucesso!");
-                    } catch (err) {
-                        alert("Erro ao resetar: " + err.message);
-                    }
-                }
-            } else alert("Senha incorreta.");
-        }
-        
-        window.exportData = async function(type) {
-            let content = "", mime = "text/plain";
-            const backupData = { timestamp: Date.now(), products: window.products, orders: window.orders, clients: window.clients, brands: window.brands.map(b => ({ name: b })) }; 
-            
-            // Salva na nuvem automaticamente ao exportar
-            await DBService.saveCloudBackup(backupData);
-            renderCloudBackups(); // Atualiza a lista na hora
-
-            if(type === 'csv') { 
-                content = "ID,Nome,SKU,Preco,Estoque\n" + window.products.map(p => `${p.id},${p.name},${p.sku},${p.price},${p.stock}`).join("\n"); 
-                mime = "text/csv"; 
-            } else { 
-                content = JSON.stringify(backupData, null, 2); 
-                mime = "application/json"; 
-            }
-            const a = document.createElement("a"); const file = new Blob(['\uFEFF'+content], {type: mime}); a.href = URL.createObjectURL(file); a.download = `backup_${Date.now()}.${type}`; a.click();
-        }
-
-        window.restoreBackup = function(input) {
-            const file = input.files[0];
-            if (!file) return;
-            // Confirm removido pois não é destrutivo mais, apenas merge
-            processBackupData(file);
-        }
-
-        window.processBackupData = function(fileOrJson) {
-            const modal = document.getElementById('restoreModal');
-            const progress = document.getElementById('restoreProgress');
-            const status = document.getElementById('restoreStatus');
-            
-            modal.classList.add('active');
-            progress.style.width = '5%';
-            status.innerText = "Lendo dados...";
-
-            const doRestore = async (data) => {
-                try {
-                    status.innerText = "Sincronizando (Merge)...";
-                    const totalItems = (data.products?.length || 0) + (data.orders?.length || 0) + (data.clients?.length || 0) + (data.brands?.length || 0);
-                    let processed = 0;
-
-                    const updateProg = () => {
-                        processed++;
-                        const pct = 10 + Math.floor((processed / totalItems) * 90);
-                        progress.style.width = pct + '%';
-                    };
-
-                    // MERGE: Usa put (setDoc com merge) em vez de clear
-                    if(data.products) for(const p of data.products) { await DBService.put('products', p); updateProg(); }
-                    if(data.orders) for(const o of data.orders) { await DBService.put('orders', o); updateProg(); }
-                    if(data.clients) for(const c of data.clients) { await DBService.put('clients', c); updateProg(); }
-                    if(data.brands) for(const b of data.brands) { await DBService.put('brands', typeof b === 'string' ? {name:b} : b); updateProg(); }
-                    
-                    status.innerText = "Atualizando tela...";
-                    await loadData(); // Recarrega para a memoria local
-                    
-                    renderAdminTable();
-                    renderOrdersTable();
-                    renderClientsTable();
-                    loadAdminDashboard();
-                    renderBrandsFilter();
-                    
-                    modal.classList.remove('active');
-                    showToast("Dados restaurados/mesclados com sucesso!");
-                    
-                } catch (err) { 
-                    alert("Erro ao restaurar: " + err.message); 
-                    modal.classList.remove('active'); 
-                }
-            };
-
-            if (fileOrJson instanceof File) {
-                const reader = new FileReader();
-                reader.onload = (e) => doRestore(JSON.parse(e.target.result));
-                reader.readAsText(fileOrJson);
-            } else {
-                doRestore(fileOrJson);
-            }
-        }
-
-        window.renderCloudBackups = async function() {
-            const list = document.getElementById('cloudBackupsList');
-            list.innerHTML = '<div style="padding:1rem;">Carregando...</div>';
-            try {
-                const backups = await DBService.getCloudBackups();
-                if(backups.length === 0) {
-                    list.innerHTML = '<div style="padding:1rem; text-align:center; color:var(--text-muted);">Nenhum backup na nuvem. Exporte um backup para criar um ponto de restauração.</div>';
-                    return;
-                }
-                list.innerHTML = backups.map(b => `
-                    <div style="padding:0.75rem; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <div class="font-bold">Backup Automático</div>
-                            <div class="text-xs text-muted">${new Date(b.timestamp).toLocaleString()}</div>
-                        </div>
-                        <button onclick='restoreCloudBackup(${JSON.stringify(b.content)})' class="btn btn-secondary btn-sm">Restaurar</button>
-                    </div>
-                `).join('');
-            } catch (err) {
-                list.innerHTML = '<div style="padding:1rem; color:red;">Erro ao listar backups.</div>';
-                console.error(err);
-            }
-        }
-
-        window.restoreCloudBackup = function(jsonContent) {
-            if(confirm("Restaurar este backup da nuvem? Isso irá adicionar/atualizar os dados atuais com os dados do backup.")) {
-                processBackupData(JSON.parse(jsonContent));
-            }
-        }
-
         window.renderAdminTable = function(filter = '') {
             const container = document.getElementById('adminProductsContainer');
-            const filtered = window.products.filter(p => (p.name + p.sku + p.vehicleBrand).toLowerCase().includes(filter.toLowerCase()));
+            const limit = document.getElementById('adminProdLimit').value === 'all' ? window.products.length : parseInt(document.getElementById('adminProdLimit').value);
+            const sort = document.getElementById('adminProdSort').value;
             
-            if(window.adminViewMode === 'list') {
-                container.innerHTML = `
-                <div class="desktop-table-view data-table-wrapper" style="display:block;">
+            let filtered = window.products.filter(p => (p.name + p.sku + p.vehicleBrand).toLowerCase().includes(filter.toLowerCase()));
+            
+            // Advanced Sort
+            if(sort === 'az') filtered.sort((a,b) => a.name.localeCompare(b.name));
+            if(sort === 'za') filtered.sort((a,b) => b.name.localeCompare(a.name));
+            if(sort === 'recent') filtered.sort((a,b) => b.id - a.id);
+            if(sort === 'oldest') filtered.sort((a,b) => a.id - b.id);
+            if(sort === 'lowstock') filtered.sort((a,b) => a.stock - b.stock);
+
+            // Pagination Slice
+            const display = filtered.slice(0, limit);
+
+            // Generate List View (Table)
+            const listViewHTML = `
+                <div class="data-table-wrapper table-responsive">
                     <table class="data-table">
                         <thead><tr><th>Imagem</th><th>Produto / SKU</th><th>Aplicação</th><th>Preço</th><th>Estoque</th><th style="text-align: center;">Ações</th></tr></thead>
-                        <tbody>
-                            ${filtered.map(p => `
-                                <tr>
-                                    <td><img src="${p.image}" style="width:40px; height:40px; object-fit:cover; border-radius:4px;"></td>
-                                    <td><div class="font-bold">${p.name}</div><div class="text-sm text-muted">${p.sku}</div></td>
-                                    <td>${p.vehicleBrand}</td>
-                                    <td>${formatMoney(p.price)}</td>
-                                    <td style="font-weight:bold; color:${p.stock<5 ? 'red':'green'}">${p.stock}</td>
-                                    <td style="text-align:center;">
-                                        <button onclick="editProduct(${p.id})" class="btn-icon"><i data-lucide="edit-3" size="16"></i></button>
-                                        <button onclick="deleteProduct(${p.id})" class="btn-icon" style="color:var(--danger)"><i data-lucide="trash-2" size="16"></i></button>
-                                    </td>
-                                </tr>
-                            `).join('')}
+                        <tbody>${display.map(p => `
+                            <tr>
+                                <td><img src="${p.image}" style="width:40px; height:40px; object-fit:cover; border-radius:4px;"></td>
+                                <td><div class="font-bold">${p.name}</div><div class="text-sm text-muted">${p.sku}</div></td>
+                                <td>${p.vehicleBrand}</td>
+                                <td>${formatMoney(p.price)}</td>
+                                <td style="font-weight:bold; color:${p.stock<5 ? 'red':'green'}">${p.stock}</td>
+                                <td style="text-align:center;">
+                                    <button onclick="editProduct(${p.id})" class="btn-icon"><i data-lucide="edit-3" size="16"></i></button>
+                                    <button onclick="deleteProduct(${p.id})" class="btn-icon" style="color:var(--danger)"><i data-lucide="trash-2" size="16"></i></button>
+                                </td>
+                            </tr>`).join('')}
                         </tbody>
                     </table>
                 </div>`;
-            } else {
-                container.innerHTML = `
-                    <div class="admin-grid-view">
-                        ${filtered.map(p => `
-                            <div class="admin-card">
-                                <img src="${p.image}" style="width:100%; height:150px; object-fit:cover; border-radius:4px;">
-                                <div class="font-bold">${p.name}</div>
-                                <div class="text-sm text-muted">${p.sku} | ${formatMoney(p.price)}</div>
-                                <div class="font-bold" style="color:${p.stock<5 ? 'red':'green'}">Estoque: ${p.stock}</div>
-                                <div class="flex gap-2 mt-auto">
-                                    <button onclick="editProduct(${p.id})" class="btn btn-secondary w-full">Editar</button>
-                                    <button onclick="deleteProduct(${p.id})" class="btn btn-danger w-full">Excluir</button>
-                                </div>
+
+            // Generate Grid View (Cards)
+            const gridViewHTML = `
+                <div class="admin-grid-view">
+                    ${display.map(p => `
+                        <div class="admin-card">
+                            <img src="${p.image}" style="width:100%; height:150px; object-fit:cover; border-radius:4px;">
+                            <div class="font-bold">${p.name}</div>
+                            <div class="card-row"><span class="card-label">SKU:</span> ${p.sku}</div>
+                            <div class="card-row"><span class="card-label">Preço:</span> ${formatMoney(p.price)}</div>
+                            <div class="card-row"><span class="card-label">Estoque:</span> <span style="color:${p.stock<5?'red':'green'}">${p.stock}</span></div>
+                            <div class="card-actions">
+                                <button onclick="editProduct(${p.id})" class="btn btn-secondary w-full">Editar</button>
+                                <button onclick="deleteProduct(${p.id})" class="btn btn-danger w-full">Excluir</button>
                             </div>
-                        `).join('')}
-                    </div>
-                `;
-            }
+                        </div>`).join('')}
+                </div>`;
+
+            container.innerHTML = window.adminViewMode === 'grid' ? gridViewHTML : listViewHTML;
             lucide.createIcons();
         }
         window.filterAdminTable = function(val) { renderAdminTable(val); }
 
-        window.renderBrandsList = function() {
-            document.getElementById('brandsList').innerHTML = window.brands.map(b => `
-                <li style="padding:0.5rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
-                    ${b} ${b !== 'Todas' ? `<button onclick="removeBrand('${b}')" style="color:red;">X</button>` : ''}
-                </li>
-            `).join('');
-        }
-        window.addBrand = async function() {
-            const val = document.getElementById('newBrandInput').value;
-            if(val && !window.brands.includes(val)) { 
-                window.brands.push(val); window.brands.sort(); 
-                await DBService.put('brands', { name: val }); 
-                renderBrandsList(); renderBrandsFilter(); showToast("Marca adicionada!"); 
-            }
-            document.getElementById('newBrandInput').value = '';
-        }
-        window.removeBrand = async function(name) { 
-            if(confirm('Remover marca?')) { window.brands = window.brands.filter(b => b !== name); await DBService.delete('brands', name); renderBrandsList(); renderBrandsFilter(); } 
+        window.renderOrdersTable = function() {
+            const container = document.getElementById('adminOrdersContainer');
+            document.getElementById('orderCountBadge').innerText = window.orders.length;
+            if(window.orders.length === 0) { document.getElementById('noOrdersMsg').classList.remove('hidden'); container.innerHTML = ''; return; }
+            document.getElementById('noOrdersMsg').classList.add('hidden'); 
+
+            const listViewHTML = `
+                <div class="data-table-wrapper table-responsive">
+                    <table class="data-table">
+                        <thead><tr><th>ID</th><th>Data</th><th>Cliente</th><th>Total</th><th>Status</th><th>Ações</th></tr></thead>
+                        <tbody>${window.orders.map(o => `
+                            <tr>
+                                <td>#${o.id.toString().slice(-6)}</td>
+                                <td>${o.date}</td>
+                                <td>${o.customer}<br><span class="text-xs text-muted">${o.phone}</span></td>
+                                <td class="font-bold">${formatMoney(o.total)}</td>
+                                <td><span class="status-badge status-${o.status||'Pendente'}">${o.status||'Pendente'}</span></td>
+                                <td style="display:flex; gap:0.5rem; justify-content:center;">
+                                    <button onclick="printOrder(${o.id})" class="btn-icon" title="Imprimir Nota"><i data-lucide="printer"></i></button>
+                                    <button onclick="shareOrder(${o.id})" class="btn-icon" title="Compartilhar"><i data-lucide="share-2"></i></button>
+                                    <button onclick="openOrderDetail(${o.id})" class="btn-icon text-primary"><i data-lucide="eye"></i></button>
+                                    ${o.status!=='Cancelado' ? `<button onclick="openEditOrder(${o.id})" class="btn-icon text-warning"><i data-lucide="edit"></i></button>`:''}
+                                </td>
+                            </tr>`).join('')}
+                        </tbody>
+                    </table>
+                </div>`;
+
+            const gridViewHTML = `
+                <div class="admin-grid-view">
+                    ${window.orders.map(o => `
+                        <div class="admin-card">
+                            <div class="flex justify-between items-center"><span class="font-bold">#${o.id.toString().slice(-6)}</span><span class="status-badge status-${o.status||'Pendente'}">${o.status}</span></div>
+                            <div class="card-row"><span class="card-label">Cliente:</span> ${o.customer}</div>
+                            <div class="card-row"><span class="card-label">Data:</span> ${o.date}</div>
+                            <div class="card-row"><span class="card-label">Total:</span> ${formatMoney(o.total)}</div>
+                            <div class="card-actions">
+                                <button onclick="printOrder(${o.id})" class="btn btn-secondary"><i data-lucide="printer"></i></button>
+                                <button onclick="shareOrder(${o.id})" class="btn btn-secondary"><i data-lucide="share-2"></i></button>
+                                <button onclick="openOrderDetail(${o.id})" class="btn btn-primary">Ver</button>
+                                ${o.status!=='Cancelado' ? `<button onclick="openEditOrder(${o.id})" class="btn btn-secondary text-warning"><i data-lucide="edit"></i></button>`:''}
+                            </div>
+                        </div>`).join('')}
+                </div>`;
+
+            container.innerHTML = window.adminViewMode === 'grid' ? gridViewHTML : listViewHTML;
+            lucide.createIcons();
         }
 
-        window.openProductForm = function() { 
-            ['prodId','prodName','prodSku','prodCat','prodSupplier','prodPrice','prodStock','prodDesc','prodVehModel','prodVehYear','prodVehVersion','prodImgUrl'].forEach(id => document.getElementById(id).value = ''); 
-            document.getElementById('prodVehBrand').value = 'Todas'; 
-            document.getElementById('formPreview').style.display = 'none'; 
-            document.getElementById('uploadPlaceholder').style.display = 'block'; 
-            document.getElementById('productFormModal').classList.add('active'); 
+        window.renderClientsTable = function() {
+            const container = document.getElementById('adminClientsContainer');
+            const listViewHTML = `
+                <div class="data-table-wrapper table-responsive">
+                    <table class="data-table">
+                        <thead><tr><th>Nome</th><th>Contato</th><th>E-mail / CPF</th><th>Ações</th></tr></thead>
+                        <tbody>${window.clients.map(c => `<tr><td>${c.name}</td><td>${c.phone}</td><td>${c.email || '-'}<br><small>${c.cpf || ''}</small></td><td><button onclick="editClient(${c.id})" class="btn-icon"><i data-lucide="edit"></i></button><button onclick="deleteClient(${c.id})" class="btn-icon text-danger"><i data-lucide="trash-2"></i></button></td></tr>`).join('')}</tbody>
+                    </table>
+                </div>`;
+            const gridViewHTML = `
+                <div class="admin-grid-view">
+                    ${window.clients.map(c => `<div class="admin-card"><div class="font-bold">${c.name}</div><div class="card-row"><span class="card-label">Tel:</span> ${c.phone}</div><div class="card-row"><span class="card-label">CPF:</span> ${c.cpf||'-'}</div><div class="card-actions"><button onclick="editClient(${c.id})" class="btn btn-secondary">Editar</button><button onclick="deleteClient(${c.id})" class="btn btn-danger">Excluir</button></div></div>`).join('')}
+                </div>`;
+            container.innerHTML = window.adminViewMode === 'grid' ? gridViewHTML : listViewHTML;
+            lucide.createIcons();
         }
+
+        // --- CRUD / LOGIC ---
+        window.renderBrandsList = function() { document.getElementById('brandsList').innerHTML = window.brands.map(b => `<li style="padding:0.5rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">${b} ${b !== 'Todas' ? `<button onclick="removeBrand('${b}')" style="color:red;">X</button>` : ''}</li>`).join(''); }
+        window.addBrand = async function() { const val = document.getElementById('newBrandInput').value; if(val && !window.brands.includes(val)) { window.brands.push(val); window.brands.sort(); await DBService.put('brands', { name: val }); renderBrandsList(); renderBrandsFilter(); showToast("Marca adicionada!"); } document.getElementById('newBrandInput').value = ''; }
+        window.removeBrand = async function(name) { if(confirm('Remover marca?')) { window.brands = window.brands.filter(b => b !== name); await DBService.delete('brands', name); renderBrandsList(); renderBrandsFilter(); } }
+
+        window.openProductForm = function() { ['prodId','prodName','prodSku','prodCat','prodSupplier','prodPrice','prodStock','prodDesc','prodVehModel','prodVehYear','prodVehVersion','prodImgUrl'].forEach(id => document.getElementById(id).value = ''); document.getElementById('prodVehBrand').value = 'Todas'; document.getElementById('formPreview').style.display = 'none'; document.getElementById('uploadPlaceholder').style.display = 'block'; document.getElementById('productFormModal').classList.add('active'); }
         window.closeProductForm = function() { document.getElementById('productFormModal').classList.remove('active'); }
-
-        window.editProduct = function(id) {
-            const p = window.products.find(x => x.id === id);
-            document.getElementById('prodId').value = p.id;
-            document.getElementById('prodName').value = p.name;
-            document.getElementById('prodSku').value = p.sku;
-            document.getElementById('prodCat').value = p.category;
-            document.getElementById('prodSupplier').value = p.supplier || '';
-            document.getElementById('prodPrice').value = p.price;
-            document.getElementById('prodStock').value = p.stock;
-            document.getElementById('prodVehBrand').value = p.vehicleBrand;
-            document.getElementById('prodVehModel').value = p.vehicleModel;
-            document.getElementById('prodVehYear').value = p.vehicleYear || '';
-            document.getElementById('prodVehVersion').value = p.vehicleVersion || '';
-            document.getElementById('prodDesc').value = p.description || "";
-            document.getElementById('prodImgUrl').value = p.image;
-            document.getElementById('formPreview').src = p.image;
-            document.getElementById('formPreview').style.display = 'block';
-            document.getElementById('uploadPlaceholder').style.display = 'none';
-            document.getElementById('productFormModal').classList.add('active');
-        }
-
-        window.saveProduct = async function(e) {
-            e.preventDefault();
-            const id = document.getElementById('prodId').value;
-            const newProd = {
-                id: id ? parseInt(id) : Date.now(),
-                name: document.getElementById('prodName').value,
-                sku: document.getElementById('prodSku').value,
-                category: document.getElementById('prodCat').value,
-                supplier: document.getElementById('prodSupplier').value,
-                price: parseFloat(document.getElementById('prodPrice').value),
-                stock: parseInt(document.getElementById('prodStock').value),
-                vehicleBrand: document.getElementById('prodVehBrand').value,
-                vehicleModel: document.getElementById('prodVehModel').value,
-                vehicleYear: document.getElementById('prodVehYear').value,
-                vehicleVersion: document.getElementById('prodVehVersion').value,
-                description: document.getElementById('prodDesc').value,
-                image: document.getElementById('formPreview').src
-            };
-            await DBService.put('products', newProd);
-            if(id) { const idx = window.products.findIndex(p => p.id == id); window.products[idx] = newProd; } else { window.products.push(newProd); }
-            closeProductForm(); renderAdminTable(); showToast("Produto Salvo!");
-        }
-
-        window.handleImageUpload = function(input) {
-            if(input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) { document.getElementById('formPreview').src = e.target.result; document.getElementById('formPreview').style.display = 'block'; document.getElementById('uploadPlaceholder').style.display = 'none'; }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
+        window.editProduct = function(id) { const p = window.products.find(x => x.id === id); document.getElementById('prodId').value = p.id; document.getElementById('prodName').value = p.name; document.getElementById('prodSku').value = p.sku; document.getElementById('prodCat').value = p.category; document.getElementById('prodSupplier').value = p.supplier || ''; document.getElementById('prodPrice').value = p.price; document.getElementById('prodStock').value = p.stock; document.getElementById('prodVehBrand').value = p.vehicleBrand; document.getElementById('prodVehModel').value = p.vehicleModel; document.getElementById('prodVehYear').value = p.vehicleYear || ''; document.getElementById('prodVehVersion').value = p.vehicleVersion || ''; document.getElementById('prodDesc').value = p.description || ""; document.getElementById('prodImgUrl').value = p.image; document.getElementById('formPreview').src = p.image; document.getElementById('formPreview').style.display = 'block'; document.getElementById('uploadPlaceholder').style.display = 'none'; document.getElementById('productFormModal').classList.add('active'); }
+        window.saveProduct = async function(e) { e.preventDefault(); const id = document.getElementById('prodId').value; const newProd = { id: id ? parseInt(id) : Date.now(), name: document.getElementById('prodName').value, sku: document.getElementById('prodSku').value, category: document.getElementById('prodCat').value, supplier: document.getElementById('prodSupplier').value, price: parseFloat(document.getElementById('prodPrice').value), stock: parseInt(document.getElementById('prodStock').value), vehicleBrand: document.getElementById('prodVehBrand').value, vehicleModel: document.getElementById('prodVehModel').value, vehicleYear: document.getElementById('prodVehYear').value, vehicleVersion: document.getElementById('prodVehVersion').value, description: document.getElementById('prodDesc').value, image: document.getElementById('formPreview').src }; await DBService.put('products', newProd); if(id) { const idx = window.products.findIndex(p => p.id == id); window.products[idx] = newProd; } else { window.products.push(newProd); } closeProductForm(); renderAdminTable(); showToast("Produto Salvo!"); }
+        window.handleImageUpload = function(input) { if(input.files && input.files[0]) { const reader = new FileReader(); reader.onload = function(e) { document.getElementById('formPreview').src = e.target.result; document.getElementById('formPreview').style.display = 'block'; document.getElementById('uploadPlaceholder').style.display = 'none'; }; reader.readAsDataURL(input.files[0]); } }
         window.previewUrl = function(url) { if(url) { document.getElementById('formPreview').src = url; document.getElementById('formPreview').style.display = 'block'; document.getElementById('uploadPlaceholder').style.display = 'none'; } }
-        
-        window.deleteProduct = async function(id) { 
-            if(confirm("Excluir?")) { window.products = window.products.filter(p => p.id !== id); await DBService.delete('products', id); renderAdminTable(); showToast("Produto Excluído"); } 
+        window.deleteProduct = async function(id) { if(confirm("Excluir?")) { window.products = window.products.filter(p => p.id !== id); await DBService.delete('products', id); renderAdminTable(); showToast("Produto Excluído"); } }
+
+        window.openClientForm = function() { ['cliId', 'cliName', 'cliCpf', 'cliEmail', 'cliPhone'].forEach(id => document.getElementById(id).value = ''); document.getElementById('clientFormModal').classList.add('active'); }
+        window.closeClientForm = function() { document.getElementById('clientFormModal').classList.remove('active'); }
+        window.saveClient = async function(e) { e.preventDefault(); const id = document.getElementById('cliId').value; const client = { id: id ? parseInt(id) : Date.now(), name: document.getElementById('cliName').value, cpf: document.getElementById('cliCpf').value, email: document.getElementById('cliEmail').value, phone: document.getElementById('cliPhone').value }; await DBService.put('clients', client); if(id) { const idx = window.clients.findIndex(c => c.id == id); window.clients[idx] = client; } else { window.clients.push(client); } closeClientForm(); renderClientsTable(); showToast("Cliente salvo!"); }
+        window.editClient = function(id) { const c = window.clients.find(x => x.id === id); if(!c) return; document.getElementById('cliId').value = c.id; document.getElementById('cliName').value = c.name; document.getElementById('cliCpf').value = c.cpf || ''; document.getElementById('cliEmail').value = c.email || ''; document.getElementById('cliPhone').value = c.phone; document.getElementById('clientFormModal').classList.add('active'); }
+        window.deleteClient = async function(id) { if(confirm("Excluir cliente?")) { window.clients = window.clients.filter(c => c.id !== id); await DBService.delete('clients', id); renderClientsTable(); showToast("Cliente excluído."); } }
+
+        // --- ORDER EDIT LOGIC ---
+        let editingOrder = null;
+        window.openEditOrder = function(id) { if(id === 'new') { editingOrder = { id: Date.now(), date: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR'), status: 'Pendente', customer: '', phone: '', email: '', cpf: '', items: [], total: 0 }; } else { const originalOrder = window.orders.find(o => o.id === id); if(!originalOrder) return; editingOrder = JSON.parse(JSON.stringify(originalOrder)); } renderEditModal(); document.getElementById('orderEditModal').classList.add('active'); }
+        window.closeEditOrder = function() { editingOrder = null; document.getElementById('orderEditModal').classList.remove('active'); }
+        window.renderEditModal = function() { document.getElementById('editClientName').value = editingOrder.customer || ''; document.getElementById('editClientPhone').value = editingOrder.phone || ''; document.getElementById('editClientEmail').value = editingOrder.email || ''; document.getElementById('editClientCpf').value = editingOrder.cpf || ''; const list = document.getElementById('editOrderItemsList'); if(!editingOrder.items.length) { list.innerHTML = `<div class="text-muted text-center py-4">Sem itens</div>`; } else { list.innerHTML = editingOrder.items.map(i => `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:0.5rem 0;"><div style="flex:1;"><div class="font-bold">${i.name}</div><div class="text-xs text-muted">${formatMoney(i.price)} un.</div></div><div class="qty-controls" style="margin:0 10px;"><button class="qty-btn" onclick="editChangeQty(${i.id}, -1)">-</button><span class="qty-val">${i.quantity}</span><button class="qty-btn" onclick="editChangeQty(${i.id}, 1)">+</button></div><button onclick="editRemoveItem(${i.id})" class="text-danger"><i data-lucide="trash-2" size="16"></i></button></div>`).join(''); } editingOrder.total = editingOrder.items.reduce((a,b)=> a + (b.price * b.quantity), 0); document.getElementById('editOrderTotal').innerText = formatMoney(editingOrder.total); lucide.createIcons(); }
+        window.searchProdForOrder = function(val) { const resDiv = document.getElementById('editProdResults'); if(val.length < 2) { resDiv.style.display = 'none'; return; } const results = window.products.filter(p => p.name.toLowerCase().includes(val.toLowerCase()) || p.sku.toLowerCase().includes(val.toLowerCase())); if(results.length > 0) { resDiv.style.display = 'block'; resDiv.innerHTML = results.map(p => `<div class="search-result-item" onclick="addProdToOrder(${p.id})"><div class="font-bold text-sm">${p.name}</div><div class="text-xs text-muted">SKU: ${p.sku} | Estoque: ${p.stock} | ${formatMoney(p.price)}</div></div>`).join(''); } else resDiv.style.display = 'none'; }
+        window.addProdToOrder = function(prodId) { const p = window.products.find(x => x.id === prodId); if(!p) return; const existing = editingOrder.items.find(i => i.id === prodId); if(existing) existing.quantity++; else editingOrder.items.push({ id: p.id, name: p.name, price: p.price, image: p.image, quantity: 1, sku: p.sku, vehicleBrand: p.vehicleBrand, vehicleModel: p.vehicleModel }); document.getElementById('editSearchProd').value = ''; document.getElementById('editProdResults').style.display = 'none'; renderEditModal(); }
+        window.editChangeQty = function(id, delta) { const item = editingOrder.items.find(i => i.id === id); if(!item) return; if(delta > 0) item.quantity++; else if(item.quantity > 1) item.quantity--; renderEditModal(); }
+        window.editRemoveItem = function(id) { editingOrder.items = editingOrder.items.filter(i => i.id !== id); renderEditModal(); }
+        window.saveOrderChanges = async function() { 
+            editingOrder.customer = document.getElementById('editClientName').value; 
+            editingOrder.phone = document.getElementById('editClientPhone').value; 
+            editingOrder.email = document.getElementById('editClientEmail').value; 
+            editingOrder.cpf = document.getElementById('editClientCpf').value; 
+            if(!editingOrder.customer || !editingOrder.phone) return alert("Nome e Telefone são obrigatórios!"); 
+            
+            const originalOrder = window.orders.find(o => o.id === editingOrder.id); 
+            // 1. Restore stock from old order
+            if(originalOrder) { for (const item of originalOrder.items) { const prod = window.products.find(p => p.id === item.id); if(prod) prod.stock += item.quantity; } } else { window.orders.unshift(editingOrder); } 
+            
+            // 2. Deduct stock from new order
+            for (const item of editingOrder.items) { const prod = window.products.find(p => p.id === item.id); if(prod) { if(prod.stock < item.quantity) { alert(`Estoque insuficiente para ${prod.name}.`); await loadData(); return; } prod.stock -= item.quantity; } } 
+            
+            // 3. Save Products
+            for (const p of window.products) await DBService.put('products', p); 
+            
+            // 4. Save Order
+            if(originalOrder) { Object.assign(originalOrder, editingOrder); await DBService.put('orders', editingOrder); } else { await DBService.put('orders', editingOrder); } 
+            
+            // 5. Auto-Save Client
+            const existingClient = window.clients.find(c => c.phone === editingOrder.phone);
+            if(existingClient) { existingClient.name = editingOrder.customer; existingClient.email = editingOrder.email; existingClient.cpf = editingOrder.cpf; await DBService.put('clients', existingClient); }
+            else { const newCli = { id: Date.now(), name: editingOrder.customer, phone: editingOrder.phone, email: editingOrder.email, cpf: editingOrder.cpf }; window.clients.push(newCli); await DBService.put('clients', newCli); }
+
+            closeEditOrder(); renderOrdersTable(); loadAdminDashboard(); showToast("Pedido salvo com sucesso!"); 
         }
 
-        window.toggleTheme = function() { 
-            document.body.classList.toggle('dark-mode'); 
-            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light'); 
+        window.openOrderDetail = function(orderId) { const o = window.orders.find(x => x.id === orderId); if(!o) return; const html = `<div style="background:var(--bg-body); padding:1rem; border-radius:8px; margin-bottom:1rem;"><p><strong>Cliente:</strong> ${o.customer}</p><p><strong>Contato:</strong> ${o.phone}</p>${o.email ? `<p><strong>Email:</strong> ${o.email}</p>` : ''}${o.cpf ? `<p><strong>CPF:</strong> ${o.cpf}</p>` : ''}<p><strong>Data:</strong> ${o.date}</p><p><strong>Status:</strong> ${o.status || 'Pendente'}</p></div><h4 style="font-weight:bold; margin-bottom:0.5rem;">Itens do Pedido:</h4><div style="max-height:200px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; margin-bottom:1rem;"><table style="width:100%; font-size:0.9rem;">${o.items.map(i => `<tr style="border-bottom:1px solid var(--border);"><td style="padding:0.5rem;"><img src="${i.image}" width="30"></td><td style="padding:0.5rem;"><strong>${i.name}</strong><br><span class="text-muted text-xs">SKU: ${i.sku || '-'}</span></td><td style="padding:0.5rem; text-align:right;">${i.quantity} x ${formatMoney(i.price)}</td><td style="padding:0.5rem; text-align:right; font-weight:bold;">${formatMoney(i.price * i.quantity)}</td></tr>`).join('')}</table></div><div style="text-align:right; font-size:1.25rem; font-weight:800; color:var(--primary);">Total: ${formatMoney(o.total)}</div>`; document.getElementById('orderDetailContent').innerHTML = html; document.getElementById('orderDetailModal').classList.add('active'); }
+        window.closeOrderDetail = function() { document.getElementById('orderDetailModal').classList.remove('active'); }
+        window.confirmOrder = async function(id) { const o = window.orders.find(x => x.id === id); if(o) { o.status = 'Entregue'; await DBService.put('orders', o); renderOrdersTable(); showToast("Entregue!"); } }
+        window.cancelOrderLogic = async function(id, isAuto = false) { const o = window.orders.find(x => x.id === id); if(!o || o.status === 'Cancelado') return; for (const item of o.items) { const prod = window.products.find(p => p.id === item.id); if (prod) { prod.stock += item.quantity; await DBService.put('products', prod); } } o.status = 'Cancelado'; await DBService.put('orders', o); if(!isAuto) { renderOrdersTable(); loadAdminDashboard(); showToast("Cancelado e estornado."); } }
+        window.cancelOrder = function(id) { if(confirm("Cancelar pedido e devolver estoque?")) cancelOrderLogic(id); }
+
+        window.printOrder = function(id) {
+            const o = window.orders.find(x => x.id === id);
+            const win = window.open('', '', 'width=800,height=600');
+            win.document.write(`<html><head><title>Pedido #${o.id}</title><style>body{font-family:monospace; padding:20px;} table{width:100%; border-collapse:collapse;} th,td{border-bottom:1px solid #000; padding:5px; text-align:left;} .right{text-align:right;}</style></head><body>
+            <center><h3>DUPEÇAS DUARTE PEÇAS</h3><p>Av. Sete de Setembro, 105 - Petrolina/PE<br>Tel: (87) 9909-4280</p></center><hr>
+            <p><b>Pedido:</b> #${o.id}<br><b>Data:</b> ${o.date}<br><b>Cliente:</b> ${o.customer} (${o.phone})<br><b>CPF:</b> ${o.cpf||'-'}<br><b>Email:</b> ${o.email||'-'}</p><hr>
+            <table><tr><th>Qtd</th><th>Produto</th><th>Unit</th><th>Total</th></tr>
+            ${o.items.map(i => `<tr><td>${i.quantity}</td><td>${i.name}<br><small>${i.sku}</small></td><td>${i.price.toFixed(2)}</td><td class="right">${(i.price*i.quantity).toFixed(2)}</td></tr>`).join('')}
+            </table><br><h3 class="right">TOTAL: R$ ${o.total.toFixed(2)}</h3><p><i>* Documento não fiscal (Conferência)</i></p><script>window.print();<\/script></body></html>`);
+            win.document.close();
         }
+
+        window.shareOrder = function(id) {
+            const o = window.orders.find(x => x.id === id);
+            let msg = `*RESUMO DO PEDIDO #${o.id}*\n📅 ${o.date}\n👤 ${o.customer}\n\n`;
+            o.items.forEach(i => msg += `▪ ${i.quantity}x ${i.name} (${i.sku})\n`);
+            msg += `\n💰 *Total: R$ ${o.total.toFixed(2)}*`;
+            msg += `\n🔑 *Chave PIX:* ${window.pixKey}`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        window.applyReportFilters = function() { switchReport(window.currentReportType); }
+        window.switchReport = function(type) { window.currentReportType = type; document.querySelectorAll('.report-tab-btn').forEach(b => b.classList.remove('active')); event.target.classList.add('active'); const container = document.getElementById('report-content'); const startStr = document.getElementById('repStart').value; const endStr = document.getElementById('repEnd').value; const startTs = startStr ? new Date(startStr + "T00:00:00").getTime() : 0; const endTs = endStr ? new Date(endStr + "T23:59:59").getTime() : Infinity; let html = ''; let currentReportData = []; if(type === 'sales') { window.orders.forEach(o => { const oTs = o.timestamp || 0; if (oTs >= startTs && oTs <= endTs) { o.items.forEach(i => { currentReportData.push({ Data: o.date, Pedido_ID: o.id, Cliente: o.customer, Status: o.status, Produto: i.name, SKU: i.sku || 'N/A', Qtd: i.quantity, Preco_Unit: i.price, Total_Item: i.price * i.quantity }); }); } }); html = `<h4 class="font-bold mb-4">Vendas Detalhadas</h4><div class="table-responsive"><table class="data-table"><thead><tr><th>Data</th><th>Pedido</th><th>Cliente</th><th>Produto</th><th>SKU</th><th>Qtd</th><th>Total</th></tr></thead><tbody>${currentReportData.map(r => `<tr><td>${r.Data}</td><td>${r.Pedido_ID}</td><td>${r.Cliente}</td><td>${r.Produto}</td><td>${r.SKU}</td><td>${r.Qtd}</td><td>${formatMoney(r.Total_Item)}</td></tr>`).join('')}</tbody></table></div>`; } else if (type === 'stock') { currentReportData = window.products.filter(p => p.stock < 5); html = `<h4 class="font-bold mb-4">Estoque Crítico (<5)</h4><div class="table-responsive"><table class="data-table"><thead><tr><th>Produto</th><th>SKU</th><th>Estoque</th></tr></thead><tbody>${currentReportData.map(p => `<tr><td>${p.name}</td><td>${p.sku}</td><td style="color:red;font-weight:bold;">${p.stock}</td></tr>`).join('')}</tbody></table></div>`; } else if (type === 'full-inventory') { const grandTotal = window.products.reduce((a,b)=>a+(b.price*b.stock), 0); html = `<h4 class="font-bold mb-4">Inventário Completo</h4><div class="mb-4 font-bold text-lg text-primary">Total em Estoque: ${formatMoney(grandTotal)}</div><div class="table-responsive"><table class="data-table"><thead><tr><th>Produto</th><th>Preço Unit.</th><th>Qtd.</th><th>Total</th></tr></thead><tbody>${window.products.map(p => `<tr><td>${p.name}</td><td>${formatMoney(p.price)}</td><td>${p.stock}</td><td>${formatMoney(p.price * p.stock)}</td></tr>`).join('')}</tbody></table></div>`; } else if (type === 'financial') { const totalInvested = window.products.reduce((a,b)=>a+(b.price*b.stock),0); html = `<h4 class="font-bold mb-4">Financeiro</h4><div class="p-4 bg-body rounded border">Total em Estoque: <span class="font-bold text-lg">${formatMoney(totalInvested)}</span></div>`; } container.innerHTML = html; }
+        
+        window.printReport = function() { const content = document.getElementById('report-content').innerHTML; const win = window.open('', '', 'height=600,width=800'); win.document.write('<html><head><title>Relatório</title><style>body{font-family:sans-serif;} table{width:100%;border-collapse:collapse;} th,td{border:1px solid #ddd;padding:8px;} th{background:#eee;}</style></head><body>' + content + '</body></html>'); win.document.close(); win.print(); }
+
+        window.toggleTheme = function() { document.body.classList.toggle('dark-mode'); localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light'); }
+        window.saveSettings = function() { window.pixKey = document.getElementById('configPixKey').value; localStorage.setItem('dupecas_pix_key', window.pixKey); showToast("Configurações Salvas"); }
+        window.bulkUpdateImages = async function() { const txt = document.getElementById('bulkImgInput').value; if(!txt) return; const lines = txt.split('\n'); let count = 0; for (const l of lines) { const parts = l.split(','); if(parts.length >= 2) { const id = parts[0].trim(); const url = parts.slice(1).join(',').trim(); const prod = window.products.find(x => x.id == id); if (prod && url) { prod.image = url; await DBService.put('products', prod); count++; } } } showToast(`${count} imagens atualizadas!`); renderAdminTable(); }
+        window.resetSystem = async function() { const pwd = prompt("Senha:"); if(pwd === "dupeca2026") { if(confirm("Apagar tudo?")) { await DBService.clear('products'); await DBService.clear('orders'); await DBService.clear('brands'); await DBService.clear('clients'); window.location.reload(); } } }
+        window.exportData = async function(type) { const data = {timestamp:Date.now(), products:window.products, orders:window.orders, clients:window.clients, brands:window.brands.map(b=>({name:b}))}; await DBService.saveCloudBackup(data); renderCloudBackups(); const content = JSON.stringify(data); const a = document.createElement("a"); const file = new Blob([content], {type:'application/json'}); a.href = URL.createObjectURL(file); a.download = `backup_${Date.now()}.json`; a.click(); }
+        window.restoreBackup = function(input) { const file = input.files[0]; if(!file) return; processBackupData(file); }
+        window.processBackupData = function(fileOrJson) { const modal = document.getElementById('restoreModal'); modal.classList.add('active'); const doRestore = async (data) => { if(data.products) for(const p of data.products) await DBService.put('products', p); if(data.orders) for(const o of data.orders) await DBService.put('orders', o); if(data.clients) for(const c of data.clients) await DBService.put('clients', c); if(data.brands) for(const b of data.brands) await DBService.put('brands', typeof b === 'string' ? {name:b}:b); await loadData(); renderAdminTable(); renderOrdersTable(); renderClientsTable(); modal.classList.remove('active'); showToast("Restaurado (Mesclado)!"); }; if(fileOrJson instanceof File) { const reader = new FileReader(); reader.onload = (e) => doRestore(JSON.parse(e.target.result)); reader.readAsText(fileOrJson); } else { doRestore(fileOrJson); } }
+        window.renderCloudBackups = async function() { const list = document.getElementById('cloudBackupsList'); try { const backups = await DBService.getCloudBackups(); list.innerHTML = backups.length ? backups.map(b => `<div style="padding:0.5rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between;"><div>Backup ${new Date(b.timestamp).toLocaleString()}</div><button onclick='restoreCloudBackup(${JSON.stringify(b.content)})' class="btn-sm btn-secondary">Restaurar</button></div>`).join('') : 'Sem backups.'; } catch(e) { list.innerText = "Erro ao carregar backups."; } }
+        window.restoreCloudBackup = function(json) { if(confirm("Restaurar?")) processBackupData(JSON.parse(json)); }
+
     </script>
 </body>
 </html>
