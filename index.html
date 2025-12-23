@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* (CSS MANTIDO INTEGRALMENTE) */
+        /* (ESTILOS MANTIDOS) */
         :root {
             --primary: #2563eb;        
             --primary-dark: #1e40af;   
@@ -659,14 +659,24 @@
                     </div>
 
                     <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border);">
-                        <h3 style="font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="cloud"></i> Sincronização e Backup (Firebase)</h3>
-                        <p class="text-sm text-muted mb-4">Gerenciamento de dados na nuvem.</p>
-                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                            <button onclick="exportData('json')" class="btn btn-primary flex-1"><i data-lucide="download"></i> Exportar Backup (JSON)</button>
-                            <label class="btn btn-secondary flex-1 cursor-pointer">
-                                <i data-lucide="upload"></i> Restaurar Backup
-                                <input type="file" accept=".json" class="hidden" onchange="restoreBackup(this)">
-                            </label>
+                        <h3 style="font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="cloud"></i> Backups e Restauração</h3>
+                        
+                        <div class="mb-4">
+                            <h4 class="font-bold text-sm mb-2">Criar e Exportar Backup (Salva na Nuvem)</h4>
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                <button onclick="exportData('json')" class="btn btn-primary flex-1"><i data-lucide="save"></i> Salvar e Baixar Backup</button>
+                                <label class="btn btn-secondary flex-1 cursor-pointer">
+                                    <i data-lucide="upload"></i> Restaurar Arquivo Local
+                                    <input type="file" accept=".json" class="hidden" onchange="restoreBackup(this)">
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 class="font-bold text-sm mb-2">Últimos Backups na Nuvem (Firebase)</h4>
+                            <div id="cloudBackupsList" style="border: 1px solid var(--border); border-radius: 8px; max-height: 150px; overflow-y: auto;">
+                                <div style="padding:1rem; text-align:center; color:var(--text-muted);">Carregando backups...</div>
+                            </div>
                         </div>
                     </div>
 
@@ -786,7 +796,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc, writeBatch, query, orderBy, limit, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
 
         // CONFIGURAÇÃO DO FIREBASE
@@ -816,20 +826,35 @@
             },
             async put(collectionName, data) {
                 const idString = String(data.id || Date.now());
-                await setDoc(doc(db, collectionName, idString), data);
+                await setDoc(doc(db, collectionName, idString), data, { merge: true }); // MERGE ATIVADO
                 return data;
             },
             async delete(collectionName, id) {
                 await deleteDoc(doc(db, collectionName, String(id)));
             },
             async clear(collectionName) {
-                // Deletar um por um para garantir segurança em grandes volumes
                 const q = await getDocs(collection(db, collectionName));
                 const deletePromises = [];
-                q.forEach((doc) => {
-                    deletePromises.push(deleteDoc(doc.ref));
-                });
+                q.forEach((doc) => { deletePromises.push(deleteDoc(doc.ref)); });
                 await Promise.all(deletePromises);
+            },
+            async saveCloudBackup(data) {
+                // Salva backup e mantem apenas os 3 ultimos
+                await addDoc(collection(db, 'system_backups'), { timestamp: Date.now(), content: JSON.stringify(data) });
+                const q = query(collection(db, 'system_backups'), orderBy('timestamp', 'asc'));
+                const snapshot = await getDocs(q);
+                if(snapshot.size > 3) {
+                    // Remove os mais antigos
+                    const toDelete = snapshot.size - 3;
+                    for(let i=0; i<toDelete; i++) {
+                        await deleteDoc(snapshot.docs[i].ref);
+                    }
+                }
+            },
+            async getCloudBackups() {
+                const q = query(collection(db, 'system_backups'), orderBy('timestamp', 'desc'));
+                const snapshot = await getDocs(q);
+                return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
             }
         };
         window.DBService = DBService;
@@ -849,8 +874,8 @@
         window.currentFilter = 'Todos';
         window.isAdmin = false;
         window.pixKey = localStorage.getItem('dupecas_pix_key') || "teste 123456789";
-        window.visibleProductsLimit = 30; // Global limit
-        window.adminViewMode = 'list'; // 'list' or 'grid'
+        window.visibleProductsLimit = 30; 
+        window.adminViewMode = 'list'; 
         window.currentReportType = 'sales';
 
         // --- FUNÇÕES GLOBAIS ---
@@ -873,7 +898,6 @@
             document.getElementById('configPixKey').value = window.pixKey;
             await loadData();
             
-            // Verifica sessão e mantém no admin
             if (localStorage.getItem('dupecas_admin_logged') === 'true') {
                 window.isAdmin = true;
                 document.getElementById('adminView').classList.remove('hidden');
@@ -1281,6 +1305,7 @@
             if (tab === 'clients') renderClientsTable();
             if (tab === 'reports') switchReport('sales');
             if (tab === 'brands') renderBrandsList();
+            if (tab === 'settings') renderCloudBackups(); // Carrega lista de backups
         }
 
         window.setAdminViewMode = function(section, mode) {
@@ -1844,7 +1869,7 @@
             showToast("Configurações salvas!");
         }
 
-        // --- SISTEMA DE RESET E RESTAURAÇÃO (CORRIGIDO PARA NÃO SAIR DA TELA) ---
+        // --- SISTEMA DE RESET E RESTAURAÇÃO (CORRIGIDO PARA NÃO SAIR DA TELA E MERGE) ---
         window.bulkUpdateImages = async function() {
             const txt = document.getElementById('bulkImgInput').value;
             if(!txt) return;
@@ -1865,7 +1890,7 @@
                     }
                 }
                 showToast(`${count} imagens atualizadas!`);
-                renderAdminTable(); // Atualiza UI sem recarregar
+                renderAdminTable(); 
             } catch (err) {
                 showToast("Erro na atualização em massa: " + err.message, "error");
             }
@@ -1882,7 +1907,6 @@
                         await DBService.clear('clients');
                         localStorage.removeItem('dupecas_cart');
                         
-                        // Atualiza estado local sem reload
                         window.products = [];
                         window.orders = [];
                         window.clients = [];
@@ -1901,13 +1925,18 @@
             } else alert("Senha incorreta.");
         }
         
-        window.exportData = function(type) {
+        window.exportData = async function(type) {
             let content = "", mime = "text/plain";
+            const backupData = { timestamp: Date.now(), products: window.products, orders: window.orders, clients: window.clients, brands: window.brands.map(b => ({ name: b })) }; 
+            
+            // Salva na nuvem automaticamente ao exportar
+            await DBService.saveCloudBackup(backupData);
+            renderCloudBackups(); // Atualiza a lista na hora
+
             if(type === 'csv') { 
                 content = "ID,Nome,SKU,Preco,Estoque\n" + window.products.map(p => `${p.id},${p.name},${p.sku},${p.price},${p.stock}`).join("\n"); 
                 mime = "text/csv"; 
             } else { 
-                const backupData = { timestamp: Date.now(), products: window.products, orders: window.orders, clients: window.clients, brands: window.brands.map(b => ({ name: b })) }; 
                 content = JSON.stringify(backupData, null, 2); 
                 mime = "application/json"; 
             }
@@ -1916,30 +1945,23 @@
 
         window.restoreBackup = function(input) {
             const file = input.files[0];
-            if (!file || !confirm("Isso SUBSTITUIRÁ o banco atual. Continuar?")) return;
-            
+            if (!file) return;
+            // Confirm removido pois não é destrutivo mais, apenas merge
+            processBackupData(file);
+        }
+
+        window.processBackupData = function(fileOrJson) {
             const modal = document.getElementById('restoreModal');
             const progress = document.getElementById('restoreProgress');
             const status = document.getElementById('restoreStatus');
             
             modal.classList.add('active');
             progress.style.width = '5%';
-            status.innerText = "Lendo arquivo...";
+            status.innerText = "Lendo dados...";
 
-            const reader = new FileReader();
-            reader.onload = async function(e) {
+            const doRestore = async (data) => {
                 try {
-                    const data = JSON.parse(e.target.result);
-                    
-                    status.innerText = "Limpando banco antigo...";
-                    progress.style.width = '10%';
-                    await DBService.clear('products'); 
-                    await DBService.clear('orders'); 
-                    await DBService.clear('brands'); 
-                    await DBService.clear('clients');
-
-                    status.innerText = "Restaurando dados...";
-                    // Calcula total de items para progresso
+                    status.innerText = "Sincronizando (Merge)...";
                     const totalItems = (data.products?.length || 0) + (data.orders?.length || 0) + (data.clients?.length || 0) + (data.brands?.length || 0);
                     let processed = 0;
 
@@ -1949,13 +1971,14 @@
                         progress.style.width = pct + '%';
                     };
 
+                    // MERGE: Usa put (setDoc com merge) em vez de clear
                     if(data.products) for(const p of data.products) { await DBService.put('products', p); updateProg(); }
                     if(data.orders) for(const o of data.orders) { await DBService.put('orders', o); updateProg(); }
                     if(data.clients) for(const c of data.clients) { await DBService.put('clients', c); updateProg(); }
                     if(data.brands) for(const b of data.brands) { await DBService.put('brands', typeof b === 'string' ? {name:b} : b); updateProg(); }
                     
-                    status.innerText = "Atualizando sistema...";
-                    await loadData(); // Recarrega dados na memória
+                    status.innerText = "Atualizando tela...";
+                    await loadData(); // Recarrega para a memoria local
                     
                     renderAdminTable();
                     renderOrdersTable();
@@ -1964,16 +1987,51 @@
                     renderBrandsFilter();
                     
                     modal.classList.remove('active');
-                    showToast("Backup restaurado com sucesso!");
+                    showToast("Dados restaurados/mesclados com sucesso!");
                     
                 } catch (err) { 
-                    alert("Erro crítico na restauração: " + err.message); 
+                    alert("Erro ao restaurar: " + err.message); 
                     modal.classList.remove('active'); 
-                } finally {
-                    input.value = ''; // Reseta input
                 }
             };
-            reader.readAsText(file);
+
+            if (fileOrJson instanceof File) {
+                const reader = new FileReader();
+                reader.onload = (e) => doRestore(JSON.parse(e.target.result));
+                reader.readAsText(fileOrJson);
+            } else {
+                doRestore(fileOrJson);
+            }
+        }
+
+        window.renderCloudBackups = async function() {
+            const list = document.getElementById('cloudBackupsList');
+            list.innerHTML = '<div style="padding:1rem;">Carregando...</div>';
+            try {
+                const backups = await DBService.getCloudBackups();
+                if(backups.length === 0) {
+                    list.innerHTML = '<div style="padding:1rem; text-align:center; color:var(--text-muted);">Nenhum backup na nuvem. Exporte um backup para criar um ponto de restauração.</div>';
+                    return;
+                }
+                list.innerHTML = backups.map(b => `
+                    <div style="padding:0.75rem; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div class="font-bold">Backup Automático</div>
+                            <div class="text-xs text-muted">${new Date(b.timestamp).toLocaleString()}</div>
+                        </div>
+                        <button onclick='restoreCloudBackup(${JSON.stringify(b.content)})' class="btn btn-secondary btn-sm">Restaurar</button>
+                    </div>
+                `).join('');
+            } catch (err) {
+                list.innerHTML = '<div style="padding:1rem; color:red;">Erro ao listar backups.</div>';
+                console.error(err);
+            }
+        }
+
+        window.restoreCloudBackup = function(jsonContent) {
+            if(confirm("Restaurar este backup da nuvem? Isso irá adicionar/atualizar os dados atuais com os dados do backup.")) {
+                processBackupData(JSON.parse(jsonContent));
+            }
         }
 
         window.renderAdminTable = function(filter = '') {
