@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
+        /* (ESTILOS MANTIDOS) */
         :root {
             --primary: #2563eb;        
             --primary-dark: #1e40af;   
@@ -150,24 +151,37 @@
         .toast { background: var(--secondary); color: white; padding: 12px 20px; border-radius: 8px; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 10px; animation: slideInRight 0.3s ease-out; max-width: 300px; font-size: 0.9rem; }
         .toast.success { border-left: 4px solid var(--success); }
         .toast.error { border-left: 4px solid var(--danger); }
-        
-        /* Grid Views for Admin & Cards */
+        /* Grid Views for Admin */
         .admin-grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; }
-        .admin-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; transition: transform 0.2s; }
-        .admin-card:hover { border-color: var(--primary); }
+        .admin-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
         
+        /* IMPROVED SEARCH DROPDOWN CONTRAST */
         #editProdResults { 
-            position: absolute; width: 100%; max-height: 200px; overflow-y: auto; background: var(--bg-card); 
-            border: 1px solid var(--primary); border-radius: 4px; z-index: 2000; box-shadow: var(--shadow-lg);
+            position: absolute; 
+            width: 100%; 
+            max-height: 200px; 
+            overflow-y: auto; 
+            background: var(--bg-card); 
+            border: 1px solid var(--primary); 
+            border-radius: 4px; 
+            z-index: 2000; 
+            box-shadow: var(--shadow-lg);
         }
-        .search-result-item { padding: 10px; border-bottom: 1px solid var(--border); cursor: pointer; background: var(--bg-card); color: var(--text-main); }
-        .search-result-item:hover { background: var(--primary-light); color: var(--primary-dark); }
+        .search-result-item { 
+            padding: 10px; 
+            border-bottom: 1px solid var(--border); 
+            cursor: pointer; 
+            background: var(--bg-card); 
+            color: var(--text-main); 
+        }
+        .search-result-item:hover { 
+            background: var(--primary-light); 
+            color: var(--primary-dark);
+        }
 
         @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes spin { 100% { transform: rotate(360deg); } }
         .animate-spin-slow { animation: spin 2s linear infinite; }
-
-        /* MOBILE SPECIFIC STYLES */
         @media (max-width: 768px) {
             .admin-sidebar { position: fixed; top: 0; left: 0; bottom: 0; transform: translateX(-100%); width: 85%; }
             .admin-sidebar.active { transform: translateX(0); }
@@ -176,31 +190,11 @@
             .search-wrapper { margin: 0 1rem; }
             .admin-main { padding: 1rem; }
             .promo-grid { grid-template-columns: 1fr; }
-            
-            /* Admin Mobile Card System */
+            .mobile-card-table { display: block; }
             .desktop-table-view { display: none; }
-            .mobile-card-view { display: grid; gap: 1rem; grid-template-columns: 1fr; }
-            .mobile-card {
-                background: var(--bg-card);
-                border: 1px solid var(--border);
-                border-radius: 0.75rem;
-                padding: 1rem;
-                display: flex;
-                flex-direction: column;
-                gap: 0.75rem;
-                box-shadow: var(--shadow-sm);
-            }
-            .mobile-card-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; }
-            .mobile-card-label { font-weight: 600; color: var(--text-muted); font-size: 0.8rem; }
-            .mobile-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.5rem; }
-            
-            /* Report Tables to Cards on Mobile */
-            .report-card { background: var(--bg-card); padding: 1rem; margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 0.5rem; }
-            .report-card-row { display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border); padding: 0.5rem 0; }
-            .report-card-row:last-child { border: none; }
         }
         @media (min-width: 769px) {
-            .mobile-card-view { display: none; }
+            .mobile-card-table { display: none; }
             .desktop-table-view { display: table; }
             .btn-toggle-mobile { display: none; }
         }
@@ -563,7 +557,7 @@
                 <div class="flex flex-col md:flex-row justify-between gap-4 mb-6">
                     <input type="text" placeholder="Filtrar por nome, SKU, veículo..." oninput="filterAdminTable(this.value)" style="margin: 0; max-width: 300px;">
                     <div class="flex gap-2">
-                        <div class="flex bg-body rounded border p-1 hide-mobile">
+                        <div class="flex bg-body rounded border p-1">
                             <button onclick="setAdminViewMode('products', 'grid')" class="btn-icon"><i data-lucide="grid"></i></button>
                             <button onclick="setAdminViewMode('products', 'list')" class="btn-icon"><i data-lucide="list"></i></button>
                         </div>
@@ -611,7 +605,7 @@
                     <button class="report-tab-btn" onclick="switchReport('full-inventory')">Inventário Completo</button>
                     <button class="report-tab-btn" onclick="switchReport('financial')">Financeiro</button>
                 </div>
-                <div id="report-content"></div>
+                <div id="report-content" class="bg-card border rounded p-4" style="background: var(--bg-card); padding: 1.5rem; overflow-x: auto;"></div>
             </div>
 
             <div id="tab-brands" class="admin-tab hidden">
@@ -629,7 +623,7 @@
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-bold text-lg">Gerenciamento de Pedidos</h3>
                     <div class="flex gap-2">
-                        <div class="flex bg-body rounded border p-1 hide-mobile">
+                        <div class="flex bg-body rounded border p-1">
                             <button onclick="setAdminViewMode('orders', 'grid')" class="btn-icon"><i data-lucide="grid"></i></button>
                             <button onclick="setAdminViewMode('orders', 'list')" class="btn-icon"><i data-lucide="list"></i></button>
                         </div>
@@ -644,7 +638,7 @@
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-bold text-lg">Gerenciamento de Clientes</h3>
                     <div class="flex gap-2">
-                         <div class="flex bg-body rounded border p-1 hide-mobile">
+                         <div class="flex bg-body rounded border p-1">
                             <button onclick="setAdminViewMode('clients', 'grid')" class="btn-icon"><i data-lucide="grid"></i></button>
                             <button onclick="setAdminViewMode('clients', 'list')" class="btn-icon"><i data-lucide="list"></i></button>
                         </div>
@@ -1100,7 +1094,6 @@
                 if (item.quantity >= prod.stock) return showToast("Estoque máximo atingido!", "error");
                 item.quantity++;
             } else {
-                // Ensure all data is copied
                 window.cart.push({ ...prod, quantity: 1 });
             }
             saveCartLocal();
@@ -1152,8 +1145,7 @@
                         <img src="${item.image}" style="width:50px; height:50px; object-fit:cover; border-radius:4px;">
                         <div style="flex:1;">
                             <div class="font-bold text-sm">${item.name}</div>
-                            <div class="text-xs text-muted">SKU: ${item.sku} | Ref: ${item.vehicleModel || '-'}</div>
-                            <div class="text-xs text-muted mb-1">${formatMoney(item.price)} un.</div>
+                            <div class="text-muted text-xs mb-1">${formatMoney(item.price)} un.</div>
                             <div class="qty-controls" style="display:inline-flex;">
                                 <button class="qty-btn" onclick="changeCartQty(${item.id}, -1)">-</button>
                                 <span class="qty-val">${item.quantity}</span>
@@ -1223,13 +1215,9 @@
                 }
             }
             
-            // Build detailed message
-            const itemsList = window.cart.map(i => {
-                const details = `(SKU: ${i.sku}, ${i.vehicleBrand} ${i.vehicleModel} ${i.vehicleYear || ''})`;
-                return `📦 ${i.quantity}x ${i.name} ${details}`;
-            }).join('\n');
-
-            const msg = `*PEDIDO #${newOrder.id}*\n👤 *${name}*\n📞 ${phone}\n\n${itemsList}\n\n💰 *Total: ${formatMoney(total)}*` +
+            const msg = `*PEDIDO #${newOrder.id}*\n👤 *${name}*\n📞 ${phone}\n\n` +
+                        window.cart.map(i => `📦 ${i.quantity}x ${i.name}`).join('\n') + 
+                        `\n\n💰 *Total: ${formatMoney(total)}*` +
                         `\n\n🔑 *Chave PIX:* ${window.pixKey}` +
                         `\n\n⚠️ *Aviso:* O seu pedido ficará reservado por 72h.`;
             
@@ -1317,7 +1305,7 @@
             if (tab === 'clients') renderClientsTable();
             if (tab === 'reports') switchReport('sales');
             if (tab === 'brands') renderBrandsList();
-            if (tab === 'settings') renderCloudBackups(); 
+            if (tab === 'settings') renderCloudBackups(); // Carrega lista de backups
         }
 
         window.setAdminViewMode = function(section, mode) {
@@ -1353,8 +1341,7 @@
         // --- GESTÃO DE CLIENTES ---
         window.renderClientsTable = function() {
             const container = document.getElementById('adminClientsContainer');
-            // Force grid on mobile via CSS, JS logic handles the content structure
-            if(window.adminViewMode === 'list' && window.innerWidth > 768) {
+            if(window.adminViewMode === 'list') {
                 container.innerHTML = `
                     <div class="data-table-wrapper">
                         <table class="data-table">
@@ -1373,16 +1360,15 @@
                         </table>
                     </div>`;
             } else {
-                 // Card View (Mobile default or Desktop Grid)
                  container.innerHTML = `
-                    <div class="mobile-card-view admin-grid-view">
+                    <div class="admin-grid-view">
                         ${window.clients.map(c => `
-                            <div class="mobile-card admin-card">
+                            <div class="admin-card">
                                 <div class="font-bold">${c.name}</div>
-                                <div class="mobile-card-row"><span class="mobile-card-label">Tel:</span> ${c.phone}</div>
-                                <div class="mobile-card-row"><span class="mobile-card-label">Email:</span> ${c.email || '-'}</div>
-                                <div class="mobile-card-row"><span class="mobile-card-label">Local:</span> ${c.address?.city || '-'}</div>
-                                <div class="mobile-actions">
+                                <div class="text-sm"><i data-lucide="phone" size="14"></i> ${c.phone}</div>
+                                <div class="text-sm"><i data-lucide="mail" size="14"></i> ${c.email || '-'}</div>
+                                <div class="text-sm text-muted">${c.address?.city || '-'} - ${c.address?.state || '-'}</div>
+                                <div class="flex gap-2 mt-auto">
                                     <button onclick="editClient(${c.id})" class="btn btn-secondary w-full">Editar</button>
                                     <button onclick="deleteClient(${c.id})" class="btn btn-danger w-full">Excluir</button>
                                 </div>
@@ -1466,6 +1452,7 @@
             const endStr = document.getElementById('repEnd').value;
             const statusFilter = document.getElementById('repStatus').value;
 
+            // Convert date strings to timestamps for comparison
             const startTs = startStr ? new Date(startStr + "T00:00:00").getTime() : 0;
             const endTs = endStr ? new Date(endStr + "T23:59:59").getTime() : Infinity;
 
@@ -1474,7 +1461,7 @@
             if(type === 'sales') {
                 currentReportData = [];
                 window.orders.forEach(o => {
-                    const oTs = o.timestamp || 0; 
+                    const oTs = o.timestamp || 0; // fallback if timestamp missing
                     if (oTs >= startTs && oTs <= endTs) {
                         if (!statusFilter || o.status === statusFilter) {
                             o.items.forEach(i => {
@@ -1496,67 +1483,25 @@
                     }
                 });
 
-                // Responsive Report View
-                if(window.innerWidth <= 768) {
-                    html = `<h4 class="font-bold mb-4">Vendas Detalhadas</h4>`;
-                    html += currentReportData.map(r => `
-                        <div class="report-card">
-                            <div class="report-card-row"><span class="font-bold">Data:</span> ${r.Data}</div>
-                            <div class="report-card-row"><span class="font-bold">Cliente:</span> ${r.Cliente}</div>
-                            <div class="report-card-row"><span class="font-bold">Produto:</span> ${r.Produto}</div>
-                            <div class="report-card-row"><span class="font-bold">SKU:</span> ${r.SKU}</div>
-                            <div class="report-card-row"><span class="font-bold">Total:</span> ${formatMoney(r.Total_Item)}</div>
-                        </div>
-                    `).join('');
-                } else {
-                    html = `
-                        <h4 class="font-bold mb-4">Vendas Detalhadas</h4>
-                        <table class="data-table">
-                            <thead><tr><th>Data</th><th>Pedido</th><th>Cliente</th><th>Produto</th><th>SKU</th><th>Qtd</th><th>Total</th></tr></thead>
-                            <tbody>${currentReportData.map(r => `<tr><td>${r.Data}</td><td>${r.Pedido_ID}</td><td>${r.Cliente}</td><td>${r.Produto}</td><td>${r.SKU}</td><td>${r.Qtd}</td><td>${formatMoney(r.Total_Item)}</td></tr>`).join('')}</tbody>
-                        </table>`;
-                }
+                html = `
+                    <h4 class="font-bold mb-4">Vendas Detalhadas</h4>
+                    <table class="data-table">
+                        <thead><tr><th>Data</th><th>Pedido</th><th>Cliente</th><th>Produto</th><th>SKU</th><th>Qtd</th><th>Total</th></tr></thead>
+                        <tbody>${currentReportData.map(r => `<tr><td>${r.Data}</td><td>${r.Pedido_ID}</td><td>${r.Cliente}</td><td>${r.Produto}</td><td>${r.SKU}</td><td>${r.Qtd}</td><td>${formatMoney(r.Total_Item)}</td></tr>`).join('')}</tbody>
+                    </table>`;
             
             } else if (type === 'stock') { 
                 currentReportData = window.products.filter(p => p.stock < 5).map(p => ({
                     Produto: p.name, SKU: p.sku, Estoque: p.stock, Preco: p.price
                 }));
-                
-                if(window.innerWidth <= 768) {
-                    html = `<h4 class="font-bold mb-4">Estoque Crítico</h4>`;
-                    html += currentReportData.map(p => `
-                        <div class="report-card" style="border-left: 4px solid red;">
-                            <div class="font-bold">${p.Produto}</div>
-                            <div class="text-sm text-muted">SKU: ${p.SKU}</div>
-                            <div class="font-bold text-danger">Estoque: ${p.Estoque}</div>
-                        </div>
-                    `).join('');
-                } else {
-                    html = `<h4 class="font-bold mb-4">Estoque Crítico (<5)</h4><table class="data-table"><thead><tr><th>Produto</th><th>SKU</th><th>Estoque</th></tr></thead><tbody>${currentReportData.map(p => `<tr><td>${p.Produto}</td><td>${p.SKU}</td><td style="color:red;font-weight:bold;">${p.Estoque}</td></tr>`).join('')}</tbody></table>`; 
-                }
+                html = `<h4 class="font-bold mb-4">Estoque Crítico (<5)</h4><table class="data-table"><thead><tr><th>Produto</th><th>SKU</th><th>Estoque</th></tr></thead><tbody>${currentReportData.map(p => `<tr><td>${p.Produto}</td><td>${p.SKU}</td><td style="color:red;font-weight:bold;">${p.Estoque}</td></tr>`).join('')}</tbody></table>`; 
             
             } else if (type === 'full-inventory') {
-                // Simplified view for full inventory logic
+                currentReportData = window.products.map(p => ({
+                    Produto: p.name, SKU: p.sku, Categoria: p.category, Marca: p.vehicleBrand, Estoque: p.stock, Custo: p.price
+                }));
                 const grandTotal = window.products.reduce((a,b)=>a+(b.price*b.stock), 0);
-                html = `<h4 class="font-bold mb-4">Inventário Completo</h4><div class="mb-4 font-bold text-lg text-primary">Valor Total em Estoque: ${formatMoney(grandTotal)}</div>`;
-                if(window.innerWidth <= 768) {
-                    html += window.products.map(p => `
-                        <div class="report-card">
-                            <div class="font-bold">${p.name}</div>
-                            <div class="text-sm">SKU: ${p.sku}</div>
-                            <div class="flex justify-between mt-2">
-                                <span>Qtd: ${p.stock}</span>
-                                <span class="font-bold">${formatMoney(p.price * p.stock)}</span>
-                            </div>
-                        </div>
-                    `).join('');
-                } else {
-                    html += `<div class="data-table-wrapper"><table class="data-table"><thead><tr><th>Produto</th><th>Preço Unit.</th><th>Qtd.</th><th>Valor Total</th></tr></thead><tbody>${window.products.map(p => `<tr><td>${p.name} <br><span class="text-xs text-muted">${p.sku}</span></td><td>${formatMoney(p.price)}</td><td>${p.stock}</td><td class="font-bold">${formatMoney(p.price * p.stock)}</td></tr>`).join('')}</tbody></table></div>`;
-                }
-            } else if (type === 'financial') { 
-                currentReportData = []; // No CSV for simple summary
-                const totalInvested = window.products.reduce((a,b)=>a+(b.price*b.stock),0); 
-                html = `<h4 class="font-bold mb-4">Financeiro</h4><div class="p-4 bg-body rounded border">Total em Estoque: <span class="font-bold text-lg">${formatMoney(totalInvested)}</span></div>`; 
+                html = `<h4 class="font-bold mb-4">Inventário Completo</h4><div class="mb-4 font-bold text-lg text-primary">Valor Total em Estoque: ${formatMoney(grandTotal)}</div><div class="data-table-wrapper"><table class="data-table"><thead><tr><th>Produto</th><th>Preço Unit.</th><th>Qtd.</th><th>Valor Total</th></tr></thead><tbody>${window.products.map(p => `<tr><td>${p.name} <br><span class="text-xs text-muted">${p.sku}</span></td><td>${formatMoney(p.price)}</td><td>${p.stock}</td><td class="font-bold">${formatMoney(p.price * p.stock)}</td></tr>`).join('')}</tbody></table></div>`;
             }
             container.innerHTML = html;
         }
@@ -1590,7 +1535,7 @@
             const content = document.getElementById('report-content').innerHTML;
             const win = window.open('', '', 'height=600,width=800');
             win.document.write('<html><head><title>Imprimir Relatório</title>');
-            win.document.write('<style>body{font-family:sans-serif;} table{width:100%;border-collapse:collapse;} th,td{border:1px solid #ddd;padding:8px;text-align:left;} th{background:#f0f0f0;} .report-card{border:1px solid #ccc; padding:10px; margin-bottom:10px;}</style>');
+            win.document.write('<style>body{font-family:sans-serif;} table{width:100%;border-collapse:collapse;} th,td{border:1px solid #ddd;padding:8px;text-align:left;} th{background:#f0f0f0;}</style>');
             win.document.write('</head><body>');
             win.document.write(content);
             win.document.write('</body></html>');
@@ -1610,7 +1555,7 @@
             }
             document.getElementById('noOrdersMsg').classList.add('hidden'); 
 
-            if(window.adminViewMode === 'list' && window.innerWidth > 768) {
+            if(window.adminViewMode === 'list') {
                 container.innerHTML = `
                     <div class="data-table-wrapper">
                         <table class="data-table">
@@ -1635,13 +1580,12 @@
                         </table>
                     </div>`;
             } else {
-                // Card View for Mobile
                 container.innerHTML = `
-                    <div class="mobile-card-view admin-grid-view">
+                    <div class="admin-grid-view">
                         ${window.orders.map(o => {
                              const statusClass = `status-${o.status || 'Pendente'}`;
                              return `
-                            <div class="mobile-card admin-card">
+                            <div class="admin-card">
                                 <div class="flex justify-between items-center">
                                     <span class="font-bold">#${o.id.toString().slice(-6)}</span>
                                     <span class="status-badge ${statusClass}">${o.status}</span>
@@ -1649,10 +1593,9 @@
                                 <div>${o.customer}</div>
                                 <div class="text-sm text-muted">${o.date}</div>
                                 <div class="font-bold text-lg">${formatMoney(o.total)}</div>
-                                <div class="mobile-actions">
-                                    <button onclick="printOrder(${o.id})" class="btn btn-secondary w-full"><i data-lucide="printer"></i></button>
-                                    <button onclick="shareOrder(${o.id})" class="btn btn-secondary w-full"><i data-lucide="share-2"></i></button>
-                                    <button onclick="openOrderDetail(${o.id})" class="btn btn-primary w-full">Ver Detalhes</button>
+                                <div class="flex gap-2 mt-2">
+                                    <button onclick="printOrder(${o.id})" class="btn btn-secondary flex-1"><i data-lucide="printer"></i></button>
+                                    <button onclick="openOrderDetail(${o.id})" class="btn btn-primary flex-1">Ver</button>
                                 </div>
                             </div>`;
                         }).join('')}
@@ -1716,20 +1659,217 @@
         window.shareOrder = async function(id) {
             const o = window.orders.find(x => x.id === id);
             if(!o) return;
-            
-            // Generate detailed text for share
-            let text = `PEDIDO DUPEÇAS #${o.id}\nCliente: ${o.customer}\n`;
-            text += o.items.map(i => {
-                const p = window.products.find(prod => prod.id === i.id) || {};
-                return `- ${i.quantity}x ${i.name} (SKU: ${p.sku || '-'})`;
-            }).join('\n');
-            text += `\nTotal: ${formatMoney(o.total)}`;
-
+            const text = `PEDIDO #${o.id}\nCliente: ${o.customer}\nTotal: ${formatMoney(o.total)}`;
             if (navigator.share) await navigator.share({ title: 'Pedido Dupeças', text: text });
             else alert("Copie os dados:\n" + text);
         }
 
-        // --- SISTEMA DE RESET E RESTAURAÇÃO (MERGE) ---
+        // --- EDIÇÃO AVANÇADA DE PEDIDOS (CORRIGIDO) ---
+        let editingOrder = null;
+
+        window.openEditOrder = function(id) {
+            if(id === 'new') {
+                editingOrder = {
+                    id: Date.now(),
+                    date: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR'),
+                    status: 'Pendente',
+                    customer: '', phone: '', email: '', cpf: '',
+                    items: [], total: 0
+                };
+            } else {
+                const originalOrder = window.orders.find(o => o.id === id);
+                if(!originalOrder) return;
+                editingOrder = JSON.parse(JSON.stringify(originalOrder));
+            }
+            renderEditModal();
+            document.getElementById('orderEditModal').classList.add('active');
+        }
+
+        window.closeEditOrder = function() {
+            editingOrder = null;
+            document.getElementById('orderEditModal').classList.remove('active');
+        }
+
+        window.renderEditModal = function() {
+            document.getElementById('editClientName').value = editingOrder.customer || '';
+            document.getElementById('editClientPhone').value = editingOrder.phone || '';
+            document.getElementById('editClientEmail').value = editingOrder.email || '';
+            document.getElementById('editClientCpf').value = editingOrder.cpf || '';
+
+            const list = document.getElementById('editOrderItemsList');
+            if(!editingOrder.items.length) {
+                list.innerHTML = `<div class="text-muted text-center py-4">Sem itens</div>`;
+            } else {
+                list.innerHTML = editingOrder.items.map(i => `
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:0.5rem 0;">
+                        <div style="flex:1;">
+                            <div class="font-bold">${i.name}</div>
+                            <div class="text-xs text-muted">${formatMoney(i.price)} un.</div>
+                        </div>
+                        <div class="qty-controls" style="margin:0 10px;">
+                            <button class="qty-btn" onclick="editChangeQty(${i.id}, -1)">-</button>
+                            <span class="qty-val">${i.quantity}</span>
+                            <button class="qty-btn" onclick="editChangeQty(${i.id}, 1)">+</button>
+                        </div>
+                        <button onclick="editRemoveItem(${i.id})" class="text-danger"><i data-lucide="trash-2" size="16"></i></button>
+                    </div>
+                `).join('');
+            }
+            editingOrder.total = editingOrder.items.reduce((a,b)=> a + (b.price * b.quantity), 0);
+            document.getElementById('editOrderTotal').innerText = formatMoney(editingOrder.total);
+            lucide.createIcons();
+        }
+
+        window.searchProdForOrder = function(val) {
+            const resDiv = document.getElementById('editProdResults');
+            if(val.length < 2) { resDiv.style.display = 'none'; return; }
+            const results = window.products.filter(p => p.name.toLowerCase().includes(val.toLowerCase()) || p.sku.toLowerCase().includes(val.toLowerCase()));
+            if(results.length > 0) {
+                resDiv.style.display = 'block';
+                resDiv.innerHTML = results.map(p => `
+                    <div class="search-result-item" onclick="addProdToOrder(${p.id})">
+                        <div class="font-bold text-sm">${p.name}</div>
+                        <div class="text-xs text-muted">SKU: ${p.sku} | Estoque: ${p.stock} | ${formatMoney(p.price)}</div>
+                    </div>
+                `).join('');
+            } else resDiv.style.display = 'none';
+        }
+
+        window.addProdToOrder = function(prodId) {
+            const p = window.products.find(x => x.id === prodId);
+            if(!p) return;
+            const existing = editingOrder.items.find(i => i.id === prodId);
+            if(existing) existing.quantity++;
+            else editingOrder.items.push({ id: p.id, name: p.name, price: p.price, image: p.image, quantity: 1 });
+            
+            document.getElementById('editSearchProd').value = '';
+            document.getElementById('editProdResults').style.display = 'none';
+            renderEditModal();
+        }
+
+        window.editChangeQty = function(id, delta) {
+            const item = editingOrder.items.find(i => i.id === id);
+            if(!item) return;
+            if(delta > 0) item.quantity++;
+            else if(item.quantity > 1) item.quantity--;
+            renderEditModal();
+        }
+
+        window.editRemoveItem = function(id) {
+            editingOrder.items = editingOrder.items.filter(i => i.id !== id);
+            renderEditModal();
+        }
+
+        window.saveOrderChanges = async function() {
+            editingOrder.customer = document.getElementById('editClientName').value;
+            editingOrder.phone = document.getElementById('editClientPhone').value;
+            editingOrder.email = document.getElementById('editClientEmail').value;
+            editingOrder.cpf = document.getElementById('editClientCpf').value;
+
+            if(!editingOrder.customer || !editingOrder.phone) return alert("Nome e Telefone são obrigatórios!");
+
+            const originalOrder = window.orders.find(o => o.id === editingOrder.id);
+            if(originalOrder) {
+                for (const item of originalOrder.items) {
+                    const prod = window.products.find(p => p.id === item.id);
+                    if(prod) prod.stock += item.quantity;
+                }
+            } else {
+                window.orders.unshift(editingOrder);
+            }
+
+            for (const item of editingOrder.items) {
+                const prod = window.products.find(p => p.id === item.id);
+                if(prod) {
+                    if(prod.stock < item.quantity) {
+                        alert(`Estoque insuficiente para ${prod.name}.`);
+                        await loadData(); 
+                        return;
+                    }
+                    prod.stock -= item.quantity;
+                }
+            }
+
+            for (const p of window.products) await DBService.put('products', p);
+            
+            if(originalOrder) {
+                Object.assign(originalOrder, editingOrder); 
+                await DBService.put('orders', editingOrder);
+            } else {
+                await DBService.put('orders', editingOrder);
+            }
+            
+            closeEditOrder();
+            renderOrdersTable();
+            loadAdminDashboard();
+            showToast("Pedido salvo com sucesso!");
+        }
+
+        window.openOrderDetail = function(orderId) {
+            const o = window.orders.find(x => x.id === orderId);
+            if(!o) return;
+            const html = `
+                <div style="background:var(--bg-body); padding:1rem; border-radius:8px; margin-bottom:1rem;">
+                    <p><strong>Cliente:</strong> ${o.customer}</p>
+                    <p><strong>Contato:</strong> ${o.phone}</p>
+                    ${o.email ? `<p><strong>Email:</strong> ${o.email}</p>` : ''}
+                    ${o.cpf ? `<p><strong>CPF:</strong> ${o.cpf}</p>` : ''}
+                    <p><strong>Data:</strong> ${o.date}</p>
+                    <p><strong>Status:</strong> ${o.status || 'Pendente'}</p>
+                </div>
+                <h4 style="font-weight:bold; margin-bottom:0.5rem;">Itens do Pedido:</h4>
+                <div style="max-height:200px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; margin-bottom:1rem;">
+                    <table style="width:100%; font-size:0.9rem;">
+                        ${o.items.map(i => {
+                            const p = window.products.find(prod => prod.id === i.id) || {};
+                            return `
+                            <tr style="border-bottom:1px solid var(--border);">
+                                <td style="padding:0.5rem;"><img src="${i.image}" width="30"></td>
+                                <td style="padding:0.5rem;">
+                                    <strong>${i.name}</strong><br>
+                                    <span class="text-muted text-xs">SKU: ${p.sku || '-'} | Marca: ${p.vehicleBrand || '-'}</span>
+                                </td>
+                                <td style="padding:0.5rem; text-align:right;">${i.quantity} x ${formatMoney(i.price)}</td>
+                                <td style="padding:0.5rem; text-align:right; font-weight:bold;">${formatMoney(i.price * i.quantity)}</td>
+                            </tr>`;
+                        }).join('')}
+                    </table>
+                </div>
+                <div style="text-align:right; font-size:1.25rem; font-weight:800; color:var(--primary);">
+                    Total: ${formatMoney(o.total)}
+                </div>
+            `;
+            document.getElementById('orderDetailContent').innerHTML = html;
+            document.getElementById('orderDetailModal').classList.add('active');
+        }
+        window.closeOrderDetail = function() { document.getElementById('orderDetailModal').classList.remove('active'); }
+
+        window.confirmOrder = async function(id) {
+            const o = window.orders.find(x => x.id === id);
+            if(o) { o.status = 'Entregue'; await DBService.put('orders', o); renderOrdersTable(); showToast("Entregue!"); }
+        }
+
+        window.cancelOrderLogic = async function(id, isAuto = false) {
+            const o = window.orders.find(x => x.id === id);
+            if(!o || o.status === 'Cancelado') return;
+            for (const item of o.items) {
+                const prod = window.products.find(p => p.id === item.id);
+                if (prod) { prod.stock += item.quantity; await DBService.put('products', prod); }
+            }
+            o.status = 'Cancelado';
+            await DBService.put('orders', o);
+            if(!isAuto) { renderOrdersTable(); loadAdminDashboard(); showToast("Cancelado e estornado."); }
+        }
+        window.cancelOrder = function(id) { if(confirm("Cancelar pedido e devolver estoque?")) cancelOrderLogic(id); }
+
+        window.saveSettings = function() {
+            const key = document.getElementById('configPixKey').value;
+            window.pixKey = key;
+            localStorage.setItem('dupecas_pix_key', key);
+            showToast("Configurações salvas!");
+        }
+
+        // --- SISTEMA DE RESET E RESTAURAÇÃO (CORRIGIDO PARA NÃO SAIR DA TELA E MERGE) ---
         window.bulkUpdateImages = async function() {
             const txt = document.getElementById('bulkImgInput').value;
             if(!txt) return;
@@ -1789,8 +1929,9 @@
             let content = "", mime = "text/plain";
             const backupData = { timestamp: Date.now(), products: window.products, orders: window.orders, clients: window.clients, brands: window.brands.map(b => ({ name: b })) }; 
             
+            // Salva na nuvem automaticamente ao exportar
             await DBService.saveCloudBackup(backupData);
-            renderCloudBackups();
+            renderCloudBackups(); // Atualiza a lista na hora
 
             if(type === 'csv') { 
                 content = "ID,Nome,SKU,Preco,Estoque\n" + window.products.map(p => `${p.id},${p.name},${p.sku},${p.price},${p.stock}`).join("\n"); 
@@ -1805,6 +1946,7 @@
         window.restoreBackup = function(input) {
             const file = input.files[0];
             if (!file) return;
+            // Confirm removido pois não é destrutivo mais, apenas merge
             processBackupData(file);
         }
 
@@ -1829,14 +1971,14 @@
                         progress.style.width = pct + '%';
                     };
 
-                    // MERGE: put overwrites if exists, adds if new
+                    // MERGE: Usa put (setDoc com merge) em vez de clear
                     if(data.products) for(const p of data.products) { await DBService.put('products', p); updateProg(); }
                     if(data.orders) for(const o of data.orders) { await DBService.put('orders', o); updateProg(); }
                     if(data.clients) for(const c of data.clients) { await DBService.put('clients', c); updateProg(); }
                     if(data.brands) for(const b of data.brands) { await DBService.put('brands', typeof b === 'string' ? {name:b} : b); updateProg(); }
                     
                     status.innerText = "Atualizando tela...";
-                    await loadData(); 
+                    await loadData(); // Recarrega para a memoria local
                     
                     renderAdminTable();
                     renderOrdersTable();
@@ -1868,7 +2010,7 @@
             try {
                 const backups = await DBService.getCloudBackups();
                 if(backups.length === 0) {
-                    list.innerHTML = '<div style="padding:1rem; text-align:center; color:var(--text-muted);">Nenhum backup na nuvem.</div>';
+                    list.innerHTML = '<div style="padding:1rem; text-align:center; color:var(--text-muted);">Nenhum backup na nuvem. Exporte um backup para criar um ponto de restauração.</div>';
                     return;
                 }
                 list.innerHTML = backups.map(b => `
@@ -1887,7 +2029,7 @@
         }
 
         window.restoreCloudBackup = function(jsonContent) {
-            if(confirm("Restaurar este backup da nuvem? Isso irá mesclar os dados.")) {
+            if(confirm("Restaurar este backup da nuvem? Isso irá adicionar/atualizar os dados atuais com os dados do backup.")) {
                 processBackupData(JSON.parse(jsonContent));
             }
         }
@@ -1896,7 +2038,7 @@
             const container = document.getElementById('adminProductsContainer');
             const filtered = window.products.filter(p => (p.name + p.sku + p.vehicleBrand).toLowerCase().includes(filter.toLowerCase()));
             
-            if(window.adminViewMode === 'list' && window.innerWidth > 768) {
+            if(window.adminViewMode === 'list') {
                 container.innerHTML = `
                 <div class="desktop-table-view data-table-wrapper" style="display:block;">
                     <table class="data-table">
@@ -1920,20 +2062,14 @@
                 </div>`;
             } else {
                 container.innerHTML = `
-                    <div class="mobile-card-view admin-grid-view">
+                    <div class="admin-grid-view">
                         ${filtered.map(p => `
-                            <div class="mobile-card admin-card">
+                            <div class="admin-card">
                                 <img src="${p.image}" style="width:100%; height:150px; object-fit:cover; border-radius:4px;">
                                 <div class="font-bold">${p.name}</div>
-                                <div class="mobile-card-row">
-                                    <span class="text-muted">SKU: ${p.sku}</span>
-                                    <span class="font-bold text-primary">${formatMoney(p.price)}</span>
-                                </div>
-                                <div class="mobile-card-row">
-                                    <span class="mobile-card-label">Estoque:</span> 
-                                    <span style="color:${p.stock<5 ? 'red':'green'}">${p.stock}</span>
-                                </div>
-                                <div class="mobile-actions">
+                                <div class="text-sm text-muted">${p.sku} | ${formatMoney(p.price)}</div>
+                                <div class="font-bold" style="color:${p.stock<5 ? 'red':'green'}">Estoque: ${p.stock}</div>
+                                <div class="flex gap-2 mt-auto">
                                     <button onclick="editProduct(${p.id})" class="btn btn-secondary w-full">Editar</button>
                                     <button onclick="deleteProduct(${p.id})" class="btn btn-danger w-full">Excluir</button>
                                 </div>
