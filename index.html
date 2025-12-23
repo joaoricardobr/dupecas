@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
+        /* (CSS MANTIDO INTEGRALMENTE) */
         :root {
             --primary: #2563eb;        
             --primary-dark: #1e40af;   
@@ -822,10 +823,13 @@
                 await deleteDoc(doc(db, collectionName, String(id)));
             },
             async clear(collectionName) {
+                // Deletar um por um para garantir segurança em grandes volumes
                 const q = await getDocs(collection(db, collectionName));
-                const batch = writeBatch(db);
-                q.forEach((doc) => { batch.delete(doc.ref); });
-                await batch.commit();
+                const deletePromises = [];
+                q.forEach((doc) => {
+                    deletePromises.push(deleteDoc(doc.ref));
+                });
+                await Promise.all(deletePromises);
             }
         };
         window.DBService = DBService;
@@ -869,6 +873,7 @@
             document.getElementById('configPixKey').value = window.pixKey;
             await loadData();
             
+            // Verifica sessão e mantém no admin
             if (localStorage.getItem('dupecas_admin_logged') === 'true') {
                 window.isAdmin = true;
                 document.getElementById('adminView').classList.remove('hidden');
@@ -1839,38 +1844,59 @@
             showToast("Configurações salvas!");
         }
 
+        // --- SISTEMA DE RESET E RESTAURAÇÃO (CORRIGIDO PARA NÃO SAIR DA TELA) ---
         window.bulkUpdateImages = async function() {
             const txt = document.getElementById('bulkImgInput').value;
             if(!txt) return;
             const lines = txt.split('\n');
             let count = 0;
-            for (const l of lines) { 
-                const parts = l.split(',');
-                if(parts.length >= 2) {
-                    const id = parts[0].trim();
-                    const url = parts.slice(1).join(',').trim(); 
-                    const prod = window.products.find(x => x.id == id);
-                    if (prod && url) { 
-                        prod.image = url; 
-                        await DBService.put('products', prod); 
-                        count++; 
-                    } 
+            try {
+                for (const l of lines) { 
+                    const parts = l.split(',');
+                    if(parts.length >= 2) {
+                        const id = parts[0].trim();
+                        const url = parts.slice(1).join(',').trim(); 
+                        const prod = window.products.find(x => x.id == id);
+                        if (prod && url) { 
+                            prod.image = url; 
+                            await DBService.put('products', prod); 
+                            count++; 
+                        } 
+                    }
                 }
+                showToast(`${count} imagens atualizadas!`);
+                renderAdminTable(); // Atualiza UI sem recarregar
+            } catch (err) {
+                showToast("Erro na atualização em massa: " + err.message, "error");
             }
-            showToast(`${count} imagens atualizadas!`);
-            renderAdminTable();
         }
 
         window.resetSystem = async function() { 
             const pwd = prompt("Digite a senha de segurança:");
             if (pwd === "dupeca2026") {
                 if(confirm("TEM CERTEZA? ISSO APAGA TUDO.")) { 
-                    await DBService.clear('products'); 
-                    await DBService.clear('orders'); 
-                    await DBService.clear('brands'); 
-                    await DBService.clear('clients');
-                    localStorage.removeItem('dupecas_cart');
-                    location.reload(); 
+                    try {
+                        await DBService.clear('products'); 
+                        await DBService.clear('orders'); 
+                        await DBService.clear('brands'); 
+                        await DBService.clear('clients');
+                        localStorage.removeItem('dupecas_cart');
+                        
+                        // Atualiza estado local sem reload
+                        window.products = [];
+                        window.orders = [];
+                        window.clients = [];
+                        window.brands = [];
+                        window.cart = [];
+                        
+                        renderAdminTable();
+                        renderOrdersTable();
+                        renderClientsTable();
+                        loadAdminDashboard();
+                        showToast("Sistema resetado com sucesso!");
+                    } catch (err) {
+                        alert("Erro ao resetar: " + err.message);
+                    }
                 }
             } else alert("Senha incorreta.");
         }
@@ -1891,18 +1917,61 @@
         window.restoreBackup = function(input) {
             const file = input.files[0];
             if (!file || !confirm("Isso SUBSTITUIRÁ o banco atual. Continuar?")) return;
-            document.getElementById('restoreModal').classList.add('active');
+            
+            const modal = document.getElementById('restoreModal');
+            const progress = document.getElementById('restoreProgress');
+            const status = document.getElementById('restoreStatus');
+            
+            modal.classList.add('active');
+            progress.style.width = '5%';
+            status.innerText = "Lendo arquivo...";
+
             const reader = new FileReader();
             reader.onload = async function(e) {
                 try {
                     const data = JSON.parse(e.target.result);
-                    await DBService.clear('products'); await DBService.clear('orders'); await DBService.clear('brands'); await DBService.clear('clients');
-                    if(data.products) for(const p of data.products) await DBService.put('products', p);
-                    if(data.orders) for(const o of data.orders) await DBService.put('orders', o);
-                    if(data.clients) for(const c of data.clients) await DBService.put('clients', c);
-                    if(data.brands) for(const b of data.brands) await DBService.put('brands', typeof b === 'string' ? {name:b} : b);
-                    location.reload();
-                } catch (err) { alert("Erro: " + err.message); document.getElementById('restoreModal').classList.remove('active'); }
+                    
+                    status.innerText = "Limpando banco antigo...";
+                    progress.style.width = '10%';
+                    await DBService.clear('products'); 
+                    await DBService.clear('orders'); 
+                    await DBService.clear('brands'); 
+                    await DBService.clear('clients');
+
+                    status.innerText = "Restaurando dados...";
+                    // Calcula total de items para progresso
+                    const totalItems = (data.products?.length || 0) + (data.orders?.length || 0) + (data.clients?.length || 0) + (data.brands?.length || 0);
+                    let processed = 0;
+
+                    const updateProg = () => {
+                        processed++;
+                        const pct = 10 + Math.floor((processed / totalItems) * 90);
+                        progress.style.width = pct + '%';
+                    };
+
+                    if(data.products) for(const p of data.products) { await DBService.put('products', p); updateProg(); }
+                    if(data.orders) for(const o of data.orders) { await DBService.put('orders', o); updateProg(); }
+                    if(data.clients) for(const c of data.clients) { await DBService.put('clients', c); updateProg(); }
+                    if(data.brands) for(const b of data.brands) { await DBService.put('brands', typeof b === 'string' ? {name:b} : b); updateProg(); }
+                    
+                    status.innerText = "Atualizando sistema...";
+                    await loadData(); // Recarrega dados na memória
+                    
+                    renderAdminTable();
+                    renderOrdersTable();
+                    renderClientsTable();
+                    loadAdminDashboard();
+                    renderBrandsFilter();
+                    
+                    modal.classList.remove('active');
+                    showToast("Backup restaurado com sucesso!");
+                    
+                } catch (err) { 
+                    alert("Erro crítico na restauração: " + err.message); 
+                    modal.classList.remove('active'); 
+                } finally {
+                    input.value = ''; // Reseta input
+                }
             };
             reader.readAsText(file);
         }
