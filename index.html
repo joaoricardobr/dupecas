@@ -10,12 +10,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* (CSS MANTIDO IGUAL - ADICIONADO ESTILOS PARA MODAL DE EDIÇÃO) */
+        /* (ESTILOS MANTIDOS) */
         :root {
             --primary: #2563eb;        
             --primary-dark: #1e40af;   
             --primary-light: #eff6ff; 
-            --secondary: #0f172a;       
+            --secondary: #0f172a;        
             --bg-body: #f8fafc;
             --bg-card: #ffffff;
             --text-main: #1e293b;
@@ -218,10 +218,20 @@
     <div id="orderEditModal" class="modal-overlay" style="z-index: 1500;" onclick="if(event.target === this) closeEditOrder()">
         <div class="modal" style="max-width: 800px;">
             <div class="close-modal" onclick="closeEditOrder()"><i data-lucide="x"></i></div>
-            <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem;">Editar Pedido</h3>
+            <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem;">Editar / Novo Pedido</h3>
             
             <div style="display:flex; flex-direction:column; gap:1rem; height: 100%;">
                 
+                <div style="background: var(--bg-body); padding: 1rem; border-radius: 8px; border: 1px solid var(--border);">
+                    <h4 style="font-weight:700; margin-bottom:0.5rem;">Dados do Cliente</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <input type="text" id="editClientName" placeholder="Nome do Cliente" style="margin-bottom:0;">
+                        <input type="text" id="editClientPhone" placeholder="Telefone / WhatsApp" style="margin-bottom:0;">
+                        <input type="text" id="editClientEmail" placeholder="E-mail (opcional)" style="margin-bottom:0;">
+                        <input type="text" id="editClientCpf" placeholder="CPF (opcional)" style="margin-bottom:0;">
+                    </div>
+                </div>
+
                 <div style="flex:1; border:1px solid var(--border); border-radius:8px; padding:1rem; overflow-y:auto; max-height: 250px;">
                     <h4 style="font-weight:700; margin-bottom:0.5rem;">Itens no Pedido</h4>
                     <div id="editOrderItemsList"></div>
@@ -342,9 +352,12 @@
 
         <main class="container">
             <div id="resultsCount" style="margin-bottom: 1rem; font-weight: 600; color: var(--text-muted); font-size: 0.9rem;"></div>
-            <div id="productsContainer" class="products-grid">
-                </div>
+            <div id="productsContainer" class="products-grid"></div>
             
+            <div id="loadMoreBtn" class="hidden" style="text-align: center; margin-top: 2rem;">
+                <button onclick="loadMoreProducts()" class="btn btn-secondary">Ver mais produtos</button>
+            </div>
+
             <div id="emptyState" class="hidden text-center py-20">
                 <div style="background: var(--bg-body); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
                     <i data-lucide="package-search" size="40" color="#94a3b8"></i>
@@ -431,6 +444,9 @@
                 <div class="menu-item" onclick="setAdminTab('orders')">
                     <i data-lucide="shopping-bag"></i> <span class="menu-text">Pedidos</span> 
                     <span id="orderCountBadge" class="badge-count" style="background: var(--danger); font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; margin-left: auto;">0</span>
+                </div>
+                <div class="menu-item" onclick="setAdminTab('clients')">
+                    <i data-lucide="users"></i> <span class="menu-text">Clientes</span>
                 </div>
                 <div class="menu-item" onclick="setAdminTab('reports')">
                     <i data-lucide="pie-chart"></i> <span class="menu-text">Relatórios</span>
@@ -533,6 +549,10 @@
             </div>
 
             <div id="tab-orders" class="admin-tab hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-lg">Gerenciamento de Pedidos</h3>
+                    <button onclick="openEditOrder('new')" class="btn btn-primary"><i data-lucide="plus-circle"></i> Novo Pedido</button>
+                </div>
                 <div class="data-table-wrapper">
                     <table class="data-table">
                         <thead>
@@ -544,8 +564,27 @@
                 <div id="noOrdersMsg" class="hidden" style="padding: 2rem; text-align: center; color: var(--text-muted);">Nenhum pedido registrado ainda.</div>
             </div>
 
+            <div id="tab-clients" class="admin-tab hidden">
+                <div class="data-table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Cliente</th><th>Telefone</th><th>Pedidos</th><th>Total Gasto</th><th>Ações</th></tr>
+                        </thead>
+                        <tbody id="clientsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
             <div id="tab-settings" class="admin-tab hidden">
                 <div style="display: grid; gap: 1.5rem; max-width: 800px;">
+                    
+                    <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border);">
+                        <h3 style="font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="settings-2"></i> Dados de Pagamento</h3>
+                        <p class="text-sm text-muted mb-2">Chave PIX que será enviada no WhatsApp.</p>
+                        <input type="text" id="configPixKey" placeholder="Chave PIX" value="teste 123456789">
+                        <button onclick="saveSettings()" class="btn btn-primary">Salvar Configurações</button>
+                    </div>
+
                     <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border);">
                         <h3 style="font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="cloud"></i> Sincronização e Backup (Firebase)</h3>
                         <p class="text-sm text-muted mb-4">Gerenciamento de dados na nuvem.</p>
@@ -560,7 +599,8 @@
 
                     <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border);">
                         <h3 style="font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="image"></i> Atualização em Massa</h3>
-                        <textarea id="bulkImgInput" rows="4" placeholder="Ex: ID,https://link-da-imagem.jpg"></textarea>
+                        <p class="text-sm text-muted mb-2">Formato: ID,URL_DA_IMAGEM (uma por linha)</p>
+                        <textarea id="bulkImgInput" rows="4" placeholder="Ex: 1715456,https://link.com/img.jpg"></textarea>
                         <button onclick="bulkUpdateImages()" class="btn btn-primary w-full">Processar Imagens</button>
                     </div>
                     <div style="background: #fef2f2; padding: 1.5rem; border-radius: 1rem; border: 1px solid #fecaca;">
@@ -672,12 +712,11 @@
     </div>
 
     <script type="module">
-        // Importa Firebase diretamente da CDN (Versão Modular)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
 
-        // CONFIGURAÇÃO FORNECIDA PELO USUÁRIO
+        // CONFIGURAÇÃO DO FIREBASE (MANTIDA)
         const firebaseConfig = {
             apiKey: "AIzaSyA1bJpcVTG8C7W6SDqYTUW2MGEgagiKN-E",
             authDomain: "dupecas-77955.firebaseapp.com",
@@ -688,12 +727,10 @@
             measurementId: "G-10HENTDJ8R"
         };
 
-        // Inicializa Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const analytics = getAnalytics(app);
 
-        // --- SERVIÇO DE BANCO DE DADOS (FIRESTORE) ---
         const DBService = {
             async getAll(collectionName) {
                 try {
@@ -704,23 +741,18 @@
                     return [];
                 }
             },
-
             async put(collectionName, data) {
                 const idString = String(data.id || Date.now());
                 await setDoc(doc(db, collectionName, idString), data);
                 return data;
             },
-
             async delete(collectionName, id) {
                 await deleteDoc(doc(db, collectionName, String(id)));
             },
-
             async clear(collectionName) {
                 const q = await getDocs(collection(db, collectionName));
                 const batch = writeBatch(db);
-                q.forEach((doc) => {
-                    batch.delete(doc.ref);
-                });
+                q.forEach((doc) => { batch.delete(doc.ref); });
                 await batch.commit();
             }
         };
@@ -730,7 +762,6 @@
         const DEFAULT_BRANDS = ["Todas", "Audi", "BMW", "BYD", "Chevrolet", "Citroën", "Fiat", "Ford", "Honda", "Hyundai", "Jeep", "Kia", "Mercedes-Benz", "Mitsubishi", "Nissan", "Peugeot", "Renault", "Toyota", "Volkswagen", "Volvo", "Yamaha"].map(b => ({ name: b }));
         const INITIAL_PRODUCTS = [
             { id: 1, name: "Óleo Sintético 5W30", category: "Óleos", price: 45.90, stock: 50, image: "https://images.pexels.com/photos/4489749/pexels-photo-4489749.jpeg?auto=compress&cs=tinysrgb&w=600", sku: "OL5W30", vehicleBrand: "Todas", vehicleModel: "Universal", description: "Proteção máxima." },
-            { id: 2, name: "Filtro de Óleo", category: "Filtros", price: 25.00, stock: 100, image: "https://images.pexels.com/photos/2244746/pexels-photo-2244746.jpeg?auto=compress&cs=tinysrgb&w=600", sku: "FIL001", vehicleBrand: "Volkswagen", vehicleModel: "Gol", description: "Alta retenção." },
         ];
 
         // --- VARIÁVEIS GLOBAIS ---
@@ -740,7 +771,9 @@
         window.brands = [];
         window.currentFilter = 'Todos';
         window.isAdmin = false;
-        
+        window.pixKey = localStorage.getItem('dupecas_pix_key') || "teste 123456789";
+        window.visibleProductsLimit = 25; // Limite inicial mobile
+
         // --- FUNÇÕES GLOBAIS ---
         window.showToast = function(msg, type = 'success') {
             const container = document.getElementById('toastContainer');
@@ -758,9 +791,9 @@
         // --- CARREGAMENTO INICIAL ---
         window.onload = async function() {
             lucide.createIcons();
+            document.getElementById('configPixKey').value = window.pixKey; // Carrega chave salva
             await loadData();
             
-            // VERIFICA SESSÃO ADMIN
             if (localStorage.getItem('dupecas_admin_logged') === 'true') {
                 window.isAdmin = true;
                 document.getElementById('adminView').classList.remove('hidden');
@@ -798,13 +831,11 @@
         }
         window.loadData = loadData; 
 
-        // --- FILTROS ---
+        // --- FILTROS E PRODUTOS ---
         window.renderBrandsFilter = function() {
-            const select = document.getElementById('filterBrand');
-            const formSelect = document.getElementById('prodVehBrand');
             const html = window.brands.map(b => `<option value="${b}">${b}</option>`).join('');
-            if(select) select.innerHTML = html;
-            if(formSelect) formSelect.innerHTML = html;
+            if(document.getElementById('filterBrand')) document.getElementById('filterBrand').innerHTML = html;
+            if(document.getElementById('prodVehBrand')) document.getElementById('prodVehBrand').innerHTML = html;
         }
 
         window.renderCategories = function() {
@@ -818,6 +849,7 @@
         window.setCategoryFilter = function(cat) { 
             window.currentFilter = cat; 
             document.getElementById('searchInput').value = '';
+            window.visibleProductsLimit = 25; // Reset limit
             window.renderCategories(); 
             window.applyFilters(); 
         }
@@ -832,6 +864,7 @@
             document.getElementById('filterYear').value = '';
             document.getElementById('filterSku').value = '';
             window.currentFilter = 'Todos';
+            window.visibleProductsLimit = 25;
             window.renderCategories();
             window.applyFilters();
         }
@@ -866,17 +899,33 @@
             const container = document.getElementById('productsContainer');
             const empty = document.getElementById('emptyState');
             const countEl = document.getElementById('resultsCount');
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            const isMobile = window.innerWidth <= 768;
 
             if(countEl) countEl.innerText = `Exibindo ${data.length} produto(s)`;
 
             if(data.length === 0) {
                 container.innerHTML = '';
                 empty.classList.remove('hidden');
+                loadMoreBtn.classList.add('hidden');
                 return;
             }
             empty.classList.add('hidden');
 
-            container.innerHTML = data.map(p => `
+            // Lógica de Paginação Mobile
+            let displayData = data;
+            if (isMobile) {
+                displayData = data.slice(0, window.visibleProductsLimit);
+                if (displayData.length < data.length) {
+                    loadMoreBtn.classList.remove('hidden');
+                } else {
+                    loadMoreBtn.classList.add('hidden');
+                }
+            } else {
+                loadMoreBtn.classList.add('hidden');
+            }
+
+            container.innerHTML = displayData.map(p => `
                 <div class="product-card">
                     <div class="card-img-box" onclick="openDetail(${p.id})">
                         <img src="${p.image}" class="card-img" loading="lazy">
@@ -902,7 +951,12 @@
             lucide.createIcons();
         }
 
-        // --- DETALHES ---
+        window.loadMoreProducts = function() {
+            window.visibleProductsLimit += 25;
+            window.applyFilters();
+        }
+
+        // --- DETALHES, CARRINHO E CHECKOUT ---
         window.openDetail = function(id) {
             const p = window.products.find(x => x.id === id);
             if(!p) return;
@@ -929,7 +983,6 @@
         }
         window.closeProductDetail = function() { document.getElementById('productDetailModal').classList.remove('active'); }
 
-        // --- CARRINHO ---
         window.toggleCart = function() {
             document.getElementById('cartDrawer').classList.toggle('open');
             document.getElementById('drawerOverlay').classList.toggle('open');
@@ -938,15 +991,12 @@
         window.addToCart = function(id) {
             const prod = window.products.find(p => p.id === id);
             const item = window.cart.find(i => i.id === id);
-            
             if (item) {
                 if (item.quantity >= prod.stock) return showToast("Estoque máximo atingido!", "error");
                 item.quantity++;
             } else {
-                const newItem = { ...prod, quantity: 1 };
-                window.cart.push(newItem);
+                window.cart.push({ ...prod, quantity: 1 });
             }
-            
             saveCartLocal();
             updateCartUI();
             showToast("Adicionado ao carrinho!");
@@ -973,9 +1023,7 @@
             updateCartUI();
         }
 
-        window.saveCartLocal = function() {
-            localStorage.setItem('dupecas_cart', JSON.stringify(window.cart));
-        }
+        window.saveCartLocal = function() { localStorage.setItem('dupecas_cart', JSON.stringify(window.cart)); }
 
         window.updateCartUI = function() {
             const container = document.getElementById('cartItems');
@@ -1036,16 +1084,16 @@
                 date: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR'),
                 customer: name,
                 phone: phone,
+                email: "",
+                cpf: "",
                 total: total,
                 status: 'Pendente',
                 items: JSON.parse(JSON.stringify(window.cart))
             };
             
-            // Salva pedido no Firebase
             window.orders.unshift(newOrder);
             await DBService.put('orders', newOrder);
 
-            // Atualiza estoque no Firebase
             for (const item of window.cart) {
                 const prod = window.products.find(p => p.id === item.id);
                 if(prod) {
@@ -1057,7 +1105,8 @@
             const msg = `*PEDIDO #${newOrder.id}*\n👤 *${name}*\n📞 ${phone}\n\n` +
                         window.cart.map(i => `📦 ${i.quantity}x ${i.name}`).join('\n') + 
                         `\n\n💰 *Total: ${formatMoney(total)}*` +
-                        `\n\n⚠️ *Aviso:* O seu pedido ficará reservado por 72h. Após esse prazo, caso não confirmado, será cancelado automaticamente.`;
+                        `\n\n🔑 *Chave PIX:* ${window.pixKey}` +
+                        `\n\n⚠️ *Aviso:* O seu pedido ficará reservado por 72h.`;
             
             window.cart = [];
             localStorage.removeItem('dupecas_cart');
@@ -1068,7 +1117,7 @@
             window.open(`https://wa.me/558799094280?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
-        // --- ADMIN LOGIN ---
+        // --- ADMIN SISTEMA E PEDIDOS ---
         window.openLogin = function() { document.getElementById('loginModal').classList.add('active'); }
         window.closeLogin = function() { document.getElementById('loginModal').classList.remove('active'); }
         
@@ -1076,9 +1125,7 @@
             e.preventDefault();
             if (document.getElementById('adminPass').value === 'admin') {
                 window.isAdmin = true;
-                // SALVA SESSÃO NO LOCALSTORAGE
                 localStorage.setItem('dupecas_admin_logged', 'true');
-                
                 document.getElementById('adminView').classList.remove('hidden');
                 document.getElementById('storeView').classList.add('hidden');
                 closeLogin();
@@ -1089,14 +1136,11 @@
 
         window.logoutAdmin = function() {
             window.isAdmin = false;
-            // LIMPA SESSÃO
             localStorage.removeItem('dupecas_admin_logged');
-            
             document.getElementById('adminView').classList.add('hidden');
             document.getElementById('storeView').classList.remove('hidden');
         }
 
-        // --- SISTEMA DE EXPIRAÇÃO 72H ---
         window.checkExpiredOrders = async function() {
             const now = Date.now();
             const limit = 72 * 60 * 60 * 1000; 
@@ -1109,13 +1153,12 @@
                 }
             }
             if(updated) {
-                showToast("Pedidos expirados (72h) foram cancelados e retornados ao estoque.");
+                showToast("Pedidos expirados foram cancelados.");
                 renderOrdersTable();
                 loadData(); 
             }
         }
 
-        // --- ADMIN SIDEBAR ---
         window.toggleSidebarMobile = function() { document.getElementById('adminSidebar').classList.toggle('active'); }
         window.initSidebarState = function() {
             const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
@@ -1126,11 +1169,10 @@
         }
         window.toggleSidebarCollapse = function() {
             const sidebar = document.getElementById('adminSidebar');
-            const icon = document.getElementById('collapseIcon');
             sidebar.classList.toggle('collapsed');
             const isCollapsed = sidebar.classList.contains('collapsed');
             localStorage.setItem('sidebarCollapsed', isCollapsed);
-            if(isCollapsed) { icon.setAttribute('data-lucide', 'chevrons-right'); } else { icon.setAttribute('data-lucide', 'chevrons-left'); }
+            document.getElementById('collapseIcon').setAttribute('data-lucide', isCollapsed ? 'chevrons-right' : 'chevrons-left');
             lucide.createIcons();
         }
 
@@ -1142,6 +1184,7 @@
             if (tab === 'dashboard') loadAdminDashboard();
             if (tab === 'products') renderAdminTable();
             if (tab === 'orders') renderOrdersTable();
+            if (tab === 'clients') renderClientsTable();
             if (tab === 'reports') switchReport('sales');
             if (tab === 'brands') renderBrandsList();
         }
@@ -1149,7 +1192,6 @@
         let salesChartRef;
         window.loadAdminDashboard = function() {
             const totalVal = window.products.reduce((a, b) => a + (b.price * b.stock), 0);
-            // FILTRA PEDIDOS CANCELADOS PARA O TOTAL DE VENDAS
             const validOrders = window.orders.filter(o => o.status !== 'Cancelado');
             
             document.getElementById('kpiSales').innerText = formatMoney(validOrders.reduce((a,b)=>a+b.total, 0));
@@ -1168,6 +1210,427 @@
                 },
                 options: { responsive: true, maintainAspectRatio: false }
             });
+        }
+
+        // --- CLIENTES (NOVO) ---
+        window.renderClientsTable = function() {
+            const clientsMap = {};
+            window.orders.forEach(order => {
+                const phone = order.phone || "Sem telefone";
+                if(!clientsMap[phone]) {
+                    clientsMap[phone] = { 
+                        name: order.customer, 
+                        phone: phone, 
+                        count: 0, 
+                        totalSpent: 0,
+                        orders: []
+                    };
+                }
+                clientsMap[phone].count++;
+                if(order.status !== 'Cancelado') clientsMap[phone].totalSpent += order.total;
+                clientsMap[phone].orders.push(order.id);
+            });
+
+            const clientsList = Object.values(clientsMap);
+            const tbody = document.getElementById('clientsTableBody');
+            
+            if(clientsList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2rem;">Nenhum cliente registrado.</td></tr>';
+            } else {
+                tbody.innerHTML = clientsList.map(c => `
+                    <tr>
+                        <td class="font-bold">${c.name}</td>
+                        <td>${c.phone}</td>
+                        <td>${c.count}</td>
+                        <td class="font-bold text-success">${formatMoney(c.totalSpent)}</td>
+                        <td>
+                            <button onclick="showClientOrders('${c.phone}')" class="btn-sm btn-secondary">Ver Histórico</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        window.showClientOrders = function(phone) {
+            alert("Histórico do cliente com telefone: " + phone + "\n(Funcionalidade de detalhe implementada na visualização de pedidos)");
+            // Poderia filtrar a aba de pedidos, mas um alert simples resolve o "ações" por enquanto
+        }
+
+        // --- PEDIDOS, IMPRESSÃO E COMPARTILHAMENTO ---
+        window.renderOrdersTable = function() {
+            const tbody = document.getElementById('ordersTableBody');
+            document.getElementById('orderCountBadge').innerText = window.orders.length;
+            if(window.orders.length === 0) { 
+                document.getElementById('noOrdersMsg').classList.remove('hidden'); 
+                tbody.innerHTML = ''; 
+            } else { 
+                document.getElementById('noOrdersMsg').classList.add('hidden'); 
+                tbody.innerHTML = window.orders.map(o => {
+                    const statusClass = `status-${o.status || 'Pendente'}`;
+                    const statusText = o.status || 'Pendente';
+                    return `
+                    <tr>
+                        <td>#${o.id.toString().slice(-6)}</td>
+                        <td>${o.date}</td>
+                        <td>${o.customer}<br><span class="text-xs text-muted">${o.phone}</span></td>
+                        <td class="font-bold">${formatMoney(o.total)}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td style="display:flex; gap:0.5rem; justify-content:center;">
+                            <button onclick="printOrder(${o.id})" title="Imprimir Cupom" class="btn-icon"><i data-lucide="printer" size="16"></i></button>
+                            <button onclick="shareOrder(${o.id})" title="Compartilhar" class="btn-icon"><i data-lucide="share-2" size="16"></i></button>
+                            <button onclick="openOrderDetail(${o.id})" title="Ver Detalhes" class="btn-icon text-primary"><i data-lucide="eye" size="16"></i></button>
+                            ${statusText !== 'Cancelado' ? 
+                                `<button onclick="openEditOrder(${o.id})" title="Editar Pedido" class="btn-icon text-warning"><i data-lucide="edit" size="16"></i></button>
+                                 <button onclick="confirmOrder(${o.id})" title="Concluir/Entregar" class="btn-icon text-success"><i data-lucide="check" size="16"></i></button>
+                                 <button onclick="cancelOrder(${o.id})" title="Cancelar e Estornar" class="btn-icon text-danger"><i data-lucide="ban" size="16"></i></button>` 
+                            : ''}
+                        </td>
+                    </tr>`;
+                }).join(''); 
+                lucide.createIcons();
+            }
+        }
+
+        window.generateOrderHTML = function(o) {
+            return `
+                <div style="font-family: monospace; width: 300px; padding: 20px; border: 1px solid #000; background: white;">
+                    <div style="text-align:center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px;">
+                        <h2 style="margin:0; font-size: 1.2rem;">DUPEÇAS</h2>
+                        <p style="margin:0; font-size: 0.8rem;">Duarte Peças</p>
+                        <p style="margin:0; font-size: 0.8rem;">Av. Sete de Setembro, 105 - Petrolina/PE</p>
+                        <p style="margin:0; font-size: 0.8rem;">CNPJ: 00.000.000/0001-00</p>
+                        <p style="margin:0; font-size: 0.8rem;">(87) 9909-4280</p>
+                    </div>
+                    <div style="font-size: 0.9rem; margin-bottom: 10px;">
+                        <strong>PEDIDO: #${o.id}</strong><br>
+                        Data: ${o.date}<br>
+                        ---------------------------------<br>
+                        <strong>CLIENTE:</strong><br>
+                        Nome: ${o.customer}<br>
+                        Tel: ${o.phone}<br>
+                        ${o.email ? `Email: ${o.email}<br>` : ''}
+                        ${o.cpf ? `CPF: ${o.cpf}<br>` : ''}
+                    </div>
+                    <table style="width: 100%; font-size: 0.8rem; border-collapse: collapse;">
+                        <tr style="border-bottom: 1px solid #000;">
+                            <th style="text-align:left;">Item</th>
+                            <th style="text-align:right;">Qtd</th>
+                            <th style="text-align:right;">R$</th>
+                        </tr>
+                        ${o.items.map(i => `
+                            <tr>
+                                <td>${i.name}</td>
+                                <td style="text-align:right;">${i.quantity}</td>
+                                <td style="text-align:right;">${(i.price * i.quantity).toFixed(2)}</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                    <div style="border-top: 1px dashed #000; margin-top: 10px; padding-top: 5px; text-align: right; font-weight: bold; font-size: 1.1rem;">
+                        TOTAL: ${formatMoney(o.total)}
+                    </div>
+                    <div style="margin-top: 20px; text-align: center; font-size: 0.7rem;">
+                        *** NÃO É DOCUMENTO FISCAL ***<br>
+                        Obrigado pela preferência!
+                    </div>
+                </div>
+            `;
+        }
+
+        window.printOrder = function(id) {
+            const o = window.orders.find(x => x.id === id);
+            if(!o) return;
+            const content = window.generateOrderHTML(o);
+            const win = window.open('', '', 'height=600,width=400');
+            win.document.write('<html><head><title>Imprimir Pedido</title></head><body>');
+            win.document.write(content);
+            win.document.write('</body></html>');
+            win.document.close();
+            win.print();
+        }
+
+        window.shareOrder = async function(id) {
+            const o = window.orders.find(x => x.id === id);
+            if(!o) return;
+            const text = `PEDIDO DUPEÇAS #${o.id}\nCliente: ${o.customer}\nTotal: ${formatMoney(o.total)}\nItens: ${o.items.length}`;
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title: 'Pedido Dupeças', text: text });
+                } catch (err) { console.log('Share failed', err); }
+            } else {
+                alert("Copie os dados:\n" + text);
+            }
+        }
+
+        // --- EDIÇÃO AVANÇADA DE PEDIDOS (COM DADOS CLIENTE) ---
+        let editingOrder = null;
+
+        window.openEditOrder = function(id) {
+            if(id === 'new') {
+                editingOrder = {
+                    id: Date.now(),
+                    date: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR'),
+                    status: 'Pendente',
+                    customer: '', phone: '', email: '', cpf: '',
+                    items: [], total: 0
+                };
+            } else {
+                const originalOrder = window.orders.find(o => o.id === id);
+                if(!originalOrder) return;
+                editingOrder = JSON.parse(JSON.stringify(originalOrder));
+            }
+            renderEditModal();
+            document.getElementById('orderEditModal').classList.add('active');
+        }
+
+        window.closeEditOrder = function() {
+            editingOrder = null;
+            document.getElementById('orderEditModal').classList.remove('active');
+        }
+
+        window.renderEditModal = function() {
+            document.getElementById('editClientName').value = editingOrder.customer || '';
+            document.getElementById('editClientPhone').value = editingOrder.phone || '';
+            document.getElementById('editClientEmail').value = editingOrder.email || '';
+            document.getElementById('editClientCpf').value = editingOrder.cpf || '';
+
+            const list = document.getElementById('editOrderItemsList');
+            if(!editingOrder.items.length) {
+                list.innerHTML = `<div class="text-muted text-center py-4">Sem itens</div>`;
+            } else {
+                list.innerHTML = editingOrder.items.map(i => `
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:0.5rem 0;">
+                        <div style="flex:1;">
+                            <div class="font-bold">${i.name}</div>
+                            <div class="text-xs text-muted">${formatMoney(i.price)} un.</div>
+                        </div>
+                        <div class="qty-controls" style="margin:0 10px;">
+                            <button class="qty-btn" onclick="editChangeQty(${i.id}, -1)">-</button>
+                            <span class="qty-val">${i.quantity}</span>
+                            <button class="qty-btn" onclick="editChangeQty(${i.id}, 1)">+</button>
+                        </div>
+                        <button onclick="editRemoveItem(${i.id})" class="text-danger"><i data-lucide="trash-2" size="16"></i></button>
+                    </div>
+                `).join('');
+            }
+            editingOrder.total = editingOrder.items.reduce((a,b)=> a + (b.price * b.quantity), 0);
+            document.getElementById('editOrderTotal').innerText = formatMoney(editingOrder.total);
+            lucide.createIcons();
+        }
+
+        window.searchProdForOrder = function(val) {
+            const resDiv = document.getElementById('editProdResults');
+            if(val.length < 2) { resDiv.style.display = 'none'; return; }
+            const results = window.products.filter(p => p.name.toLowerCase().includes(val.toLowerCase()) || p.sku.toLowerCase().includes(val.toLowerCase()));
+            if(results.length > 0) {
+                resDiv.style.display = 'block';
+                resDiv.innerHTML = results.map(p => `
+                    <div onclick="addProdToOrder(${p.id})" style="padding:0.5rem; border-bottom:1px solid #eee; cursor:pointer;">
+                        <div class="font-bold text-sm">${p.name}</div>
+                        <div class="text-xs text-muted">Estoque: ${p.stock} | ${formatMoney(p.price)}</div>
+                    </div>
+                `).join('');
+            } else resDiv.style.display = 'none';
+        }
+
+        window.addProdToOrder = function(prodId) {
+            const p = window.products.find(x => x.id === prodId);
+            if(!p) return;
+            const existing = editingOrder.items.find(i => i.id === prodId);
+            if(existing) existing.quantity++;
+            else editingOrder.items.push({ id: p.id, name: p.name, price: p.price, image: p.image, quantity: 1 });
+            
+            document.getElementById('editSearchProd').value = '';
+            document.getElementById('editProdResults').style.display = 'none';
+            renderEditModal();
+        }
+
+        window.editChangeQty = function(id, delta) {
+            const item = editingOrder.items.find(i => i.id === id);
+            if(!item) return;
+            if(delta > 0) item.quantity++;
+            else if(item.quantity > 1) item.quantity--;
+            renderEditModal();
+        }
+
+        window.editRemoveItem = function(id) {
+            editingOrder.items = editingOrder.items.filter(i => i.id !== id);
+            renderEditModal();
+        }
+
+        window.saveOrderChanges = async function() {
+            // Atualiza dados do cliente do input para o objeto
+            editingOrder.customer = document.getElementById('editClientName').value;
+            editingOrder.phone = document.getElementById('editClientPhone').value;
+            editingOrder.email = document.getElementById('editClientEmail').value;
+            editingOrder.cpf = document.getElementById('editClientCpf').value;
+
+            if(!editingOrder.customer || !editingOrder.phone) return alert("Nome e Telefone são obrigatórios!");
+
+            // Se for pedido existente, devolve estoque original primeiro
+            const originalOrder = window.orders.find(o => o.id === editingOrder.id);
+            if(originalOrder) {
+                for (const item of originalOrder.items) {
+                    const prod = window.products.find(p => p.id === item.id);
+                    if(prod) prod.stock += item.quantity;
+                }
+            } else {
+                // Novo pedido
+                window.orders.unshift(editingOrder);
+            }
+
+            // Consome estoque do novo pedido
+            for (const item of editingOrder.items) {
+                const prod = window.products.find(p => p.id === item.id);
+                if(prod) {
+                    if(prod.stock < item.quantity) {
+                        alert(`Estoque insuficiente para ${prod.name}.`);
+                        await loadData(); // Reload para corrigir dados locais
+                        return;
+                    }
+                    prod.stock -= item.quantity;
+                }
+            }
+
+            // Salva produtos atualizados
+            for (const p of window.products) await DBService.put('products', p);
+            
+            // Atualiza ou insere pedido
+            if(originalOrder) {
+                Object.assign(originalOrder, editingOrder); // Atualiza referencia local
+                await DBService.put('orders', editingOrder);
+            } else {
+                await DBService.put('orders', editingOrder);
+            }
+            
+            closeEditOrder();
+            renderOrdersTable();
+            loadAdminDashboard();
+            showToast("Pedido salvo com sucesso!");
+        }
+
+        window.openOrderDetail = function(orderId) {
+            const o = window.orders.find(x => x.id === orderId);
+            if(!o) return;
+            const html = `
+                <div style="background:var(--bg-body); padding:1rem; border-radius:8px; margin-bottom:1rem;">
+                    <p><strong>Cliente:</strong> ${o.customer}</p>
+                    <p><strong>Contato:</strong> ${o.phone}</p>
+                    ${o.email ? `<p><strong>Email:</strong> ${o.email}</p>` : ''}
+                    ${o.cpf ? `<p><strong>CPF:</strong> ${o.cpf}</p>` : ''}
+                    <p><strong>Data:</strong> ${o.date}</p>
+                    <p><strong>Status:</strong> ${o.status || 'Pendente'}</p>
+                </div>
+                <h4 style="font-weight:bold; margin-bottom:0.5rem;">Itens do Pedido:</h4>
+                <div style="max-height:200px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; margin-bottom:1rem;">
+                    <table style="width:100%; font-size:0.9rem;">
+                        ${o.items.map(i => `
+                            <tr style="border-bottom:1px solid var(--border);">
+                                <td style="padding:0.5rem;"><img src="${i.image}" width="30"></td>
+                                <td style="padding:0.5rem;">${i.quantity}x ${i.name}</td>
+                                <td style="padding:0.5rem; text-align:right;">${formatMoney(i.price * i.quantity)}</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                </div>
+                <div style="text-align:right; font-size:1.25rem; font-weight:800; color:var(--primary);">
+                    Total: ${formatMoney(o.total)}
+                </div>
+            `;
+            document.getElementById('orderDetailContent').innerHTML = html;
+            document.getElementById('orderDetailModal').classList.add('active');
+        }
+        window.closeOrderDetail = function() { document.getElementById('orderDetailModal').classList.remove('active'); }
+
+        window.confirmOrder = async function(id) {
+            const o = window.orders.find(x => x.id === id);
+            if(o) { o.status = 'Entregue'; await DBService.put('orders', o); renderOrdersTable(); showToast("Entregue!"); }
+        }
+
+        window.cancelOrderLogic = async function(id, isAuto = false) {
+            const o = window.orders.find(x => x.id === id);
+            if(!o || o.status === 'Cancelado') return;
+            for (const item of o.items) {
+                const prod = window.products.find(p => p.id === item.id);
+                if (prod) { prod.stock += item.quantity; await DBService.put('products', prod); }
+            }
+            o.status = 'Cancelado';
+            await DBService.put('orders', o);
+            if(!isAuto) { renderOrdersTable(); loadAdminDashboard(); showToast("Cancelado e estornado."); }
+        }
+        window.cancelOrder = function(id) { if(confirm("Cancelar pedido e devolver estoque?")) cancelOrderLogic(id); }
+
+        // --- CONFIGURAÇÕES E IMAGENS ---
+        window.saveSettings = function() {
+            const key = document.getElementById('configPixKey').value;
+            window.pixKey = key;
+            localStorage.setItem('dupecas_pix_key', key);
+            showToast("Configurações salvas!");
+        }
+
+        window.bulkUpdateImages = async function() {
+            const txt = document.getElementById('bulkImgInput').value;
+            if(!txt) return;
+            const lines = txt.split('\n');
+            let count = 0;
+            for (const l of lines) { 
+                const parts = l.split(',');
+                if(parts.length >= 2) {
+                    const id = parts[0].trim();
+                    const url = parts.slice(1).join(',').trim(); // Join caso url tenha virgula
+                    const prod = window.products.find(x => x.id == id); // == permite string vs int
+                    if (prod && url) { 
+                        prod.image = url; 
+                        await DBService.put('products', prod); 
+                        count++; 
+                    } 
+                }
+            }
+            showToast(`${count} imagens atualizadas!`);
+            renderAdminTable();
+        }
+
+        window.resetSystem = async function() { 
+            const pwd = prompt("Digite a senha de segurança:");
+            if (pwd === "dupeca2026") {
+                if(confirm("TEM CERTEZA? ISSO APAGA TUDO.")) { 
+                    await DBService.clear('products'); 
+                    await DBService.clear('orders'); 
+                    await DBService.clear('brands'); 
+                    localStorage.removeItem('dupecas_cart');
+                    location.reload(); 
+                }
+            } else alert("Senha incorreta.");
+        }
+        
+        window.exportData = function(type) {
+            let content = "", mime = "text/plain";
+            if(type === 'csv') { 
+                content = "ID,Nome,SKU,Preco,Estoque\n" + window.products.map(p => `${p.id},${p.name},${p.sku},${p.price},${p.stock}`).join("\n"); 
+                mime = "text/csv"; 
+            } else { 
+                const backupData = { timestamp: Date.now(), products: window.products, orders: window.orders, brands: window.brands.map(b => ({ name: b })) }; 
+                content = JSON.stringify(backupData, null, 2); 
+                mime = "application/json"; 
+            }
+            const a = document.createElement("a"); const file = new Blob(['\uFEFF'+content], {type: mime}); a.href = URL.createObjectURL(file); a.download = `backup_${Date.now()}.${type}`; a.click();
+        }
+
+        window.restoreBackup = function(input) {
+            const file = input.files[0];
+            if (!file || !confirm("Isso SUBSTITUIRÁ o banco atual. Continuar?")) return;
+            document.getElementById('restoreModal').classList.add('active');
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    await DBService.clear('products'); await DBService.clear('orders'); await DBService.clear('brands');
+                    if(data.products) for(const p of data.products) await DBService.put('products', p);
+                    if(data.orders) for(const o of data.orders) await DBService.put('orders', o);
+                    if(data.brands) for(const b of data.brands) await DBService.put('brands', typeof b === 'string' ? {name:b} : b);
+                    location.reload();
+                } catch (err) { alert("Erro: " + err.message); document.getElementById('restoreModal').classList.remove('active'); }
+            };
+            reader.readAsText(file);
         }
 
         window.renderAdminTable = function(filter = '') {
@@ -1236,22 +1699,14 @@
         window.addBrand = async function() {
             const val = document.getElementById('newBrandInput').value;
             if(val && !window.brands.includes(val)) { 
-                window.brands.push(val); 
-                window.brands.sort(); 
+                window.brands.push(val); window.brands.sort(); 
                 await DBService.put('brands', { name: val }); 
-                renderBrandsList(); 
-                renderBrandsFilter(); 
-                showToast("Marca adicionada!"); 
+                renderBrandsList(); renderBrandsFilter(); showToast("Marca adicionada!"); 
             }
             document.getElementById('newBrandInput').value = '';
         }
         window.removeBrand = async function(name) { 
-            if(confirm('Remover marca?')) { 
-                window.brands = window.brands.filter(b => b !== name); 
-                await DBService.delete('brands', name); 
-                renderBrandsList(); 
-                renderBrandsFilter(); 
-            } 
+            if(confirm('Remover marca?')) { window.brands = window.brands.filter(b => b !== name); await DBService.delete('brands', name); renderBrandsList(); renderBrandsFilter(); } 
         }
 
         window.openProductForm = function() { 
@@ -1302,18 +1757,9 @@
                 description: document.getElementById('prodDesc').value,
                 image: document.getElementById('formPreview').src
             };
-            
             await DBService.put('products', newProd);
-            
-            if(id) { 
-                const idx = window.products.findIndex(p => p.id == id); 
-                window.products[idx] = newProd; 
-            } else { 
-                window.products.push(newProd); 
-            }
-            closeProductForm();
-            renderAdminTable();
-            showToast("Produto Salvo no Firebase!");
+            if(id) { const idx = window.products.findIndex(p => p.id == id); window.products[idx] = newProd; } else { window.products.push(newProd); }
+            closeProductForm(); renderAdminTable(); showToast("Produto Salvo!");
         }
 
         window.handleImageUpload = function(input) {
@@ -1326,362 +1772,9 @@
         window.previewUrl = function(url) { if(url) { document.getElementById('formPreview').src = url; document.getElementById('formPreview').style.display = 'block'; document.getElementById('uploadPlaceholder').style.display = 'none'; } }
         
         window.deleteProduct = async function(id) { 
-            if(confirm("Excluir?")) { 
-                window.products = window.products.filter(p => p.id !== id); 
-                await DBService.delete('products', id); 
-                renderAdminTable(); 
-                showToast("Produto Excluído"); 
-            } 
-        }
-        
-        // --- GESTÃO DE PEDIDOS ---
-        window.renderOrdersTable = function() {
-            const tbody = document.getElementById('ordersTableBody');
-            document.getElementById('orderCountBadge').innerText = window.orders.length;
-            if(window.orders.length === 0) { 
-                document.getElementById('noOrdersMsg').classList.remove('hidden'); 
-                tbody.innerHTML = ''; 
-            } else { 
-                document.getElementById('noOrdersMsg').classList.add('hidden'); 
-                tbody.innerHTML = window.orders.map(o => {
-                    const statusClass = `status-${o.status || 'Pendente'}`;
-                    const statusText = o.status || 'Pendente';
-                    return `
-                    <tr>
-                        <td>#${o.id.toString().slice(-6)}</td>
-                        <td>${o.date}</td>
-                        <td>${o.customer}<br><span class="text-xs text-muted">${o.phone}</span></td>
-                        <td class="font-bold">${formatMoney(o.total)}</td>
-                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-                        <td style="display:flex; gap:0.5rem; justify-content:center;">
-                            <button onclick="openOrderDetail(${o.id})" title="Ver Detalhes" class="btn-icon text-primary"><i data-lucide="eye" size="16"></i></button>
-                            ${statusText !== 'Cancelado' ? 
-                                `<button onclick="openEditOrder(${o.id})" title="Editar Pedido" class="btn-icon text-warning"><i data-lucide="edit" size="16"></i></button>
-                                 <button onclick="confirmOrder(${o.id})" title="Concluir/Entregar" class="btn-icon text-success"><i data-lucide="check" size="16"></i></button>
-                                 <button onclick="cancelOrder(${o.id})" title="Cancelar e Estornar Estoque" class="btn-icon text-danger"><i data-lucide="ban" size="16"></i></button>` 
-                            : ''}
-                        </td>
-                    </tr>`;
-                }).join(''); 
-                lucide.createIcons();
-            }
+            if(confirm("Excluir?")) { window.products = window.products.filter(p => p.id !== id); await DBService.delete('products', id); renderAdminTable(); showToast("Produto Excluído"); } 
         }
 
-        window.openOrderDetail = function(orderId) {
-            const o = window.orders.find(x => x.id === orderId);
-            if(!o) return;
-            
-            const html = `
-                <div style="background:var(--bg-body); padding:1rem; border-radius:8px; margin-bottom:1rem;">
-                    <p><strong>Cliente:</strong> ${o.customer}</p>
-                    <p><strong>Contato:</strong> ${o.phone}</p>
-                    <p><strong>Data:</strong> ${o.date}</p>
-                    <p><strong>Status:</strong> ${o.status || 'Pendente'}</p>
-                </div>
-                <h4 style="font-weight:bold; margin-bottom:0.5rem;">Itens do Pedido:</h4>
-                <div style="max-height:200px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; margin-bottom:1rem;">
-                    <table style="width:100%; font-size:0.9rem;">
-                        ${o.items.map(i => `
-                            <tr style="border-bottom:1px solid var(--border);">
-                                <td style="padding:0.5rem;"><img src="${i.image}" width="30"></td>
-                                <td style="padding:0.5rem;">${i.quantity}x ${i.name}</td>
-                                <td style="padding:0.5rem; text-align:right;">${formatMoney(i.price * i.quantity)}</td>
-                            </tr>
-                        `).join('')}
-                    </table>
-                </div>
-                <div style="text-align:right; font-size:1.25rem; font-weight:800; color:var(--primary);">
-                    Total: ${formatMoney(o.total)}
-                </div>
-            `;
-            document.getElementById('orderDetailContent').innerHTML = html;
-            document.getElementById('orderDetailModal').classList.add('active');
-        }
-        window.closeOrderDetail = function() { document.getElementById('orderDetailModal').classList.remove('active'); }
-
-        window.confirmOrder = async function(id) {
-            const o = window.orders.find(x => x.id === id);
-            if(o) {
-                o.status = 'Entregue';
-                await DBService.put('orders', o);
-                renderOrdersTable();
-                showToast("Pedido marcado como Entregue");
-            }
-        }
-
-        window.cancelOrderLogic = async function(id, isAuto = false) {
-            const o = window.orders.find(x => x.id === id);
-            if(!o || o.status === 'Cancelado') return;
-
-            // Retorna itens ao estoque
-            for (const item of o.items) {
-                const prod = window.products.find(p => p.id === item.id);
-                if (prod) {
-                    prod.stock += item.quantity;
-                    await DBService.put('products', prod);
-                }
-            }
-
-            o.status = 'Cancelado';
-            await DBService.put('orders', o);
-            if(!isAuto) {
-                renderOrdersTable();
-                loadAdminDashboard(); 
-                showToast("Pedido cancelado e estoque restaurado.");
-            }
-        }
-
-        window.cancelOrder = function(id) {
-            if(confirm("Tem certeza? Isso irá cancelar o pedido e devolver os produtos para o estoque.")) {
-                cancelOrderLogic(id);
-            }
-        }
-
-        // --- SISTEMA DE EDIÇÃO DE PEDIDOS (NOVO) ---
-        let editingOrder = null;
-
-        window.openEditOrder = function(id) {
-            const originalOrder = window.orders.find(o => o.id === id);
-            if(!originalOrder) return;
-            // Cria uma cópia profunda para não alterar direto
-            editingOrder = JSON.parse(JSON.stringify(originalOrder));
-            renderEditModal();
-            document.getElementById('orderEditModal').classList.add('active');
-        }
-
-        window.closeEditOrder = function() {
-            editingOrder = null;
-            document.getElementById('orderEditModal').classList.remove('active');
-        }
-
-        window.renderEditModal = function() {
-            const list = document.getElementById('editOrderItemsList');
-            if(!editingOrder.items.length) {
-                list.innerHTML = `<div class="text-muted text-center py-4">Sem itens</div>`;
-            } else {
-                list.innerHTML = editingOrder.items.map(i => `
-                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:0.5rem 0;">
-                        <div style="flex:1;">
-                            <div class="font-bold">${i.name}</div>
-                            <div class="text-xs text-muted">${formatMoney(i.price)} un.</div>
-                        </div>
-                        <div class="qty-controls" style="margin:0 10px;">
-                            <button class="qty-btn" onclick="editChangeQty(${i.id}, -1)">-</button>
-                            <span class="qty-val">${i.quantity}</span>
-                            <button class="qty-btn" onclick="editChangeQty(${i.id}, 1)">+</button>
-                        </div>
-                        <button onclick="editRemoveItem(${i.id})" class="text-danger"><i data-lucide="trash-2" size="16"></i></button>
-                    </div>
-                `).join('');
-            }
-            // Recalcula total
-            editingOrder.total = editingOrder.items.reduce((a,b)=> a + (b.price * b.quantity), 0);
-            document.getElementById('editOrderTotal').innerText = formatMoney(editingOrder.total);
-            lucide.createIcons();
-        }
-
-        window.editChangeQty = function(id, delta) {
-            const item = editingOrder.items.find(i => i.id === id);
-            if(!item) return;
-            if(delta > 0) item.quantity++;
-            else {
-                if(item.quantity > 1) item.quantity--;
-            }
-            renderEditModal();
-        }
-
-        window.editRemoveItem = function(id) {
-            editingOrder.items = editingOrder.items.filter(i => i.id !== id);
-            renderEditModal();
-        }
-
-        window.searchProdForOrder = function(val) {
-            const resDiv = document.getElementById('editProdResults');
-            if(val.length < 2) { resDiv.style.display = 'none'; return; }
-            
-            const results = window.products.filter(p => p.name.toLowerCase().includes(val.toLowerCase()) || p.sku.toLowerCase().includes(val.toLowerCase()));
-            
-            if(results.length > 0) {
-                resDiv.style.display = 'block';
-                resDiv.innerHTML = results.map(p => `
-                    <div onclick="addProdToOrder(${p.id})" style="padding:0.5rem; border-bottom:1px solid #eee; cursor:pointer; hover:bg-gray-100;">
-                        <div class="font-bold text-sm">${p.name}</div>
-                        <div class="text-xs text-muted">Estoque: ${p.stock} | ${formatMoney(p.price)}</div>
-                    </div>
-                `).join('');
-            } else {
-                resDiv.style.display = 'none';
-            }
-        }
-
-        window.addProdToOrder = function(prodId) {
-            const p = window.products.find(x => x.id === prodId);
-            if(!p) return;
-            
-            // Verifica se já existe
-            const existing = editingOrder.items.find(i => i.id === prodId);
-            if(existing) {
-                existing.quantity++;
-            } else {
-                editingOrder.items.push({
-                    id: p.id,
-                    name: p.name,
-                    price: p.price,
-                    image: p.image,
-                    quantity: 1
-                });
-            }
-            document.getElementById('editSearchProd').value = '';
-            document.getElementById('editProdResults').style.display = 'none';
-            renderEditModal();
-        }
-
-        window.saveOrderChanges = async function() {
-            const originalOrder = window.orders.find(o => o.id === editingOrder.id);
-            if(!originalOrder) return;
-
-            // 1. DEVOLVE TUDO DO PEDIDO ORIGINAL PRO ESTOQUE
-            for (const item of originalOrder.items) {
-                const prod = window.products.find(p => p.id === item.id);
-                if(prod) {
-                    prod.stock += item.quantity;
-                }
-            }
-
-            // 2. RETIRA TUDO DO NOVO PEDIDO DO ESTOQUE
-            for (const item of editingOrder.items) {
-                const prod = window.products.find(p => p.id === item.id);
-                if(prod) {
-                    if(prod.stock < item.quantity) {
-                        alert(`Estoque insuficiente para ${prod.name}. Operação cancelada.`);
-                        // Recarrega dados para desfazer bagunça local
-                        loadData(); 
-                        return;
-                    }
-                    prod.stock -= item.quantity;
-                }
-            }
-
-            // 3. SALVA PRODUTOS ATUALIZADOS E O PEDIDO
-            for (const p of window.products) {
-                await DBService.put('products', p);
-            }
-            
-            // Atualiza objeto original
-            originalOrder.items = editingOrder.items;
-            originalOrder.total = editingOrder.total;
-            
-            await DBService.put('orders', originalOrder);
-            
-            closeEditOrder();
-            renderOrdersTable();
-            loadAdminDashboard();
-            showToast("Pedido atualizado com sucesso!");
-        }
-
-        // --- ZERAR SISTEMA COM SENHA ---
-        window.resetSystem = async function() { 
-            const pwd = prompt("Digite a senha de segurança para APAGAR TODO O BANCO DE DADOS NA NUVEM:");
-            if (pwd === "dupeca2026") {
-                if(confirm("TEM CERTEZA ABSOLUTA? Isso é irreversível.")) { 
-                    await DBService.clear('products'); 
-                    await DBService.clear('orders'); 
-                    await DBService.clear('brands'); 
-                    localStorage.removeItem('dupecas_cart');
-                    location.reload(); 
-                }
-            } else {
-                alert("Senha incorreta! Ação bloqueada.");
-            }
-        }
-        
-        // --- BACKUP E EXPORT ---
-        window.exportData = function(type) {
-            let content = "", mime = "text/plain";
-            if(type === 'csv') { 
-                content = "ID,Nome,SKU,Preco,Estoque\n" + window.products.map(p => `${p.id},${p.name},${p.sku},${p.price},${p.stock}`).join("\n"); 
-                mime = "text/csv"; 
-            } else { 
-                const backupData = { timestamp: Date.now(), products: window.products, orders: window.orders, brands: window.brands.map(b => ({ name: b })) }; 
-                content = JSON.stringify(backupData, null, 2); 
-                mime = "application/json"; 
-            }
-            downloadFile(content, `backup_dupecas_${Date.now()}.${type}`, mime);
-        }
-
-        function downloadFile(content, name, type) { const a = document.createElement("a"); const file = new Blob(['\uFEFF'+content], {type: type}); a.href = URL.createObjectURL(file); a.download = name; a.click(); }
-
-        window.restoreBackup = function(input) {
-            const file = input.files[0];
-            if (!file) return;
-            if(!confirm("CUIDADO: Isso APAGARÁ o banco atual no Firebase e substituirá pelo backup. Deseja continuar?")) { input.value = ''; return; }
-            
-            const modal = document.getElementById('restoreModal');
-            const progressBar = document.getElementById('restoreProgress');
-            const statusText = document.getElementById('restoreStatus');
-            modal.classList.add('active');
-            progressBar.style.width = '0%';
-            
-            const reader = new FileReader();
-            reader.onload = async function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (!data.products) throw new Error("Arquivo inválido.");
-                    
-                    statusText.innerText = "Limpando Banco Online...";
-                    progressBar.style.width = '10%';
-                    
-                    // Limpa tudo antes
-                    await DBService.clear('products');
-                    await DBService.clear('orders');
-                    await DBService.clear('brands');
-
-                    const totalItems = (data.products?.length || 0) + (data.orders?.length || 0) + (data.brands?.length || 0);
-                    let processed = 0;
-                    
-                    const updateProgress = () => { 
-                        processed++; 
-                        const pct = Math.min(10 + Math.floor((processed / totalItems) * 90), 100); 
-                        progressBar.style.width = pct + '%'; 
-                        statusText.innerText = `Enviando item ${processed} de ${totalItems}...`; 
-                    };
-                    
-                    if(data.products) { for(const p of data.products) { await DBService.put('products', p); updateProgress(); } }
-                    if(data.orders) { for(const o of data.orders) { await DBService.put('orders', o); updateProgress(); } }
-                    if(data.brands) { for(const b of data.brands) { let bt = (typeof b === 'string') ? { name: b } : b; await DBService.put('brands', bt); updateProgress(); } }
-                    
-                    progressBar.style.width = '100%'; 
-                    statusText.innerText = "Concluído!"; 
-                    setTimeout(() => location.reload(), 1000);
-                } catch (err) { 
-                    modal.classList.remove('active'); 
-                    alert("Erro na restauração: " + err.message); 
-                    console.error(err);
-                    input.value = ''; 
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        window.bulkUpdateImages = async function() {
-            const txt = document.getElementById('bulkImgInput').value;
-            const lines = txt.split('\n');
-            let count = 0;
-            for (const l of lines) { 
-                const [id, url] = l.split(','); 
-                if (id && url) { 
-                    const prod = window.products.find(x => x.id == id.trim()); 
-                    if (prod) { 
-                        prod.image = url.trim(); 
-                        await DBService.put('products', prod); 
-                        count++; 
-                    } 
-                } 
-            }
-            showToast(`${count} imagens atualizadas na nuvem!`);
-            renderAdminTable();
-        }
-        
         window.toggleTheme = function() { 
             document.body.classList.toggle('dark-mode'); 
             localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light'); 
