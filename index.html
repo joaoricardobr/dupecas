@@ -50,12 +50,15 @@
         a { text-decoration: none; color: inherit; }
         ul { list-style: none; }
         button { cursor: pointer; border: none; font-family: inherit; }
+        
         input, select, textarea { width: 100%; padding: 0.8rem 1rem; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 1rem; background: var(--bg-body); color: var(--text-main); font-size: 0.95rem; transition: all 0.2s; }
         input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
         label { display: block; margin-bottom: 0.4rem; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
         .container { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; }
+        
         .flex { display: flex; } .flex-col { flex-direction: column; } .items-center { align-items: center; } .justify-between { justify-content: space-between; }
         .gap-2 { gap: 0.5rem; } .gap-3 { gap: 0.75rem; } .gap-4 { gap: 1rem; } .hidden { display: none !important; } .w-full { width: 100%; }
+        
         .text-sm { font-size: 0.875rem; } .font-bold { font-weight: 700; } .rounded { border-radius: var(--radius); } .text-warning { color: var(--warning); }
         .btn { padding: 0.75rem 1.25rem; border-radius: var(--radius); font-weight: 600; font-size: 0.95rem; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer; border: 1px solid transparent; }
         .btn-sm { padding: 0.5rem 1rem; font-size: 0.85rem; }
@@ -198,6 +201,7 @@
     
     <div id="toastContainer" class="toast-container"></div>
     
+    <!-- Modal de Restauração (Estilo Código 01) -->
     <div id="restoreModal" class="modal-overlay" style="z-index: 2000;">
         <div class="modal" style="max-width: 400px; text-align: center;">
             <div style="width: 64px; height: 64px; background: var(--primary-light); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
@@ -817,57 +821,38 @@
                     return querySnapshot.docs.map(doc => doc.data());
                 } catch (error) {
                     console.error("Erro ao ler " + collectionName, error);
-                    alert(`Erro de conexão com o Banco de Dados (${collectionName}). Verifique se as Regras do Firestore estão configuradas como públicas ou se há bloqueio.`);
                     return [];
                 }
             },
             async put(collectionName, data) {
-                try {
-                    const idString = String(data.id || Date.now());
-                    await setDoc(doc(db, collectionName, idString), data, { merge: true });
-                    return data;
-                } catch(error) {
-                    console.error("Erro ao salvar", error);
-                    alert("Erro ao salvar dados no Firebase. Verifique permissões.");
-                    throw error;
-                }
+                const idString = String(data.id || Date.now());
+                // Use merge: true to avoid overwriting existing fields when updating partial data
+                await setDoc(doc(db, collectionName, idString), data, { merge: true });
+                return data;
             },
             async delete(collectionName, id) {
-                try {
-                    await deleteDoc(doc(db, collectionName, String(id)));
-                } catch(error) {
-                    console.error("Erro ao deletar", error);
-                    alert("Erro ao excluir dados.");
-                }
+                await deleteDoc(doc(db, collectionName, String(id)));
             },
             async clear(collectionName) {
+                // CORREÇÃO: Limpeza robusta igual ao codigo 01
                 const q = await getDocs(collection(db, collectionName));
                 const deletePromises = [];
                 q.forEach((doc) => { deletePromises.push(deleteDoc(doc.ref)); });
                 await Promise.all(deletePromises);
             },
             async saveCloudBackup(data) {
-                try {
-                    await addDoc(collection(db, 'system_backups'), { timestamp: Date.now(), content: JSON.stringify(data) });
-                    const q = query(collection(db, 'system_backups'), orderBy('timestamp', 'asc'));
-                    const snapshot = await getDocs(q);
-                    if(snapshot.size > 3) {
-                        const toDelete = snapshot.size - 3;
-                        for(let i=0; i<toDelete; i++) await deleteDoc(snapshot.docs[i].ref);
-                    }
-                } catch (e) {
-                    console.error("Erro Backup Cloud", e);
-                    alert("Falha ao salvar backup na nuvem.");
+                await addDoc(collection(db, 'system_backups'), { timestamp: Date.now(), content: JSON.stringify(data) });
+                const q = query(collection(db, 'system_backups'), orderBy('timestamp', 'asc'));
+                const snapshot = await getDocs(q);
+                if(snapshot.size > 3) {
+                    const toDelete = snapshot.size - 3;
+                    for(let i=0; i<toDelete; i++) await deleteDoc(snapshot.docs[i].ref);
                 }
             },
             async getCloudBackups() {
-                try {
-                    const q = query(collection(db, 'system_backups'), orderBy('timestamp', 'desc'));
-                    const snapshot = await getDocs(q);
-                    return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-                } catch(e) {
-                    return [];
-                }
+                const q = query(collection(db, 'system_backups'), orderBy('timestamp', 'desc'));
+                const snapshot = await getDocs(q);
+                return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
             }
         };
         
@@ -883,7 +868,7 @@
         window.visibleProductsLimit = 25; 
         window.adminViewMode = 'list'; 
         window.currentReportType = 'sales';
-        window.currentReportRows = [];
+        window.currentReportRows = []; // To store data for export
 
         window.showToast = function(msg, type = 'success') {
             const container = document.getElementById('toastContainer');
@@ -1504,6 +1489,132 @@
         window.cancelOrderLogic = async function(id, isAuto = false) { const o = window.orders.find(x => x.id === id); if(!o || o.status === 'Cancelado') return; for (const item of o.items) { const prod = window.products.find(p => p.id === item.id); if (prod) { prod.stock += item.quantity; await DBService.put('products', prod); } } o.status = 'Cancelado'; await DBService.put('orders', o); if(!isAuto) { renderOrdersTable(); loadAdminDashboard(); showToast("Cancelado e estornado."); } }
         window.cancelOrder = function(id) { if(confirm("Cancelar pedido e devolver estoque?")) cancelOrderLogic(id); }
 
+        // --- CORREÇÃO: FUNÇÕES DE IMPRESSÃO E COMPARTILHAMENTO DO CÓDIGO 01 ---
+        window.generateOrderHTML = function(o) {
+            return `
+                <div style="font-family: monospace; width: 300px; padding: 20px; border: 1px solid #000; background: white;">
+                    <div style="text-align:center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px;">
+                        <h2 style="margin:0; font-size: 1.2rem;">DUPEÇAS</h2>
+                        <p style="margin:0; font-size: 0.8rem;">Duarte Peças</p>
+                        <p style="margin:0; font-size: 0.8rem;">Av. Sete de Setembro, 105 - Petrolina/PE</p>
+                        <p style="margin:0; font-size: 0.8rem;">(87) 9909-4280</p>
+                    </div>
+                    <div style="font-size: 0.9rem; margin-bottom: 10px;">
+                        <strong>PEDIDO: #${o.id}</strong><br>
+                        Data: ${o.date}<br>
+                        <strong>CLIENTE:</strong> ${o.customer} (${o.phone})
+                    </div>
+                    <table style="width: 100%; font-size: 0.8rem; border-collapse: collapse;">
+                        <tr style="border-bottom: 1px solid #000;">
+                            <th style="text-align:left;">Item / Detalhes</th>
+                            <th style="text-align:right;">Qtd</th>
+                            <th style="text-align:right;">R$</th>
+                        </tr>
+                        ${o.items.map(i => {
+                            const p = window.products.find(prod => prod.id === i.id) || {};
+                            return `
+                            <tr>
+                                <td style="padding-top:5px;"><strong>${i.name}</strong><br>
+                                    SKU: ${p.sku || '-'}<br>
+                                    Marca: ${p.vehicleBrand || '-'} ${p.vehicleModel || '-'}
+                                </td>
+                                <td style="text-align:right; vertical-align:top;">${i.quantity}</td>
+                                <td style="text-align:right; vertical-align:top;">${(i.price * i.quantity).toFixed(2)}</td>
+                            </tr>`;
+                        }).join('')}
+                    </table>
+                    <div style="border-top: 1px dashed #000; margin-top: 10px; padding-top: 5px; text-align: right; font-weight: bold; font-size: 1.1rem;">
+                        TOTAL: ${formatMoney(o.total)}
+                    </div>
+                </div>
+            `;
+        }
+
+        window.printOrder = function(id) {
+            const o = window.orders.find(x => x.id === id);
+            if(!o) return;
+            const content = window.generateOrderHTML(o);
+            const win = window.open('', '', 'height=600,width=400');
+            win.document.write('<html><head><title>Imprimir</title></head><body>');
+            win.document.write(content);
+            win.document.write('</body></html>');
+            win.document.close();
+            win.print();
+        }
+
+        window.shareOrder = async function(id) {
+            const o = window.orders.find(x => x.id === id);
+            if(!o) return;
+            const text = `PEDIDO #${o.id}\nCliente: ${o.customer}\nTotal: ${formatMoney(o.total)}`;
+            if (navigator.share) await navigator.share({ title: 'Pedido Dupeças', text: text });
+            else alert("Copie os dados:\n" + text);
+        }
+
+        // --- CORREÇÃO: RESTAURAÇÃO DE BACKUP (IGUAL AO CÓDIGO 01) ---
+        // A função restoreBackup agora usa o input file diretamente e atualiza a UI corretamente
+        window.restoreBackup = function(input) {
+            const file = input.files[0];
+            if (!file || !confirm("Isso SUBSTITUIRÁ o banco atual. Continuar?")) return;
+            
+            const modal = document.getElementById('restoreModal');
+            const progress = document.getElementById('restoreProgress');
+            const status = document.getElementById('restoreStatus');
+            
+            modal.classList.add('active');
+            progress.style.width = '5%';
+            status.innerText = "Lendo arquivo...";
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    status.innerText = "Limpando banco antigo...";
+                    progress.style.width = '10%';
+                    // Limpa todas as coleções de forma segura (como no Codigo 01)
+                    await DBService.clear('products'); 
+                    await DBService.clear('orders'); 
+                    await DBService.clear('brands'); 
+                    await DBService.clear('clients');
+
+                    status.innerText = "Restaurando dados...";
+                    const totalItems = (data.products?.length || 0) + (data.orders?.length || 0) + (data.clients?.length || 0) + (data.brands?.length || 0);
+                    let processed = 0;
+
+                    const updateProg = () => {
+                        processed++;
+                        const pct = 10 + Math.floor((processed / totalItems) * 90);
+                        progress.style.width = pct + '%';
+                    };
+
+                    // Inserção sequencial para garantir integridade
+                    if(data.products) for(const p of data.products) { await DBService.put('products', p); updateProg(); }
+                    if(data.orders) for(const o of data.orders) { await DBService.put('orders', o); updateProg(); }
+                    if(data.clients) for(const c of data.clients) { await DBService.put('clients', c); updateProg(); }
+                    if(data.brands) for(const b of data.brands) { await DBService.put('brands', typeof b === 'string' ? {name:b} : b); updateProg(); }
+                    
+                    status.innerText = "Atualizando sistema...";
+                    await loadData(); // Recarrega dados na memória
+                    
+                    renderAdminTable();
+                    renderOrdersTable();
+                    renderClientsTable();
+                    loadAdminDashboard();
+                    renderBrandsFilter();
+                    
+                    modal.classList.remove('active');
+                    showToast("Backup restaurado com sucesso!");
+                    
+                } catch (err) { 
+                    alert("Erro crítico na restauração: " + err.message); 
+                    modal.classList.remove('active'); 
+                } finally {
+                    input.value = ''; // Reseta input
+                }
+            };
+            reader.readAsText(file);
+        }
+
         window.applyReportFilters = function() { switchReport(window.currentReportType); }
         
         window.switchReport = function(type) {
@@ -1515,44 +1626,25 @@
             const startStr = document.getElementById('repStart').value;
             const endStr = document.getElementById('repEnd').value;
             
-            // Fix Date Logic: Parse strings to local time boundaries
-            // If empty, use 0 and Infinity
             let startTs = 0;
             let endTs = Infinity;
 
-            if (startStr) {
-                // Creates date at 00:00 local time
-                const d = new Date(startStr + "T00:00:00");
-                startTs = d.getTime();
-            }
-            if (endStr) {
-                // Creates date at 23:59:59 local time
-                const d = new Date(endStr + "T23:59:59");
-                endTs = d.getTime();
-            }
+            if (startStr) { const d = new Date(startStr + "T00:00:00"); startTs = d.getTime(); }
+            if (endStr) { const d = new Date(endStr + "T23:59:59"); endTs = d.getTime(); }
 
             let html = '';
-            let rows = []; // Data for export
+            let rows = []; 
 
             if (type === 'sales') {
                 let totalSales = 0;
                 let count = 0;
                 
                 window.orders.forEach(o => {
-                    const oTs = o.timestamp || 0; // Use stored timestamp
+                    const oTs = o.timestamp || 0; 
                     if (oTs >= startTs && oTs <= endTs && o.status !== 'Cancelado') {
                         o.items.forEach(i => {
                             const subTotal = i.price * i.quantity;
-                            rows.push({
-                                Data: o.date,
-                                Pedido: `#${o.id}`,
-                                Cliente: o.customer,
-                                Produto: i.name,
-                                SKU: i.sku || '-',
-                                Qtd: i.quantity,
-                                Valor: formatMoney(i.price),
-                                Total: formatMoney(subTotal)
-                            });
+                            rows.push({ Data: o.date, Pedido: `#${o.id}`, Cliente: o.customer, Produto: i.name, SKU: i.sku || '-', Qtd: i.quantity, Valor: formatMoney(i.price), Total: formatMoney(subTotal) });
                             totalSales += subTotal;
                             count += i.quantity;
                         });
@@ -1564,204 +1656,82 @@
                     <div class="data-table-wrapper">
                         <table class="data-table">
                             <thead><tr><th>Data</th><th>Pedido</th><th>Cliente</th><th>Produto</th><th>SKU</th><th>Qtd</th><th>Valor Unit.</th><th>Total</th></tr></thead>
-                            <tbody>
-                                ${rows.map(r => `<tr><td>${r.Data}</td><td>${r.Pedido}</td><td>${r.Cliente}</td><td>${r.Produto}</td><td>${r.SKU}</td><td>${r.Qtd}</td><td>${r.Valor}</td><td>${r.Total}</td></tr>`).join('')}
-                            </tbody>
-                            <tfoot>
-                                <tr style="background:#f1f5f9; font-weight:bold;">
-                                    <td colspan="5">TOTAIS</td>
-                                    <td>${count}</td>
-                                    <td>-</td>
-                                    <td>${formatMoney(totalSales)}</td>
-                                </tr>
-                            </tfoot>
+                            <tbody>${rows.map(r => `<tr><td>${r.Data}</td><td>${r.Pedido}</td><td>${r.Cliente}</td><td>${r.Produto}</td><td>${r.SKU}</td><td>${r.Qtd}</td><td>${r.Valor}</td><td>${r.Total}</td></tr>`).join('')}</tbody>
+                            <tfoot><tr style="background:#f1f5f9; font-weight:bold;"><td colspan="5">TOTAIS</td><td>${count}</td><td>-</td><td>${formatMoney(totalSales)}</td></tr></tfoot>
                         </table>
                     </div>`;
             } else if (type === 'stock') {
                 const low = window.products.filter(p => p.stock < 5);
                 rows = low.map(p => ({ Produto: p.name, SKU: p.sku, Estoque: p.stock }));
-                
-                html = `<h4 class="font-bold mb-4">Estoque Crítico (<5)</h4>
-                        <div class="data-table-wrapper">
-                            <table class="data-table"><thead><tr><th>Produto</th><th>SKU</th><th>Estoque</th></tr></thead><tbody>${rows.map(r => `<tr><td>${r.Produto}</td><td>${r.SKU}</td><td style="color:red;font-weight:bold;">${r.Estoque}</td></tr>`).join('')}</tbody></table>
-                        </div>`;
+                html = `<h4 class="font-bold mb-4">Estoque Crítico (<5)</h4><div class="data-table-wrapper"><table class="data-table"><thead><tr><th>Produto</th><th>SKU</th><th>Estoque</th></tr></thead><tbody>${rows.map(r => `<tr><td>${r.Produto}</td><td>${r.SKU}</td><td style="color:red;font-weight:bold;">${r.Estoque}</td></tr>`).join('')}</tbody></table></div>`;
             } else if (type === 'full-inventory') {
-                let grandTotal = 0;
-                let totalItems = 0;
-                
-                window.products.forEach(p => {
-                    const totalVal = p.price * p.stock;
-                    rows.push({ Produto: p.name, SKU: p.sku, Preco: formatMoney(p.price), Qtd: p.stock, Total: formatMoney(totalVal) });
-                    grandTotal += totalVal;
-                    totalItems += p.stock;
-                });
-
-                html = `
-                    <h4 class="font-bold mb-4">Inventário Completo</h4>
-                    <div class="mb-4 font-bold text-lg text-primary">Valor Total em Estoque: ${formatMoney(grandTotal)}</div>
-                    <div class="data-table-wrapper">
-                        <table class="data-table">
-                            <thead><tr><th>Produto</th><th>SKU</th><th>Preço Unit.</th><th>Qtd.</th><th>Valor Total</th></tr></thead>
-                            <tbody>${rows.map(r => `<tr><td>${r.Produto}</td><td>${r.SKU}</td><td>${r.Preco}</td><td>${r.Qtd}</td><td class="font-bold">${r.Total}</td></tr>`).join('')}</tbody>
-                            <tfoot>
-                                <tr style="background:#f1f5f9; font-weight:bold;">
-                                    <td colspan="3">TOTAIS</td>
-                                    <td>${totalItems}</td>
-                                    <td>${formatMoney(grandTotal)}</td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>`;
+                let grandTotal = 0; let totalItems = 0;
+                window.products.forEach(p => { const totalVal = p.price * p.stock; rows.push({ Produto: p.name, SKU: p.sku, Preco: formatMoney(p.price), Qtd: p.stock, Total: formatMoney(totalVal) }); grandTotal += totalVal; totalItems += p.stock; });
+                html = `<h4 class="font-bold mb-4">Inventário Completo</h4><div class="mb-4 font-bold text-lg text-primary">Valor Total em Estoque: ${formatMoney(grandTotal)}</div><div class="data-table-wrapper"><table class="data-table"><thead><tr><th>Produto</th><th>SKU</th><th>Preço Unit.</th><th>Qtd.</th><th>Valor Total</th></tr></thead><tbody>${rows.map(r => `<tr><td>${r.Produto}</td><td>${r.SKU}</td><td>${r.Preco}</td><td>${r.Qtd}</td><td class="font-bold">${r.Total}</td></tr>`).join('')}</tbody><tfoot><tr style="background:#f1f5f9; font-weight:bold;"><td colspan="3">TOTAIS</td><td>${totalItems}</td><td>${formatMoney(grandTotal)}</td></tr></tfoot></table></div>`;
             } else if (type === 'financial') {
                 const stockVal = window.products.reduce((a,b)=>a+(b.price*b.stock),0);
                 const salesVal = window.orders.filter(o=>o.status!=='Cancelado' && o.timestamp >= startTs && o.timestamp <= endTs).reduce((a,b)=>a+b.total,0);
-                
                 rows = [{ Metric: "Valor em Estoque", Value: formatMoney(stockVal) }, { Metric: "Total Vendido (Período)", Value: formatMoney(salesVal) }];
-                
-                html = `<h4 class="font-bold mb-4">Resumo Financeiro</h4>
-                        <div class="flex gap-4 flex-wrap">
-                            <div class="p-4 bg-body rounded border flex-1">Valor em Estoque: <span class="font-bold text-lg block text-primary">${formatMoney(stockVal)}</span></div>
-                            <div class="p-4 bg-body rounded border flex-1">Vendas no Período: <span class="font-bold text-lg block text-success">${formatMoney(salesVal)}</span></div>
-                        </div>`;
+                html = `<h4 class="font-bold mb-4">Resumo Financeiro</h4><div class="flex gap-4 flex-wrap"><div class="p-4 bg-body rounded border flex-1">Valor em Estoque: <span class="font-bold text-lg block text-primary">${formatMoney(stockVal)}</span></div><div class="p-4 bg-body rounded border flex-1">Vendas no Período: <span class="font-bold text-lg block text-success">${formatMoney(salesVal)}</span></div></div>`;
             }
-
-            // Save raw data for export functions
             window.currentReportRows = rows;
             container.innerHTML = html;
         }
 
         window.generateExportData = function(format) {
             const rows = window.currentReportRows;
-            if (!rows || rows.length === 0) {
-                alert("Nenhum dado para exportar. Gere o relatório primeiro.");
-                return;
-            }
-
-            let content = "";
-            let filename = `relatorio_${window.currentReportType}_${Date.now()}.${format}`;
-            let mime = "text/plain";
-
-            // Get headers from first object keys
+            if (!rows || rows.length === 0) { alert("Nenhum dado para exportar. Gere o relatório primeiro."); return; }
+            let content = ""; let filename = `relatorio_${window.currentReportType}_${Date.now()}.${format}`; let mime = "text/plain";
             const headers = Object.keys(rows[0]);
-
             if (format === 'csv' || format === 'txt') {
                 const separator = format === 'csv' ? ',' : '\t';
-                // Add BOM for Excel UTF-8 compatibility
                 if (format === 'csv') content += "\uFEFF"; 
-                
                 content += headers.join(separator) + "\n";
-                
                 rows.forEach(r => {
-                    const line = headers.map(h => {
-                        let val = String(r[h]);
-                        // Escape quotes/commas for CSV
-                        if (format === 'csv' && (val.includes(',') || val.includes('"'))) {
-                            val = `"${val.replace(/"/g, '""')}"`;
-                        }
-                        return val;
-                    });
+                    const line = headers.map(h => { let val = String(r[h]); if (format === 'csv' && (val.includes(',') || val.includes('"'))) { val = `"${val.replace(/"/g, '""')}"`; } return val; });
                     content += line.join(separator) + "\n";
                 });
-                
                 mime = format === 'csv' ? "text/csv" : "text/plain";
             } else if (format === 'xls') {
-                // HTML Table method for simple Excel export
                 mime = "application/vnd.ms-excel";
-                content = `
-                    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-                    <head><meta charset="UTF-8"></head><body>
-                    <table>
-                        <thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
-                        <tbody>${rows.map(r => `<tr>${headers.map(h => `<td>${r[h]}</td>`).join('')}</tr>`).join('')}</tbody>
-                    </table>
-                    </body></html>`;
+                content = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"></head><body><table><thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${headers.map(h => `<td>${r[h]}</td>`).join('')}</tr>`).join('')}</tbody></table></body></html>`;
             }
-
-            const a = document.createElement("a");
-            const file = new Blob([content], { type: mime });
-            a.href = URL.createObjectURL(file);
-            a.download = filename;
-            a.click();
+            const a = document.createElement("a"); const file = new Blob([content], { type: mime }); a.href = URL.createObjectURL(file); a.download = filename; a.click();
         }
 
         window.printReport = function() {
             const content = document.getElementById('report-content').innerHTML;
             const win = window.open('', '', 'height=600,width=800');
-            win.document.write(`<html><head><title>Relatório - Dupeças</title>
-                <style>
-                    body{font-family:sans-serif; padding: 20px;} 
-                    table{width:100%; border-collapse:collapse; margin-top:20px; font-size:12px;} 
-                    th,td{border:1px solid #ddd; padding:8px; text-align:left;} 
-                    th{background:#f1f5f9; font-weight:bold;}
-                    tfoot{font-weight:bold; background:#eee;}
-                    h4 {margin-bottom: 5px; font-size: 18px;}
-                </style>
-                </head><body>
-                <h2>Dupeças Duarte Peças - Relatório</h2>
-                <p>Data de Emissão: ${new Date().toLocaleString()}</p>
-                <hr>
-                ${content}
-                <script>window.print();<\/script></body></html>`);
+            win.document.write(`<html><head><title>Relatório - Dupeças</title><style>body{font-family:sans-serif; padding: 20px;} table{width:100%; border-collapse:collapse; margin-top:20px; font-size:12px;} th,td{border:1px solid #ddd; padding:8px; text-align:left;} th{background:#f1f5f9; font-weight:bold;} tfoot{font-weight:bold; background:#eee;} h4 {margin-bottom: 5px; font-size: 18px;}</style></head><body><h2>Dupeças Duarte Peças - Relatório</h2><p>Data de Emissão: ${new Date().toLocaleString()}</p><hr>${content}<script>window.print();<\/script></body></html>`);
             win.document.close();
         }
 
         window.toggleTheme = function() { document.body.classList.toggle('dark-mode'); localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light'); }
         window.saveSettings = function() { window.pixKey = document.getElementById('configPixKey').value; localStorage.setItem('dupecas_pix_key', window.pixKey); showToast("Configurações Salvas"); }
         
-        // --- FIXED: BULK UPDATE IMAGES (SYNC FIREBASE & UI FEEDBACK) ---
         window.bulkUpdateImages = async function() { 
-            const txt = document.getElementById('bulkImgInput').value; 
-            if(!txt) return; 
-            
-            showToast("Iniciando processamento...", "info");
-            
-            const lines = txt.split('\n'); 
-            let count = 0; 
-            let errors = 0;
-            const updates = [];
-            
-            for (const l of lines) { 
-                const parts = l.split(','); 
-                if(parts.length >= 2) { 
-                    const id = parts[0].trim(); 
-                    const url = parts.slice(1).join(',').trim(); 
-                    
-                    // Match by string equality to handle both number/string IDs
-                    // This finds the local object reference
-                    const prod = window.products.find(x => String(x.id) === String(id)); 
-                    
-                    if (prod && url) { 
-                        prod.image = url; // Update local state immediately
-                        // Push promise to array to await all Firebase writes
-                        updates.push(DBService.put('products', prod)); 
-                        count++; 
-                    } else {
-                        errors++;
-                    }
-                } 
-            } 
-            
-            try {
-                if(updates.length > 0) {
-                    await Promise.all(updates); // Wait for Firebase
-                    showToast(`${count} imagens atualizadas no Banco de Dados!`); 
-                    renderAdminTable(); 
-                    document.getElementById('bulkImgInput').value = '';
-                } else {
-                    showToast("Nenhum ID correspondente encontrado.", "error");
-                }
-            } catch (err) {
-                console.error(err);
-                showToast("Erro ao sincronizar com Firebase.", "error");
-            }
+            const txt = document.getElementById('bulkImgInput').value; if(!txt) return; showToast("Iniciando processamento...", "info");
+            const lines = txt.split('\n'); let count = 0; const updates = [];
+            for (const l of lines) { const parts = l.split(','); if(parts.length >= 2) { const id = parts[0].trim(); const url = parts.slice(1).join(',').trim(); const prod = window.products.find(x => String(x.id) === String(id)); if (prod && url) { prod.image = url; updates.push(DBService.put('products', prod)); count++; } } } 
+            try { if(updates.length > 0) { await Promise.all(updates); showToast(`${count} imagens atualizadas no Banco de Dados!`); renderAdminTable(); document.getElementById('bulkImgInput').value = ''; } else { showToast("Nenhum ID correspondente encontrado.", "error"); } } catch (err) { console.error(err); showToast("Erro ao sincronizar com Firebase.", "error"); }
         }
         
         window.resetSystem = async function() { const pwd = prompt("Senha:"); if(pwd === "dupeca2026") { if(confirm("Apagar tudo?")) { await DBService.clear('products'); await DBService.clear('orders'); await DBService.clear('brands'); await DBService.clear('clients'); window.location.reload(); } } }
         window.exportData = async function(type) { const data = {timestamp:Date.now(), products:window.products, orders:window.orders, clients:window.clients, brands:window.brands.map(b=>({name:b}))}; await DBService.saveCloudBackup(data); renderCloudBackups(); const content = JSON.stringify(data); const a = document.createElement("a"); const file = new Blob([content], {type:'application/json'}); a.href = URL.createObjectURL(file); a.download = `backup_${Date.now()}.json`; a.click(); }
-        window.restoreBackup = function(input) { const file = input.files[0]; if(!file) return; processBackupData(file); }
-        window.processBackupData = function(fileOrJson) { const modal = document.getElementById('restoreModal'); modal.classList.add('active'); const doRestore = async (data) => { if(data.products) for(const p of data.products) await DBService.put('products', p); if(data.orders) for(const o of data.orders) await DBService.put('orders', o); if(data.clients) for(const c of data.clients) await DBService.put('clients', c); if(data.brands) for(const b of data.brands) await DBService.put('brands', typeof b === 'string' ? {name:b}:b); await loadData(); renderAdminTable(); renderOrdersTable(); renderClientsTable(); modal.classList.remove('active'); showToast("Restaurado (Mesclado)!"); }; if(fileOrJson instanceof File) { const reader = new FileReader(); reader.onload = (e) => doRestore(JSON.parse(e.target.result)); reader.readAsText(fileOrJson); } else { doRestore(fileOrJson); } }
+        
+        window.processBackupData = function(fileOrJson) { alert("Use a função Restaurar Arquivo Local para restauração completa segura."); }
         window.renderCloudBackups = async function() { const list = document.getElementById('cloudBackupsList'); try { const backups = await DBService.getCloudBackups(); list.innerHTML = backups.length ? backups.map(b => `<div style="padding:0.5rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between;"><div>Backup ${new Date(b.timestamp).toLocaleString()}</div><button onclick='restoreCloudBackup(${JSON.stringify(b.content)})' class="btn-sm btn-secondary">Restaurar</button></div>`).join('') : 'Sem backups.'; } catch(e) { list.innerText = "Erro ao carregar backups."; } }
-        window.restoreCloudBackup = function(json) { if(confirm("Restaurar?")) processBackupData(JSON.parse(json)); }
+        
+        // Adaptação para restaurar do Cloud usando a mesma logica segura (via modal simulado ou direto)
+        window.restoreCloudBackup = function(json) { 
+            if(!confirm("Restaurar backup da nuvem? Isso substituirá os dados atuais.")) return;
+            // Cria um Blob para simular um arquivo e reutilizar a função segura restoreBackup
+            const blob = new Blob([json], {type: 'application/json'});
+            const file = new File([blob], "cloud_backup.json");
+            // Hack para reutilizar a função que espera um input
+            const dummyInput = { files: [file], value: '' };
+            restoreBackup(dummyInput);
+        }
 
     </script>
 </body>
