@@ -1,17 +1,17 @@
 
+
 <!DOCTYPE html>
 <html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dupeças Duarte Peças | Sistema Integrado Completo</title>
+    <title>Dupeças Duarte Peças | Sistema Integrado</title>
     
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* --- CSS ORIGINAL MANTIDO E EXPANDIDO --- */
         :root {
             --primary: #2563eb;        
             --primary-dark: #1e40af;   
@@ -51,12 +51,16 @@
         a { text-decoration: none; color: inherit; }
         ul { list-style: none; }
         button { cursor: pointer; border: none; font-family: inherit; }
+        /* Aumentado espaçamento nos inputs */
         input, select, textarea { width: 100%; padding: 0.8rem 1rem; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 1rem; background: var(--bg-body); color: var(--text-main); font-size: 0.95rem; transition: all 0.2s; }
         input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
         label { display: block; margin-bottom: 0.4rem; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
         .container { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; }
+        
+        /* Utilitários de Espaçamento */
         .flex { display: flex; } .flex-col { flex-direction: column; } .items-center { align-items: center; } .justify-between { justify-content: space-between; }
         .gap-2 { gap: 0.5rem; } .gap-3 { gap: 0.75rem; } .gap-4 { gap: 1rem; } .hidden { display: none !important; } .w-full { width: 100%; }
+        
         .text-sm { font-size: 0.875rem; } .font-bold { font-weight: 700; } .rounded { border-radius: var(--radius); } .text-warning { color: var(--warning); }
         .btn { padding: 0.75rem 1.25rem; border-radius: var(--radius); font-weight: 600; font-size: 0.95rem; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer; border: 1px solid transparent; }
         .btn-sm { padding: 0.5rem 1rem; font-size: 0.85rem; }
@@ -109,7 +113,6 @@
         .products-list .card-img { width: 140px; height: 140px; flex-shrink: 0; }
         .products-list .card-body { padding: 1rem 1.5rem; }
         
-        /* ADMIN STYLES */
         .admin-layout { display: flex; height: 100vh; overflow: hidden; }
         .admin-sidebar { width: var(--sidebar-width); background: var(--secondary); color: white; display: flex; flex-direction: column; flex-shrink: 0; z-index: 100; transition: width 0.3s ease; overflow: hidden; white-space: nowrap; }
         .admin-sidebar.collapsed { width: var(--sidebar-collapsed-width); }
@@ -143,7 +146,6 @@
         .modal-overlay.active { display: flex; }
         .modal { background: var(--bg-card); width: 100%; max-width: 900px; border-radius: 1rem; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); animation: scaleIn 0.2s; max-height: 90vh; overflow-y: auto; position: relative; border: 1px solid var(--border); }
         .close-modal { position: absolute; top: 1rem; right: 1rem; background: var(--bg-body); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid var(--border); }
-        
         .cart-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 100%; max-width: 450px; background: var(--bg-card); z-index: 200; transform: translateX(100%); transition: 0.3s; display: flex; flex-direction: column; box-shadow: -10px 0 30px rgba(0,0,0,0.2); }
         .cart-drawer.open { transform: translateX(0); }
         .cart-header { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--secondary); color: white; }
@@ -151,22 +153,20 @@
         .cart-footer { padding: 2rem; border-top: 1px solid var(--border); background: var(--bg-body); }
         .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 150; display: none; }
         .drawer-overlay.open { display: block; }
-        
         .qty-controls { display: flex; align-items: center; gap: 0.5rem; background: var(--bg-body); border: 1px solid var(--border); border-radius: 4px; padding: 2px; }
         .qty-btn { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; background: white; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; font-weight: bold; color: var(--text-main); }
         .qty-btn:hover { background: var(--primary-light); color: var(--primary); }
         .qty-val { font-size: 0.9rem; font-weight: 600; min-width: 20px; text-align: center; }
-        
         .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
         .toast { background: var(--secondary); color: white; padding: 12px 20px; border-radius: 8px; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 10px; animation: slideInRight 0.3s ease-out; max-width: 300px; font-size: 0.9rem; }
         .toast.success { border-left: 4px solid var(--success); }
         .toast.error { border-left: 4px solid var(--danger); }
         
         /* Universal Grid/List Styles */
-        .admin-grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+        .admin-grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; } /* Aumentado GAP */
         .admin-card { 
-            background: var(--bg-card); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1rem; 
-            display: flex; flex-direction: column; gap: 0.75rem; box-shadow: var(--shadow-sm); position: relative;
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.5rem; 
+            display: flex; flex-direction: column; gap: 1rem; box-shadow: var(--shadow-sm); position: relative; /* Aumentado padding e gap */
         }
         .admin-card:hover { border-color: var(--primary); }
         .card-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; border-bottom: 1px dashed var(--border); padding-bottom: 0.5rem; }
@@ -192,7 +192,7 @@
             .search-wrapper { margin: 0 1rem; }
             .admin-main { padding: 1rem; }
             .promo-grid { grid-template-columns: 1fr; }
-            .admin-grid-view { grid-template-columns: 1fr; } 
+            .admin-grid-view { grid-template-columns: 1fr; } /* Force single col on mobile grid */
         }
         @media (min-width: 769px) {
             .btn-toggle-mobile { display: none; }
@@ -243,15 +243,33 @@
     <div id="clientFormModal" class="modal-overlay" style="z-index: 1600;" onclick="if(event.target === this) closeClientForm()">
         <div class="modal" style="max-width: 600px;">
             <div class="close-modal" onclick="closeClientForm()"><i data-lucide="x"></i></div>
-            <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem;">Cadastro de Cliente</h3>
-            <form onsubmit="saveClient(event)" style="display: flex; flex-direction: column; gap: 1rem;">
+            <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1.5rem;">Cadastro Completo de Cliente</h3>
+            <form onsubmit="saveClient(event)" style="display: flex; flex-direction: column; gap: 1.5rem;">
                 <input type="hidden" id="cliId">
-                <input type="text" id="cliName" placeholder="Nome Completo *" required>
-                <div class="flex gap-4">
-                    <input type="text" id="cliCpf" placeholder="CPF">
-                    <input type="email" id="cliEmail" placeholder="E-mail">
+                <div>
+                    <label>Dados Pessoais</label>
+                    <input type="text" id="cliName" placeholder="Nome Completo *" required>
+                    <div class="flex gap-4">
+                        <input type="text" id="cliCpf" placeholder="CPF">
+                        <input type="email" id="cliEmail" placeholder="E-mail">
+                    </div>
+                    <input type="tel" id="cliPhone" placeholder="Telefone/WhatsApp *" required>
                 </div>
-                <input type="tel" id="cliPhone" placeholder="Telefone/WhatsApp *" required>
+                <div>
+                    <label>Endereço</label>
+                    <div class="flex gap-4">
+                        <input type="text" id="cliCep" placeholder="CEP" style="width: 120px;">
+                        <input type="text" id="cliAddress" placeholder="Logradouro" style="flex:1;">
+                    </div>
+                    <div class="flex gap-4">
+                        <input type="text" id="cliNum" placeholder="Nº" style="width: 80px;">
+                        <input type="text" id="cliDistrict" placeholder="Bairro" style="flex:1;">
+                    </div>
+                    <div class="flex gap-4">
+                        <input type="text" id="cliCity" placeholder="Cidade" style="flex:1;">
+                        <input type="text" id="cliState" placeholder="UF" style="width: 60px;">
+                    </div>
+                </div>
                 <button type="submit" class="btn btn-primary w-full">Salvar Cliente</button>
             </form>
         </div>
@@ -262,10 +280,10 @@
             <div class="close-modal" onclick="closeEditOrder()"><i data-lucide="x"></i></div>
             <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem;">Editar / Novo Pedido</h3>
             
-            <div style="display:flex; flex-direction:column; gap:1rem; height: 100%;">
+            <div style="display:flex; flex-direction:column; gap:1.5rem; height: 100%;">
                 
-                <div style="background: var(--bg-body); padding: 1rem; border-radius: 8px; border: 1px solid var(--border);">
-                    <h4 style="font-weight:700; margin-bottom:0.5rem;">Dados do Cliente</h4>
+                <div style="background: var(--bg-body); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border);">
+                    <h4 style="font-weight:700; margin-bottom:1rem;">Dados do Cliente</h4>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                         <input type="text" id="editClientName" placeholder="Nome do Cliente" style="margin-bottom:0;">
                         <input type="text" id="editClientPhone" placeholder="Telefone / WhatsApp" style="margin-bottom:0;">
@@ -274,13 +292,13 @@
                     </div>
                 </div>
 
-                <div style="flex:1; border:1px solid var(--border); border-radius:8px; padding:1rem; overflow-y:auto; max-height: 250px;">
-                    <h4 style="font-weight:700; margin-bottom:0.5rem;">Itens no Pedido</h4>
+                <div style="flex:1; border:1px solid var(--border); border-radius:8px; padding:1.5rem; overflow-y:auto; max-height: 250px;">
+                    <h4 style="font-weight:700; margin-bottom:1rem;">Itens no Pedido</h4>
                     <div id="editOrderItemsList"></div>
                 </div>
 
-                <div style="border:1px solid var(--border); border-radius:8px; padding:1rem; background: var(--bg-body); position: relative;">
-                    <h4 style="font-weight:700; margin-bottom:0.5rem;">Adicionar Produto</h4>
+                <div style="border:1px solid var(--border); border-radius:8px; padding:1.5rem; background: var(--bg-body); position: relative;">
+                    <h4 style="font-weight:700; margin-bottom:1rem;">Adicionar Produto</h4>
                     <input type="text" id="editSearchProd" placeholder="Buscar produto para adicionar..." oninput="searchProdForOrder(this.value)">
                     <div id="editProdResults" style="display: none;"></div>
                 </div>
@@ -565,6 +583,9 @@
                 <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
                     <h3 class="font-bold text-lg">Central de Relatórios</h3>
                     <div class="flex gap-2">
+                        <button onclick="exportReport('txt')" class="btn btn-secondary btn-sm"><i data-lucide="file-text"></i> TXT</button>
+                        <button onclick="exportReport('csv')" class="btn btn-secondary btn-sm"><i data-lucide="sheet"></i> CSV</button>
+                        <button onclick="exportReport('xls')" class="btn btn-secondary btn-sm"><i data-lucide="table"></i> Excel</button>
                         <button onclick="printReport()" class="btn btn-secondary btn-sm"><i data-lucide="printer"></i> PDF/Imprimir</button>
                     </div>
                 </div>
@@ -1359,6 +1380,7 @@
                                     <button onclick="printOrder(${o.id})" class="btn-icon" title="Imprimir Nota"><i data-lucide="printer"></i></button>
                                     <button onclick="shareOrder(${o.id})" class="btn-icon" title="Compartilhar"><i data-lucide="share-2"></i></button>
                                     <button onclick="openOrderDetail(${o.id})" class="btn-icon text-primary"><i data-lucide="eye"></i></button>
+                                    ${o.status!=='Cancelado' ? `<button onclick="cancelOrder(${o.id})" title="Cancelar e Estornar" class="btn-icon text-danger"><i data-lucide="ban"></i></button>`:''}
                                     ${o.status!=='Cancelado' ? `<button onclick="openEditOrder(${o.id})" class="btn-icon text-warning"><i data-lucide="edit"></i></button>`:''}
                                 </td>
                             </tr>`).join('')}
@@ -1378,7 +1400,7 @@
                                 <button onclick="printOrder(${o.id})" class="btn btn-secondary"><i data-lucide="printer"></i></button>
                                 <button onclick="shareOrder(${o.id})" class="btn btn-secondary"><i data-lucide="share-2"></i></button>
                                 <button onclick="openOrderDetail(${o.id})" class="btn btn-primary">Ver</button>
-                                ${o.status!=='Cancelado' ? `<button onclick="openEditOrder(${o.id})" class="btn btn-secondary text-warning"><i data-lucide="edit"></i></button>`:''}
+                                ${o.status!=='Cancelado' ? `<button onclick="cancelOrder(${o.id})" class="btn btn-danger">Cancelar</button>`:''}
                             </div>
                         </div>`).join('')}
                 </div>`;
@@ -1417,10 +1439,10 @@
         window.previewUrl = function(url) { if(url) { document.getElementById('formPreview').src = url; document.getElementById('formPreview').style.display = 'block'; document.getElementById('uploadPlaceholder').style.display = 'none'; } }
         window.deleteProduct = async function(id) { if(confirm("Excluir?")) { window.products = window.products.filter(p => p.id !== id); await DBService.delete('products', id); renderAdminTable(); showToast("Produto Excluído"); } }
 
-        window.openClientForm = function() { ['cliId', 'cliName', 'cliCpf', 'cliEmail', 'cliPhone'].forEach(id => document.getElementById(id).value = ''); document.getElementById('clientFormModal').classList.add('active'); }
+        window.openClientForm = function() { ['cliId', 'cliName', 'cliCpf', 'cliEmail', 'cliPhone', 'cliCep', 'cliAddress', 'cliNum', 'cliDistrict', 'cliCity', 'cliState'].forEach(id => document.getElementById(id).value = ''); document.getElementById('clientFormModal').classList.add('active'); }
         window.closeClientForm = function() { document.getElementById('clientFormModal').classList.remove('active'); }
-        window.saveClient = async function(e) { e.preventDefault(); const id = document.getElementById('cliId').value; const client = { id: id ? parseInt(id) : Date.now(), name: document.getElementById('cliName').value, cpf: document.getElementById('cliCpf').value, email: document.getElementById('cliEmail').value, phone: document.getElementById('cliPhone').value }; await DBService.put('clients', client); if(id) { const idx = window.clients.findIndex(c => c.id == id); window.clients[idx] = client; } else { window.clients.push(client); } closeClientForm(); renderClientsTable(); showToast("Cliente salvo!"); }
-        window.editClient = function(id) { const c = window.clients.find(x => x.id === id); if(!c) return; document.getElementById('cliId').value = c.id; document.getElementById('cliName').value = c.name; document.getElementById('cliCpf').value = c.cpf || ''; document.getElementById('cliEmail').value = c.email || ''; document.getElementById('cliPhone').value = c.phone; document.getElementById('clientFormModal').classList.add('active'); }
+        window.saveClient = async function(e) { e.preventDefault(); const id = document.getElementById('cliId').value; const client = { id: id ? parseInt(id) : Date.now(), name: document.getElementById('cliName').value, cpf: document.getElementById('cliCpf').value, email: document.getElementById('cliEmail').value, phone: document.getElementById('cliPhone').value, address: { cep: document.getElementById('cliCep').value, street: document.getElementById('cliAddress').value, num: document.getElementById('cliNum').value, district: document.getElementById('cliDistrict').value, city: document.getElementById('cliCity').value, state: document.getElementById('cliState').value } }; await DBService.put('clients', client); if(id) { const idx = window.clients.findIndex(c => c.id == id); window.clients[idx] = client; } else { window.clients.push(client); } closeClientForm(); renderClientsTable(); showToast("Cliente salvo!"); }
+        window.editClient = function(id) { const c = window.clients.find(x => x.id === id); if(!c) return; document.getElementById('cliId').value = c.id; document.getElementById('cliName').value = c.name; document.getElementById('cliCpf').value = c.cpf || ''; document.getElementById('cliEmail').value = c.email || ''; document.getElementById('cliPhone').value = c.phone; if(c.address){ document.getElementById('cliCep').value = c.address.cep; document.getElementById('cliAddress').value = c.address.street; document.getElementById('cliNum').value = c.address.num; document.getElementById('cliDistrict').value = c.address.district; document.getElementById('cliCity').value = c.address.city; document.getElementById('cliState').value = c.address.state; } document.getElementById('clientFormModal').classList.add('active'); }
         window.deleteClient = async function(id) { if(confirm("Excluir cliente?")) { window.clients = window.clients.filter(c => c.id !== id); await DBService.delete('clients', id); renderClientsTable(); showToast("Cliente excluído."); } }
 
         // --- ORDER EDIT LOGIC ---
@@ -1466,35 +1488,53 @@
         window.cancelOrderLogic = async function(id, isAuto = false) { const o = window.orders.find(x => x.id === id); if(!o || o.status === 'Cancelado') return; for (const item of o.items) { const prod = window.products.find(p => p.id === item.id); if (prod) { prod.stock += item.quantity; await DBService.put('products', prod); } } o.status = 'Cancelado'; await DBService.put('orders', o); if(!isAuto) { renderOrdersTable(); loadAdminDashboard(); showToast("Cancelado e estornado."); } }
         window.cancelOrder = function(id) { if(confirm("Cancelar pedido e devolver estoque?")) cancelOrderLogic(id); }
 
-        window.printOrder = function(id) {
-            const o = window.orders.find(x => x.id === id);
-            const win = window.open('', '', 'width=800,height=600');
-            win.document.write(`<html><head><title>Pedido #${o.id}</title><style>body{font-family:monospace; padding:20px;} table{width:100%; border-collapse:collapse;} th,td{border-bottom:1px solid #000; padding:5px; text-align:left;} .right{text-align:right;}</style></head><body>
-            <center><h3>DUPEÇAS DUARTE PEÇAS</h3><p>Av. Sete de Setembro, 105 - Petrolina/PE<br>Tel: (87) 9909-4280</p></center><hr>
-            <p><b>Pedido:</b> #${o.id}<br><b>Data:</b> ${o.date}<br><b>Cliente:</b> ${o.customer} (${o.phone})<br><b>CPF:</b> ${o.cpf||'-'}<br><b>Email:</b> ${o.email||'-'}</p><hr>
-            <table><tr><th>Qtd</th><th>Produto</th><th>Unit</th><th>Total</th></tr>
-            ${o.items.map(i => `<tr><td>${i.quantity}</td><td>${i.name}<br><small>${i.sku}</small></td><td>${i.price.toFixed(2)}</td><td class="right">${(i.price*i.quantity).toFixed(2)}</td></tr>`).join('')}
-            </table><br><h3 class="right">TOTAL: R$ ${o.total.toFixed(2)}</h3><p><i>* Documento não fiscal (Conferência)</i></p><script>window.print();<\/script></body></html>`);
-            win.document.close();
-        }
-
-        window.shareOrder = function(id) {
-            const o = window.orders.find(x => x.id === id);
-            let msg = `*RESUMO DO PEDIDO #${o.id}*\n📅 ${o.date}\n👤 ${o.customer}\n\n`;
-            o.items.forEach(i => msg += `▪ ${i.quantity}x ${i.name} (${i.sku})\n`);
-            msg += `\n💰 *Total: R$ ${o.total.toFixed(2)}*`;
-            msg += `\n🔑 *Chave PIX:* ${window.pixKey}`;
-            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
-        }
-
-        window.applyReportFilters = function() { switchReport(window.currentReportType); }
-        window.switchReport = function(type) { window.currentReportType = type; document.querySelectorAll('.report-tab-btn').forEach(b => b.classList.remove('active')); event.target.classList.add('active'); const container = document.getElementById('report-content'); const startStr = document.getElementById('repStart').value; const endStr = document.getElementById('repEnd').value; const startTs = startStr ? new Date(startStr + "T00:00:00").getTime() : 0; const endTs = endStr ? new Date(endStr + "T23:59:59").getTime() : Infinity; let html = ''; let currentReportData = []; if(type === 'sales') { window.orders.forEach(o => { const oTs = o.timestamp || 0; if (oTs >= startTs && oTs <= endTs) { o.items.forEach(i => { currentReportData.push({ Data: o.date, Pedido_ID: o.id, Cliente: o.customer, Status: o.status, Produto: i.name, SKU: i.sku || 'N/A', Qtd: i.quantity, Preco_Unit: i.price, Total_Item: i.price * i.quantity }); }); } }); html = `<h4 class="font-bold mb-4">Vendas Detalhadas</h4><div class="table-responsive"><table class="data-table"><thead><tr><th>Data</th><th>Pedido</th><th>Cliente</th><th>Produto</th><th>SKU</th><th>Qtd</th><th>Total</th></tr></thead><tbody>${currentReportData.map(r => `<tr><td>${r.Data}</td><td>${r.Pedido_ID}</td><td>${r.Cliente}</td><td>${r.Produto}</td><td>${r.SKU}</td><td>${r.Qtd}</td><td>${formatMoney(r.Total_Item)}</td></tr>`).join('')}</tbody></table></div>`; } else if (type === 'stock') { currentReportData = window.products.filter(p => p.stock < 5); html = `<h4 class="font-bold mb-4">Estoque Crítico (<5)</h4><div class="table-responsive"><table class="data-table"><thead><tr><th>Produto</th><th>SKU</th><th>Estoque</th></tr></thead><tbody>${currentReportData.map(p => `<tr><td>${p.name}</td><td>${p.sku}</td><td style="color:red;font-weight:bold;">${p.stock}</td></tr>`).join('')}</tbody></table></div>`; } else if (type === 'full-inventory') { const grandTotal = window.products.reduce((a,b)=>a+(b.price*b.stock), 0); html = `<h4 class="font-bold mb-4">Inventário Completo</h4><div class="mb-4 font-bold text-lg text-primary">Total em Estoque: ${formatMoney(grandTotal)}</div><div class="table-responsive"><table class="data-table"><thead><tr><th>Produto</th><th>Preço Unit.</th><th>Qtd.</th><th>Total</th></tr></thead><tbody>${window.products.map(p => `<tr><td>${p.name}</td><td>${formatMoney(p.price)}</td><td>${p.stock}</td><td>${formatMoney(p.price * p.stock)}</td></tr>`).join('')}</tbody></table></div>`; } else if (type === 'financial') { const totalInvested = window.products.reduce((a,b)=>a+(b.price*b.stock),0); html = `<h4 class="font-bold mb-4">Financeiro</h4><div class="p-4 bg-body rounded border">Total em Estoque: <span class="font-bold text-lg">${formatMoney(totalInvested)}</span></div>`; } container.innerHTML = html; }
-        
         window.printReport = function() { const content = document.getElementById('report-content').innerHTML; const win = window.open('', '', 'height=600,width=800'); win.document.write('<html><head><title>Relatório</title><style>body{font-family:sans-serif;} table{width:100%;border-collapse:collapse;} th,td{border:1px solid #ddd;padding:8px;} th{background:#eee;}</style></head><body>' + content + '</body></html>'); win.document.close(); win.print(); }
+        window.downloadFile = function(filename, content, type) { const a = document.createElement("a"); const file = new Blob([content], {type: type}); a.href = URL.createObjectURL(file); a.download = filename; a.click(); }
+        window.exportReport = function(format) {
+            let data = "";
+            let filename = `relatorio_${Date.now()}.${format}`;
+            let mime = "text/plain";
+            
+            if(window.currentReportType === 'sales') {
+                const header = format === 'csv' ? "Data,Pedido,Cliente,Total\n" : "Data\tPedido\tCliente\tTotal\n";
+                data = header + window.orders.map(o => `${o.date},#${o.id},${o.customer},${o.total}`).join("\n");
+                if(format === 'xls') {
+                    mime = "application/vnd.ms-excel";
+                    data = `<table><tr><th>Data</th><th>Pedido</th><th>Cliente</th><th>Total</th></tr>${window.orders.map(o=>`<tr><td>${o.date}</td><td>${o.id}</td><td>${o.customer}</td><td>${o.total}</td></tr>`).join('')}</table>`;
+                }
+            } else {
+                alert("Exportação simplificada disponível apenas para Vendas nesta versão.");
+                return;
+            }
+            window.downloadFile(filename, data, mime);
+        }
 
         window.toggleTheme = function() { document.body.classList.toggle('dark-mode'); localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light'); }
         window.saveSettings = function() { window.pixKey = document.getElementById('configPixKey').value; localStorage.setItem('dupecas_pix_key', window.pixKey); showToast("Configurações Salvas"); }
-        window.bulkUpdateImages = async function() { const txt = document.getElementById('bulkImgInput').value; if(!txt) return; const lines = txt.split('\n'); let count = 0; for (const l of lines) { const parts = l.split(','); if(parts.length >= 2) { const id = parts[0].trim(); const url = parts.slice(1).join(',').trim(); const prod = window.products.find(x => x.id == id); if (prod && url) { prod.image = url; await DBService.put('products', prod); count++; } } } showToast(`${count} imagens atualizadas!`); renderAdminTable(); }
+        
+        window.bulkUpdateImages = async function() { 
+            const txt = document.getElementById('bulkImgInput').value; 
+            if(!txt) return; 
+            const lines = txt.split('\n'); 
+            let count = 0; 
+            for (const l of lines) { 
+                const parts = l.split(','); 
+                if(parts.length >= 2) { 
+                    const id = parts[0].trim(); 
+                    const url = parts.slice(1).join(',').trim(); 
+                    // Tenta achar string ou numero
+                    const prod = window.products.find(x => String(x.id) === String(id)); 
+                    if (prod && url) { 
+                        prod.image = url; 
+                        await DBService.put('products', prod); 
+                        count++; 
+                    } 
+                } 
+            } 
+            showToast(`${count} imagens atualizadas!`); 
+            renderAdminTable(); 
+        }
+        
         window.resetSystem = async function() { const pwd = prompt("Senha:"); if(pwd === "dupeca2026") { if(confirm("Apagar tudo?")) { await DBService.clear('products'); await DBService.clear('orders'); await DBService.clear('brands'); await DBService.clear('clients'); window.location.reload(); } } }
         window.exportData = async function(type) { const data = {timestamp:Date.now(), products:window.products, orders:window.orders, clients:window.clients, brands:window.brands.map(b=>({name:b}))}; await DBService.saveCloudBackup(data); renderCloudBackups(); const content = JSON.stringify(data); const a = document.createElement("a"); const file = new Blob([content], {type:'application/json'}); a.href = URL.createObjectURL(file); a.download = `backup_${Date.now()}.json`; a.click(); }
         window.restoreBackup = function(input) { const file = input.files[0]; if(!file) return; processBackupData(file); }
