@@ -50,16 +50,12 @@
         a { text-decoration: none; color: inherit; }
         ul { list-style: none; }
         button { cursor: pointer; border: none; font-family: inherit; }
-        
-        /* Espaçamento melhorado nos inputs */
         input, select, textarea { width: 100%; padding: 0.8rem 1rem; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 1rem; background: var(--bg-body); color: var(--text-main); font-size: 0.95rem; transition: all 0.2s; }
         input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
         label { display: block; margin-bottom: 0.4rem; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
         .container { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; }
-        
         .flex { display: flex; } .flex-col { flex-direction: column; } .items-center { align-items: center; } .justify-between { justify-content: space-between; }
         .gap-2 { gap: 0.5rem; } .gap-3 { gap: 0.75rem; } .gap-4 { gap: 1rem; } .hidden { display: none !important; } .w-full { width: 100%; }
-        
         .text-sm { font-size: 0.875rem; } .font-bold { font-weight: 700; } .rounded { border-radius: var(--radius); } .text-warning { color: var(--warning); }
         .btn { padding: 0.75rem 1.25rem; border-radius: var(--radius); font-weight: 600; font-size: 0.95rem; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer; border: 1px solid transparent; }
         .btn-sm { padding: 0.5rem 1rem; font-size: 0.85rem; }
@@ -821,17 +817,28 @@
                     return querySnapshot.docs.map(doc => doc.data());
                 } catch (error) {
                     console.error("Erro ao ler " + collectionName, error);
+                    alert(`Erro de conexão com o Banco de Dados (${collectionName}). Verifique se as Regras do Firestore estão configuradas como públicas ou se há bloqueio.`);
                     return [];
                 }
             },
             async put(collectionName, data) {
-                const idString = String(data.id || Date.now());
-                // Use merge: true to avoid overwriting existing fields when updating partial data
-                await setDoc(doc(db, collectionName, idString), data, { merge: true });
-                return data;
+                try {
+                    const idString = String(data.id || Date.now());
+                    await setDoc(doc(db, collectionName, idString), data, { merge: true });
+                    return data;
+                } catch(error) {
+                    console.error("Erro ao salvar", error);
+                    alert("Erro ao salvar dados no Firebase. Verifique permissões.");
+                    throw error;
+                }
             },
             async delete(collectionName, id) {
-                await deleteDoc(doc(db, collectionName, String(id)));
+                try {
+                    await deleteDoc(doc(db, collectionName, String(id)));
+                } catch(error) {
+                    console.error("Erro ao deletar", error);
+                    alert("Erro ao excluir dados.");
+                }
             },
             async clear(collectionName) {
                 const q = await getDocs(collection(db, collectionName));
@@ -840,18 +847,27 @@
                 await Promise.all(deletePromises);
             },
             async saveCloudBackup(data) {
-                await addDoc(collection(db, 'system_backups'), { timestamp: Date.now(), content: JSON.stringify(data) });
-                const q = query(collection(db, 'system_backups'), orderBy('timestamp', 'asc'));
-                const snapshot = await getDocs(q);
-                if(snapshot.size > 3) {
-                    const toDelete = snapshot.size - 3;
-                    for(let i=0; i<toDelete; i++) await deleteDoc(snapshot.docs[i].ref);
+                try {
+                    await addDoc(collection(db, 'system_backups'), { timestamp: Date.now(), content: JSON.stringify(data) });
+                    const q = query(collection(db, 'system_backups'), orderBy('timestamp', 'asc'));
+                    const snapshot = await getDocs(q);
+                    if(snapshot.size > 3) {
+                        const toDelete = snapshot.size - 3;
+                        for(let i=0; i<toDelete; i++) await deleteDoc(snapshot.docs[i].ref);
+                    }
+                } catch (e) {
+                    console.error("Erro Backup Cloud", e);
+                    alert("Falha ao salvar backup na nuvem.");
                 }
             },
             async getCloudBackups() {
-                const q = query(collection(db, 'system_backups'), orderBy('timestamp', 'desc'));
-                const snapshot = await getDocs(q);
-                return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                try {
+                    const q = query(collection(db, 'system_backups'), orderBy('timestamp', 'desc'));
+                    const snapshot = await getDocs(q);
+                    return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+                } catch(e) {
+                    return [];
+                }
             }
         };
         
@@ -867,7 +883,7 @@
         window.visibleProductsLimit = 25; 
         window.adminViewMode = 'list'; 
         window.currentReportType = 'sales';
-        window.currentReportRows = []; // To store data for export
+        window.currentReportRows = [];
 
         window.showToast = function(msg, type = 'success') {
             const container = document.getElementById('toastContainer');
