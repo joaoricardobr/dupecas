@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="pt-PT">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dupeças Duarte Peças | Sistema Integrado</title>
+    <title>Dupeças Duarte Peças | Sistema Híbrido</title>
     
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -45,74 +44,129 @@
             --border: #334155;
             --border-focus: #3b82f6;
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg-body); color: var(--text-main); transition: background 0.3s, color 0.3s; overflow-x: hidden; display: flex; flex-direction: column; min-height: 100vh; }
+        
+        /* Reset e Hibridez */
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        body { background-color: var(--bg-body); color: var(--text-main); transition: background 0.3s, color 0.3s; overflow-x: hidden; display: flex; flex-direction: column; min-height: 100vh; -webkit-font-smoothing: antialiased; }
         a { text-decoration: none; color: inherit; }
         ul { list-style: none; }
-        button { cursor: pointer; border: none; font-family: inherit; }
+        button { cursor: pointer; border: none; font-family: inherit; user-select: none; }
         
-        input, select, textarea { width: 100%; padding: 0.8rem 1rem; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 1rem; background: var(--bg-body); color: var(--text-main); font-size: 0.95rem; transition: all 0.2s; }
+        /* Inputs otimizados para mobile */
+        input, select, textarea { 
+            width: 100%; padding: 0.8rem 1rem; border: 1px solid var(--border); border-radius: var(--radius); 
+            margin-bottom: 1rem; background: var(--bg-body); color: var(--text-main); font-size: 16px; /* Evita zoom no iOS */
+            transition: all 0.2s; appearance: none; -webkit-appearance: none;
+        }
         input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
         label { display: block; margin-bottom: 0.4rem; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
         .container { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; }
         
+        /* Utilitários */
         .flex { display: flex; } .flex-col { flex-direction: column; } .items-center { align-items: center; } .justify-between { justify-content: space-between; }
         .gap-2 { gap: 0.5rem; } .gap-3 { gap: 0.75rem; } .gap-4 { gap: 1rem; } .hidden { display: none !important; } .w-full { width: 100%; }
         
+        /* Botões e Badges */
         .text-sm { font-size: 0.875rem; } .font-bold { font-weight: 700; } .rounded { border-radius: var(--radius); } .text-warning { color: var(--warning); }
-        .btn { padding: 0.75rem 1.25rem; border-radius: var(--radius); font-weight: 600; font-size: 0.95rem; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer; border: 1px solid transparent; }
+        .btn { padding: 0.75rem 1.25rem; border-radius: var(--radius); font-weight: 600; font-size: 0.95rem; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer; border: 1px solid transparent; position: relative; overflow: hidden; }
+        .btn:active { transform: scale(0.98); }
         .btn-sm { padding: 0.5rem 1rem; font-size: 0.85rem; }
         .btn-primary { background: var(--primary); color: white; box-shadow: var(--shadow-sm); }
-        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+        .btn-primary:hover { background: var(--primary-dark); box-shadow: var(--shadow-md); }
         .btn-secondary { background: var(--bg-body); border: 1px solid var(--border); color: var(--text-main); }
         .btn-secondary:hover { background: var(--border); }
         .btn-danger { background: var(--danger); color: white; }
         .btn-icon { padding: 0.6rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; background: transparent; color: var(--text-muted); }
         .btn-icon:hover { background: rgba(0,0,0,0.05); color: var(--primary); }
+        
+        /* Header */
         header { background: var(--bg-card); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; height: var(--header-height); box-shadow: var(--shadow-sm); }
         .header-inner { height: 100%; display: flex; align-items: center; justify-content: space-between; }
         .logo-area { display: flex; align-items: center; gap: 0.75rem; }
         .logo-icon { background: var(--primary); color: white; padding: 0.5rem; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 0.5rem; }
         .logo-text h1 { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.5px; line-height: 1; }
         .logo-text span { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 600; }
+        
         .search-wrapper { flex: 1; max-width: 500px; position: relative; margin: 0 2rem; }
         .search-wrapper input { margin: 0; padding-left: 2.75rem; border-radius: 99px; background: var(--bg-body); border: 1px solid transparent; }
         .search-wrapper input:focus { background: var(--bg-card); border-color: var(--primary); }
         .search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); width: 18px; pointer-events: none; }
+        
+        /* Promo Cards */
         .promo-section { padding: 2rem 0; }
         .promo-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
         @media(min-width: 768px) { .promo-grid { grid-template-columns: 2fr 1fr; } }
         .promo-card { border-radius: 1rem; overflow: hidden; position: relative; height: 220px; display: flex; align-items: center; padding: 2rem; color: white; background-size: cover; background-position: center; box-shadow: var(--shadow-md); }
         .promo-card.main { background-image: linear-gradient(to right, rgba(0,0,0,0.8), rgba(0,0,0,0.1)), url('https://images.pexels.com/photos/3807386/pexels-photo-3807386.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'); }
         .promo-card.secondary { background-image: linear-gradient(to right, rgba(37, 99, 235, 0.9), rgba(37, 99, 235, 0.6)), url('https://images.pexels.com/photos/4489749/pexels-photo-4489749.jpeg?auto=compress&cs=tinysrgb&w=600'); }
-        .promo-content { position: relative; z-index: 2; max-width: 60%; }
+        .promo-content { position: relative; z-index: 2; max-width: 80%; }
         .promo-tag { background: #f59e0b; color: black; font-weight: 700; font-size: 0.7rem; padding: 0.3rem 0.6rem; border-radius: 4px; text-transform: uppercase; margin-bottom: 0.5rem; display: inline-block; }
-        .promo-title { font-size: 1.8rem; font-weight: 800; line-height: 1.1; margin-bottom: 0.5rem; }
-        .promo-desc { font-size: 0.9rem; opacity: 0.9; margin-bottom: 1rem; }
+        .promo-title { font-size: 1.6rem; font-weight: 800; line-height: 1.1; margin-bottom: 0.5rem; }
+        
+        /* Filters */
         .filter-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow-sm); margin-bottom: 2rem; }
         .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
-        .toolbar { background: var(--bg-card); padding: 1rem 0; border-bottom: 1px solid var(--border); position: sticky; top: var(--header-height); z-index: 30; }
+        .toolbar { background: var(--bg-card); padding: 1rem 0; border-bottom: 1px solid var(--border); position: sticky; top: var(--header-height); z-index: 30; overflow-x: auto; }
         .categories-scroll { display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+        .categories-scroll::-webkit-scrollbar { display: none; }
         .cat-pill { padding: 0.5rem 1.25rem; border-radius: 99px; background: var(--bg-body); border: 1px solid var(--border); font-size: 0.9rem; white-space: nowrap; cursor: pointer; transition: 0.2s; font-weight: 500; color: var(--text-muted); }
         .cat-pill:hover, .cat-pill.active { background: var(--primary); color: white; border-color: var(--primary); }
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; padding: 2rem 0; }
-        .product-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 1rem; overflow: hidden; transition: 0.3s; position: relative; display: flex; flex-direction: column; }
+
+        /* --- PRODUTOS & CARDS (CORREÇÃO DE IMAGEM & RESPONSIVIDADE) --- */
+        .products-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
+            gap: 1.5rem; 
+            padding: 2rem 0; 
+        }
+        
+        .product-card { 
+            background: var(--bg-card); 
+            border: 1px solid var(--border); 
+            border-radius: 1rem; 
+            overflow: hidden; 
+            transition: 0.3s; 
+            position: relative; 
+            display: flex; 
+            flex-direction: column;
+            height: 100%;
+        }
         .product-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); border-color: var(--primary); }
-        .card-img { height: 200px; width: 100%; object-fit: contain; padding: 10px; background: #f8fafc; cursor: pointer; border-bottom: 1px solid var(--border); }
+        
+        .card-img-box {
+            width: 100%;
+            aspect-ratio: 4/3; /* Mantém a proporção constante */
+            background: #ffffff; /* Fundo branco para peças recortadas */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: contain; /* Mostra a peça inteira sem cortar */
+            padding: 10px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .product-card:hover .card-img { transform: scale(1.05); }
+
         .card-body { padding: 1.25rem; flex: 1; display: flex; flex-direction: column; }
         .card-cat { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px; margin-bottom: 0.25rem; }
-        .card-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; line-height: 1.4; color: var(--text-main); min-height: 2.8rem; }
+        .card-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; line-height: 1.4; color: var(--text-main); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.8rem; }
         .card-meta { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem; display: flex; flex-direction: column; gap: 2px; }
         .card-price { font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin-top: auto; display: flex; align-items: center; justify-content: space-between; }
+        
         .btn-cart-mini { width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         .btn-cart-mini:hover { background: var(--primary); color: white; transform: scale(1.1); }
-        .products-list { display: flex; flex-direction: column; gap: 1rem; padding: 2rem 0; }
-        .products-list .product-card { flex-direction: row; height: auto; align-items: center; padding-right: 1.5rem; }
-        .products-list .card-img { width: 140px; height: 140px; flex-shrink: 0; }
-        .products-list .card-body { padding: 1rem 1.5rem; }
-        
+
+        /* Layout Admin */
         .admin-layout { display: flex; height: 100vh; overflow: hidden; }
-        .admin-sidebar { width: var(--sidebar-width); background: var(--secondary); color: white; display: flex; flex-direction: column; flex-shrink: 0; z-index: 100; transition: width 0.3s ease; overflow: hidden; white-space: nowrap; }
+        .admin-sidebar { width: var(--sidebar-width); background: var(--secondary); color: white; display: flex; flex-direction: column; flex-shrink: 0; z-index: 100; transition: transform 0.3s ease, width 0.3s ease; overflow: hidden; white-space: nowrap; height: 100%; }
         .admin-sidebar.collapsed { width: var(--sidebar-collapsed-width); }
         .admin-sidebar.collapsed .logo-text, .admin-sidebar.collapsed .menu-text, .admin-sidebar.collapsed .badge-count { display: none; }
         .admin-sidebar.collapsed .sidebar-logo { justify-content: center; padding: 1.5rem 0; }
@@ -122,88 +176,102 @@
         .sidebar-menu { padding: 1.5rem 1rem; flex: 1; display: flex; flex-direction: column; gap: 0.5rem; overflow-y: auto; overflow-x: hidden; }
         .menu-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1rem; border-radius: 0.5rem; color: #94a3b8; font-weight: 500; transition: 0.2s; cursor: pointer; }
         .menu-item:hover, .menu-item.active { background: var(--primary); color: white; }
-        .menu-item i { width: 20px; height: 20px; flex-shrink: 0; }
-        .admin-main { flex: 1; background: var(--bg-body); overflow-y: auto; padding: 2rem; transition: margin 0.3s; }
+        .admin-main { flex: 1; background: var(--bg-body); overflow-y: auto; padding: 2rem; transition: margin 0.3s; position: relative; }
         
-        .data-table-wrapper { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card); width: 100%; }
+        /* Tabelas & Listas */
+        .data-table-wrapper { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card); width: 100%; -webkit-overflow-scrolling: touch; }
         .data-table { width: 100%; border-collapse: collapse; min-width: 800px; }
         .data-table th { text-align: left; padding: 1rem; background: var(--bg-body); border-bottom: 2px solid var(--border); color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 700; }
         .data-table td { padding: 1rem; border-bottom: 1px solid var(--border); font-size: 0.95rem; vertical-align: middle; background: var(--bg-card); }
         .data-table tr:hover td { background: var(--primary-light); }
         
-        .report-tabs { display: flex; gap: 0.5rem; overflow-x: auto; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
-        .report-tab-btn { padding: 0.5rem 1rem; background: transparent; border: none; font-weight: 600; color: var(--text-muted); border-bottom: 2px solid transparent; transition: 0.2s; white-space: nowrap; }
-        .report-tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
-        
-        .status-badge { padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
-        .status-Pendente { background: #fef3c7; color: #d97706; }
-        .status-Entregue { background: #dcfce7; color: #16a34a; }
-        .status-Cancelado { background: #fee2e2; color: #b91c1c; }
-        
+        /* Admin Grid View */
+        .admin-grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+        .admin-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; box-shadow: var(--shadow-sm); position: relative; }
+        .card-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; border-bottom: 1px dashed var(--border); padding-bottom: 0.5rem; }
+
+        /* Modais */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 1rem; }
         .modal-overlay.active { display: flex; }
         .modal { background: var(--bg-card); width: 100%; max-width: 900px; border-radius: 1rem; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); animation: scaleIn 0.2s; max-height: 90vh; overflow-y: auto; position: relative; border: 1px solid var(--border); }
-        .close-modal { position: absolute; top: 1rem; right: 1rem; background: var(--bg-body); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid var(--border); }
-        .cart-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 100%; max-width: 450px; background: var(--bg-card); z-index: 200; transform: translateX(100%); transition: 0.3s; display: flex; flex-direction: column; box-shadow: -10px 0 30px rgba(0,0,0,0.2); }
+        .close-modal { position: absolute; top: 1rem; right: 1rem; background: var(--bg-body); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid var(--border); z-index: 10; }
+        
+        /* Drawer Carrinho */
+        .cart-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 85%; max-width: 450px; background: var(--bg-card); z-index: 200; transform: translateX(100%); transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -10px 0 30px rgba(0,0,0,0.2); }
         .cart-drawer.open { transform: translateX(0); }
         .cart-header { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--secondary); color: white; }
         .cart-body { flex: 1; overflow-y: auto; padding: 1.5rem; }
         .cart-footer { padding: 2rem; border-top: 1px solid var(--border); background: var(--bg-body); }
         .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 150; display: none; }
         .drawer-overlay.open { display: block; }
+
         .qty-controls { display: flex; align-items: center; gap: 0.5rem; background: var(--bg-body); border: 1px solid var(--border); border-radius: 4px; padding: 2px; }
-        .qty-btn { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; background: white; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; font-weight: bold; color: var(--text-main); }
-        .qty-btn:hover { background: var(--primary-light); color: var(--primary); }
-        .qty-val { font-size: 0.9rem; font-weight: 600; min-width: 20px; text-align: center; }
-        .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-        .toast { background: var(--secondary); color: white; padding: 12px 20px; border-radius: 8px; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 10px; animation: slideInRight 0.3s ease-out; max-width: 300px; font-size: 0.9rem; }
+        .qty-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: white; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; font-weight: bold; color: var(--text-main); }
+        
+        .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 350px; pointer-events: none; }
+        .toast { background: var(--secondary); color: white; padding: 12px 20px; border-radius: 8px; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 10px; animation: slideInRight 0.3s ease-out; font-size: 0.9rem; pointer-events: auto; }
         .toast.success { border-left: 4px solid var(--success); }
         .toast.error { border-left: 4px solid var(--danger); }
-        
-        .admin-grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
-        .admin-card { 
-            background: var(--bg-card); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.5rem; 
-            display: flex; flex-direction: column; gap: 1rem; box-shadow: var(--shadow-sm); position: relative;
-        }
-        .admin-card:hover { border-color: var(--primary); }
-        .card-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; border-bottom: 1px dashed var(--border); padding-bottom: 0.5rem; }
-        .card-label { font-weight: 600; color: var(--text-muted); font-size: 0.8rem; }
-        .card-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(30px, 1fr)); gap: 0.5rem; margin-top: 0.5rem; }
-        
-        #editProdResults { 
-            position: absolute; width: 100%; max-height: 200px; overflow-y: auto; background: var(--bg-card); 
-            border: 1px solid var(--primary); border-radius: 4px; z-index: 2000; box-shadow: var(--shadow-lg);
-        }
-        .search-result-item { padding: 10px; border-bottom: 1px solid var(--border); cursor: pointer; background: var(--bg-card); color: var(--text-main); }
-        .search-result-item:hover { background: var(--primary-light); color: var(--primary-dark); }
 
+        #editProdResults { position: absolute; width: 100%; max-height: 200px; overflow-y: auto; background: var(--bg-card); border: 1px solid var(--primary); border-radius: 4px; z-index: 2000; box-shadow: var(--shadow-lg); }
+        .search-result-item { padding: 10px; border-bottom: 1px solid var(--border); cursor: pointer; background: var(--bg-card); color: var(--text-main); }
+        
         @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes spin { 100% { transform: rotate(360deg); } }
         .animate-spin-slow { animation: spin 2s linear infinite; }
+        @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
+        /* --- RESPONSIVIDADE MOBILE (Híbrido) --- */
         @media (max-width: 768px) {
-            .admin-sidebar { position: fixed; top: 0; left: 0; bottom: 0; transform: translateX(-100%); width: 85%; }
+            .container { padding: 0 1rem; }
+            .header-inner { gap: 1rem; }
+            .logo-text h1 { font-size: 1rem; }
+            .logo-text span { font-size: 0.6rem; }
+            
+            /* Admin Sidebar Mobile (Gaveta) */
+            .admin-sidebar { position: fixed; top: 0; left: 0; bottom: 0; transform: translateX(-100%); width: 85%; max-width: 300px; box-shadow: 2px 0 10px rgba(0,0,0,0.5); }
             .admin-sidebar.active { transform: translateX(0); }
+            
             .btn-collapse-sidebar { display: none !important; }
             .hide-mobile { display: none; }
-            .search-wrapper { margin: 0 1rem; }
-            .admin-main { padding: 1rem; }
+            .search-wrapper { display: none; } /* Busca vai para toolbar inferior */
+            .admin-main { padding: 1rem; width: 100%; }
             .promo-grid { grid-template-columns: 1fr; }
             .admin-grid-view { grid-template-columns: 1fr; }
+            
+            /* Melhorias no Grid Mobile (2 colunas estilo App) */
+            .products-grid { 
+                grid-template-columns: 1fr 1fr; 
+                gap: 0.75rem; 
+                padding: 1rem 0;
+            }
+            .product-card { border-radius: 0.5rem; }
+            .card-body { padding: 0.75rem; }
+            .card-title { font-size: 0.9rem; margin-bottom: 0.25rem; min-height: 2.4rem; }
+            .card-price { font-size: 1rem; }
+            .btn-cart-mini { width: 32px; height: 32px; }
+            .btn-cart-mini i { width: 16px; height: 16px; }
+            
+            /* Toolbar fixa mobile */
+            .toolbar { padding: 0.75rem 0; }
+            .toolbar input { margin-bottom: 0.5rem; }
+
+            /* Modais Mobile */
+            .modal { padding: 1.5rem; max-height: 95vh; border-radius: 1rem 1rem 0 0; position: absolute; bottom: 0; width: 100%; margin: 0; max-width: 100%; }
+            .modal-overlay { align-items: flex-end; padding: 0; }
         }
+        
         @media (min-width: 769px) {
             .btn-toggle-mobile { display: none; }
         }
-        @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body>
     
     <div id="toastContainer" class="toast-container"></div>
     
-    <!-- Modal de Restauração (Estilo Código 01) -->
     <div id="restoreModal" class="modal-overlay" style="z-index: 2000;">
-        <div class="modal" style="max-width: 400px; text-align: center;">
+        <div class="modal" style="max-width: 400px; text-align: center; border-radius: 1rem; position:relative; bottom:auto;">
             <div style="width: 64px; height: 64px; background: var(--primary-light); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
                 <i data-lucide="cloud-lightning" class="animate-spin-slow"></i> 
             </div>
@@ -216,7 +284,7 @@
     </div>
 
     <div id="loginModal" class="modal-overlay" onclick="if(event.target === this) closeLogin()">
-        <div class="modal" style="max-width: 400px; text-align: center;">
+        <div class="modal" style="max-width: 400px; text-align: center; border-radius: 1rem; position:relative; bottom:auto;">
             <div style="width: 64px; height: 64px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);">
                 <i data-lucide="lock" color="white" size="28"></i>
             </div>
@@ -247,7 +315,7 @@
                 <div>
                     <label>Dados Pessoais</label>
                     <input type="text" id="cliName" placeholder="Nome Completo *" required>
-                    <div class="flex gap-4">
+                    <div class="flex gap-4 flex-col md:flex-row">
                         <input type="text" id="cliCpf" placeholder="CPF">
                         <input type="email" id="cliEmail" placeholder="E-mail">
                     </div>
@@ -551,8 +619,7 @@
                 <div class="flex flex-col md:flex-row justify-between gap-4 mb-6">
                     <input type="text" placeholder="Filtrar por nome, SKU, veículo..." oninput="filterAdminTable(this.value)" style="margin: 0; max-width: 300px;">
                     <div class="flex gap-2 items-center">
-                         <!-- Filtros e Paginação -->
-                        <select id="adminProdLimit" onchange="renderAdminTable()" style="margin:0; width:auto;">
+                         <select id="adminProdLimit" onchange="renderAdminTable()" style="margin:0; width:auto;">
                             <option value="25">25 itens</option>
                             <option value="50">50 itens</option>
                             <option value="100">100 itens</option>
@@ -567,7 +634,7 @@
                             <option value="oldest">Mais Antigos</option>
                             <option value="lowstock">Estoque Baixo</option>
                         </select>
-                        <div class="flex bg-body rounded border p-1">
+                        <div class="flex bg-body rounded border p-1 hide-mobile">
                             <button onclick="setAdminViewMode('products', 'grid')" class="btn-icon"><i data-lucide="grid"></i></button>
                             <button onclick="setAdminViewMode('products', 'list')" class="btn-icon"><i data-lucide="list"></i></button>
                         </div>
@@ -624,7 +691,7 @@
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-bold text-lg">Gerenciamento de Pedidos</h3>
                     <div class="flex gap-2">
-                        <div class="flex bg-body rounded border p-1">
+                        <div class="flex bg-body rounded border p-1 hide-mobile">
                             <button onclick="setAdminViewMode('orders', 'grid')" class="btn-icon"><i data-lucide="grid"></i></button>
                             <button onclick="setAdminViewMode('orders', 'list')" class="btn-icon"><i data-lucide="list"></i></button>
                         </div>
@@ -639,7 +706,7 @@
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="font-bold text-lg">Gerenciamento de Clientes</h3>
                     <div class="flex gap-2">
-                         <div class="flex bg-body rounded border p-1">
+                         <div class="flex bg-body rounded border p-1 hide-mobile">
                             <button onclick="setAdminViewMode('clients', 'grid')" class="btn-icon"><i data-lucide="grid"></i></button>
                             <button onclick="setAdminViewMode('clients', 'list')" class="btn-icon"><i data-lucide="list"></i></button>
                         </div>
@@ -715,11 +782,11 @@
                         <input type="text" id="prodImgUrl" placeholder="Ou URL da imagem" class="mt-2" onchange="previewUrl(this.value)">
                     </div>
                     <div>
-                        <div class="flex gap-4">
+                        <div class="flex gap-4 flex-col md:flex-row">
                             <input type="text" id="prodName" placeholder="Nome do Produto *" required class="w-full">
-                            <input type="text" id="prodSku" placeholder="SKU / Cód. *" required style="width: 140px;">
+                            <input type="text" id="prodSku" placeholder="SKU / Cód. *" required style="width: 100%; md:width: 140px;">
                         </div>
-                        <div class="flex gap-4">
+                        <div class="flex gap-4 flex-col md:flex-row">
                             <input type="text" id="prodCat" list="catList" placeholder="Categoria *" required>
                             <datalist id="catList"></datalist>
                             <input type="text" id="prodSupplier" placeholder="Fornecedor">
@@ -730,11 +797,11 @@
                         </div>
                         <fieldset style="border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius); margin-bottom: 1rem;">
                             <legend style="font-size: 0.85rem; font-weight: 700; color: var(--primary); padding: 0 0.5rem;">Dados Veiculares</legend>
-                            <div class="flex gap-4">
+                            <div class="flex gap-4 flex-col md:flex-row">
                                 <div class="w-full"><label>Marca</label><select id="prodVehBrand"></select></div>
                                 <div class="w-full"><label>Modelo</label><input type="text" id="prodVehModel" placeholder="Ex: Gol"></div>
                             </div>
-                            <div class="flex gap-4">
+                            <div class="flex gap-4 flex-col md:flex-row">
                                 <div class="w-full"><label>Ano</label><input type="text" id="prodVehYear"></div>
                                 <div class="w-full"><label>Versão</label><input type="text" id="prodVehVersion"></div>
                             </div>
@@ -775,7 +842,7 @@
             <div class="close-modal" onclick="closeProductDetail()"><i data-lucide="x"></i></div>
             <div style="display: flex; gap: 2rem; flex-direction: column; md:flex-row;">
                 <div style="flex: 1;">
-                    <img id="detailImg" src="" style="width: 100%; border-radius: var(--radius); border: 1px solid var(--border);">
+                    <img id="detailImg" src="" style="width: 100%; border-radius: var(--radius); border: 1px solid var(--border); aspect-ratio: 4/3; object-fit: contain; background: #fff;">
                 </div>
                 <div style="flex: 1.5; display: flex; flex-direction: column;">
                     <span id="detailCat" class="badge" style="background: var(--primary-light); color: var(--primary); padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; align-self: flex-start;">CAT</span>
@@ -799,6 +866,8 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc, writeBatch, query, orderBy, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
+        // IMPORTAÇÃO DO STORAGE (Mantida caso seja necessário backup, mas upload principal será via Cloudinary)
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA1bJpcVTG8C7W6SDqYTUW2MGEgagiKN-E",
@@ -813,6 +882,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const analytics = getAnalytics(app);
+        const storage = getStorage(app);
 
         const DBService = {
             async getAll(collectionName) {
@@ -826,7 +896,6 @@
             },
             async put(collectionName, data) {
                 const idString = String(data.id || Date.now());
-                // Use merge: true to avoid overwriting existing fields when updating partial data
                 await setDoc(doc(db, collectionName, idString), data, { merge: true });
                 return data;
             },
@@ -834,7 +903,6 @@
                 await deleteDoc(doc(db, collectionName, String(id)));
             },
             async clear(collectionName) {
-                // CORREÇÃO: Limpeza robusta igual ao codigo 01
                 const q = await getDocs(collection(db, collectionName));
                 const deletePromises = [];
                 q.forEach((doc) => { deletePromises.push(deleteDoc(doc.ref)); });
@@ -868,7 +936,7 @@
         window.visibleProductsLimit = 25; 
         window.adminViewMode = 'list'; 
         window.currentReportType = 'sales';
-        window.currentReportRows = []; // To store data for export
+        window.currentReportRows = [];
 
         window.showToast = function(msg, type = 'success') {
             const container = document.getElementById('toastContainer');
@@ -884,6 +952,11 @@
         window.formatMoney = (val) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
         window.onload = async function() {
+            // DETECTA SE É MOBILE E AJUSTA O MODO DE VISÃO PARA CARD (GRID)
+            if (window.innerWidth < 768) {
+                window.adminViewMode = 'grid';
+            }
+
             lucide.createIcons();
             document.getElementById('configPixKey').value = window.pixKey;
             await loadData();
@@ -1436,7 +1509,79 @@
         window.closeProductForm = function() { document.getElementById('productFormModal').classList.remove('active'); }
         window.editProduct = function(id) { const p = window.products.find(x => x.id === id); document.getElementById('prodId').value = p.id; document.getElementById('prodName').value = p.name; document.getElementById('prodSku').value = p.sku; document.getElementById('prodCat').value = p.category; document.getElementById('prodSupplier').value = p.supplier || ''; document.getElementById('prodPrice').value = p.price; document.getElementById('prodStock').value = p.stock; document.getElementById('prodVehBrand').value = p.vehicleBrand; document.getElementById('prodVehModel').value = p.vehicleModel; document.getElementById('prodVehYear').value = p.vehicleYear || ''; document.getElementById('prodVehVersion').value = p.vehicleVersion || ''; document.getElementById('prodDesc').value = p.description || ""; document.getElementById('prodImgUrl').value = p.image; document.getElementById('formPreview').src = p.image; document.getElementById('formPreview').style.display = 'block'; document.getElementById('uploadPlaceholder').style.display = 'none'; document.getElementById('productFormModal').classList.add('active'); }
         window.saveProduct = async function(e) { e.preventDefault(); const id = document.getElementById('prodId').value; const newProd = { id: id ? parseInt(id) : Date.now(), name: document.getElementById('prodName').value, sku: document.getElementById('prodSku').value, category: document.getElementById('prodCat').value, supplier: document.getElementById('prodSupplier').value, price: parseFloat(document.getElementById('prodPrice').value), stock: parseInt(document.getElementById('prodStock').value), vehicleBrand: document.getElementById('prodVehBrand').value, vehicleModel: document.getElementById('prodVehModel').value, vehicleYear: document.getElementById('prodVehYear').value, vehicleVersion: document.getElementById('prodVehVersion').value, description: document.getElementById('prodDesc').value, image: document.getElementById('formPreview').src }; await DBService.put('products', newProd); if(id) { const idx = window.products.findIndex(p => p.id == id); window.products[idx] = newProd; } else { window.products.push(newProd); } closeProductForm(); renderAdminTable(); showToast("Produto Salvo!"); }
-        window.handleImageUpload = function(input) { if(input.files && input.files[0]) { const reader = new FileReader(); reader.onload = function(e) { document.getElementById('formPreview').src = e.target.result; document.getElementById('formPreview').style.display = 'block'; document.getElementById('uploadPlaceholder').style.display = 'none'; }; reader.readAsDataURL(input.files[0]); } }
+        
+        // --- FUNÇÃO DE UPLOAD ATUALIZADA (CLOUDINARY) ---
+        window.handleImageUpload = async function(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const preview = document.getElementById('formPreview');
+                const placeholder = document.getElementById('uploadPlaceholder');
+                const urlInput = document.getElementById('prodImgUrl');
+                
+                // 1. Mostrar visualmente que está trabalhando
+                placeholder.innerHTML = `
+                    <div class="animate-spin-slow" style="color:var(--primary); margin-bottom:10px;">
+                        <i data-lucide="cloud-lightning" size="32"></i>
+                    </div>
+                    <span style="font-size:0.8rem; font-weight:bold; color:var(--primary);">
+                        Otimizando & Enviando...<br>Cloudinary
+                    </span>`;
+                lucide.createIcons();
+
+                try {
+                    console.log("Iniciando upload para Cloudinary...");
+
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('upload_preset', 'dvoczbxfo'); 
+                    // O nome 'dvoczbxfo' foi usado como preset e cloudname conforme pedido
+
+                    const response = await fetch('https://api.cloudinary.com/v1_1/dvoczbxfo/image/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    if (data.error) {
+                        throw new Error(data.error.message);
+                    }
+
+                    // 2. URL recebida com sucesso
+                    console.log("URL Original Cloudinary:", data.secure_url);
+                    
+                    // 3. INJEÇÃO DE COMPRESSÃO AUTOMÁTICA
+                    // Transforma: .../upload/v1234.../imagem.jpg -> .../upload/w_800,q_auto,f_auto/v1234.../imagem.jpg
+                    let optimizedUrl = data.secure_url;
+                    if (optimizedUrl.includes('/upload/')) {
+                        optimizedUrl = optimizedUrl.replace('/upload/', '/upload/w_800,q_auto,f_auto/');
+                    }
+                    console.log("URL Otimizada:", optimizedUrl);
+
+                    // 4. Sucesso: Atualizar tela e input oculto
+                    preview.src = optimizedUrl;
+                    preview.style.display = 'block';
+                    placeholder.style.display = 'none';
+                    
+                    // PREENCHE O CAMPO DE TEXTO AUTOMATICAMENTE
+                    urlInput.value = optimizedUrl; 
+                    
+                    showToast("✅ Foto salva e comprimida!", "success");
+
+                } catch (error) {
+                    console.error("ERRO NO UPLOAD:", error);
+                    
+                    // Restaura o ícone de upload para tentar de novo
+                    placeholder.innerHTML = `
+                        <i data-lucide="camera" size="32"></i><br>
+                        <span style="font-size: 0.8rem;">Clique para tentar novamente</span>
+                    `;
+                    lucide.createIcons();
+                    alert("Erro no Upload Cloudinary: " + error.message);
+                }
+            }
+        }
+        
         window.previewUrl = function(url) { if(url) { document.getElementById('formPreview').src = url; document.getElementById('formPreview').style.display = 'block'; document.getElementById('uploadPlaceholder').style.display = 'none'; } }
         window.deleteProduct = async function(id) { if(confirm("Excluir?")) { window.products = window.products.filter(p => p.id !== id); await DBService.delete('products', id); renderAdminTable(); showToast("Produto Excluído"); } }
 
@@ -1489,7 +1634,6 @@
         window.cancelOrderLogic = async function(id, isAuto = false) { const o = window.orders.find(x => x.id === id); if(!o || o.status === 'Cancelado') return; for (const item of o.items) { const prod = window.products.find(p => p.id === item.id); if (prod) { prod.stock += item.quantity; await DBService.put('products', prod); } } o.status = 'Cancelado'; await DBService.put('orders', o); if(!isAuto) { renderOrdersTable(); loadAdminDashboard(); showToast("Cancelado e estornado."); } }
         window.cancelOrder = function(id) { if(confirm("Cancelar pedido e devolver estoque?")) cancelOrderLogic(id); }
 
-        // --- CORREÇÃO: FUNÇÕES DE IMPRESSÃO E COMPARTILHAMENTO DO CÓDIGO 01 ---
         window.generateOrderHTML = function(o) {
             return `
                 <div style="font-family: monospace; width: 300px; padding: 20px; border: 1px solid #000; background: white;">
@@ -1550,8 +1694,6 @@
             else alert("Copie os dados:\n" + text);
         }
 
-        // --- CORREÇÃO: RESTAURAÇÃO DE BACKUP (IGUAL AO CÓDIGO 01) ---
-        // A função restoreBackup agora usa o input file diretamente e atualiza a UI corretamente
         window.restoreBackup = function(input) {
             const file = input.files[0];
             if (!file || !confirm("Isso SUBSTITUIRÁ o banco atual. Continuar?")) return;
@@ -1722,13 +1864,10 @@
         window.processBackupData = function(fileOrJson) { alert("Use a função Restaurar Arquivo Local para restauração completa segura."); }
         window.renderCloudBackups = async function() { const list = document.getElementById('cloudBackupsList'); try { const backups = await DBService.getCloudBackups(); list.innerHTML = backups.length ? backups.map(b => `<div style="padding:0.5rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between;"><div>Backup ${new Date(b.timestamp).toLocaleString()}</div><button onclick='restoreCloudBackup(${JSON.stringify(b.content)})' class="btn-sm btn-secondary">Restaurar</button></div>`).join('') : 'Sem backups.'; } catch(e) { list.innerText = "Erro ao carregar backups."; } }
         
-        // Adaptação para restaurar do Cloud usando a mesma logica segura (via modal simulado ou direto)
         window.restoreCloudBackup = function(json) { 
             if(!confirm("Restaurar backup da nuvem? Isso substituirá os dados atuais.")) return;
-            // Cria um Blob para simular um arquivo e reutilizar a função segura restoreBackup
             const blob = new Blob([json], {type: 'application/json'});
             const file = new File([blob], "cloud_backup.json");
-            // Hack para reutilizar a função que espera um input
             const dummyInput = { files: [file], value: '' };
             restoreBackup(dummyInput);
         }
