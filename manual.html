@@ -1,0 +1,1303 @@
+Aqui está o arquivo **unificado e completo** (`index.html`).
+
+Ele contém toda a estrutura **HTML**, o estilo **CSS** e a lógica **JavaScript** (com Firebase Auth e Firestore + Cloudinary) integrados em um único documento.
+
+**Como usar:**
+1.  Copie o código abaixo.
+2.  Salve como um arquivo chamado `index.html`.
+3.  Abra diretamente no seu navegador (Chrome, Edge, Safari, etc.).
+
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dupeças Duarte Peças | Sistema Híbrido 2.0</title>
+    
+    <!-- Bibliotecas Externas -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- CSS: VARIÁVEIS E TEMA --- */
+        :root {
+            --primary: #2563eb;        
+            --primary-dark: #1e40af;   
+            --primary-light: #eff6ff; 
+            --secondary: #0f172a;        
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --border-focus: #2563eb;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --sidebar-width: 280px;
+            --sidebar-collapsed-width: 80px;
+            --header-height: 70px;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --radius: 0.75rem;
+        }
+        body.dark-mode {
+            --primary: #3b82f6;
+            --primary-dark: #60a5fa;
+            --primary-light: #1e293b;
+            --secondary: #020617;
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --border-focus: #3b82f6;
+        }
+        
+        /* --- RESET E BASES --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        body { background-color: var(--bg-body); color: var(--text-main); transition: background 0.3s, color 0.3s; overflow-x: hidden; display: flex; flex-direction: column; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+        button { cursor: pointer; border: none; font-family: inherit; user-select: none; }
+        
+        /* --- INPUTS & FORMULÁRIOS --- */
+        input, select, textarea { 
+            width: 100%; padding: 0.8rem 1rem; border: 1px solid var(--border); border-radius: var(--radius); 
+            margin-bottom: 1rem; background: var(--bg-body); color: var(--text-main); font-size: 16px; 
+            transition: all 0.2s; appearance: none; -webkit-appearance: none;
+        }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        label { display: block; margin-bottom: 0.4rem; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
+        .container { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; }
+        
+        /* --- UTILITÁRIOS --- */
+        .flex { display: flex; } .flex-col { flex-direction: column; } .items-center { align-items: center; } .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 0.5rem; } .gap-3 { gap: 0.75rem; } .gap-4 { gap: 1rem; } .hidden { display: none !important; } .w-full { width: 100%; }
+        .text-sm { font-size: 0.875rem; } .font-bold { font-weight: 700; } .rounded { border-radius: var(--radius); } .text-warning { color: var(--warning); }
+        
+        /* --- BOTÕES --- */
+        .btn { padding: 0.75rem 1.25rem; border-radius: var(--radius); font-weight: 600; font-size: 0.95rem; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; cursor: pointer; border: 1px solid transparent; position: relative; overflow: hidden; }
+        .btn:active { transform: scale(0.98); }
+        .btn-sm { padding: 0.5rem 1rem; font-size: 0.85rem; }
+        .btn-primary { background: var(--primary); color: white; box-shadow: var(--shadow-sm); }
+        .btn-primary:hover { background: var(--primary-dark); box-shadow: var(--shadow-md); }
+        .btn-secondary { background: var(--bg-body); border: 1px solid var(--border); color: var(--text-main); }
+        .btn-secondary:hover { background: var(--border); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-icon { padding: 0.6rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; background: transparent; color: var(--text-muted); }
+        .btn-icon:hover { background: rgba(0,0,0,0.05); color: var(--primary); }
+        
+        /* --- LOJA: HEADER --- */
+        header { background: var(--bg-card); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; height: var(--header-height); box-shadow: var(--shadow-sm); }
+        .header-inner { height: 100%; display: flex; align-items: center; justify-content: space-between; }
+        .logo-area { display: flex; align-items: center; gap: 0.75rem; }
+        .logo-icon { background: var(--primary); color: white; padding: 0.5rem; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 0.5rem; }
+        .logo-text h1 { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.5px; line-height: 1; }
+        .logo-text span { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); font-weight: 600; }
+        .search-wrapper { flex: 1; max-width: 500px; position: relative; margin: 0 2rem; }
+        .search-wrapper input { margin: 0; padding-left: 2.75rem; border-radius: 99px; background: var(--bg-body); border: 1px solid transparent; }
+        .search-wrapper input:focus { background: var(--bg-card); border-color: var(--primary); }
+        .search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); width: 18px; pointer-events: none; }
+        
+        /* --- LOJA: PROMO & FILTROS --- */
+        .promo-section { padding: 2rem 0; }
+        .promo-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+        @media(min-width: 768px) { .promo-grid { grid-template-columns: 2fr 1fr; } }
+        .promo-card { border-radius: 1rem; overflow: hidden; position: relative; height: 220px; display: flex; align-items: center; padding: 2rem; color: white; background-size: cover; background-position: center; box-shadow: var(--shadow-md); }
+        .promo-card.main { background-image: linear-gradient(to right, rgba(0,0,0,0.8), rgba(0,0,0,0.1)), url('https://images.pexels.com/photos/3807386/pexels-photo-3807386.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1'); }
+        .promo-card.secondary { background-image: linear-gradient(to right, rgba(37, 99, 235, 0.9), rgba(37, 99, 235, 0.6)), url('https://images.pexels.com/photos/4489749/pexels-photo-4489749.jpeg?auto=compress&cs=tinysrgb&w=600'); }
+        .promo-content { position: relative; z-index: 2; max-width: 80%; }
+        .promo-tag { background: #f59e0b; color: black; font-weight: 700; font-size: 0.7rem; padding: 0.3rem 0.6rem; border-radius: 4px; text-transform: uppercase; margin-bottom: 0.5rem; display: inline-block; }
+        .promo-title { font-size: 1.6rem; font-weight: 800; line-height: 1.1; margin-bottom: 0.5rem; }
+        
+        .filter-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow-sm); margin-bottom: 2rem; }
+        .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
+        .toolbar { background: var(--bg-card); padding: 1rem 0; border-bottom: 1px solid var(--border); position: sticky; top: var(--header-height); z-index: 30; overflow-x: auto; }
+        .categories-scroll { display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+        .categories-scroll::-webkit-scrollbar { display: none; }
+        .cat-pill { padding: 0.5rem 1.25rem; border-radius: 99px; background: var(--bg-body); border: 1px solid var(--border); font-size: 0.9rem; white-space: nowrap; cursor: pointer; transition: 0.2s; font-weight: 500; color: var(--text-muted); }
+        .cat-pill:hover, .cat-pill.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* --- LOJA: PRODUTOS --- */
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem; padding: 2rem 0; }
+        .product-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 1rem; overflow: hidden; transition: 0.3s; position: relative; display: flex; flex-direction: column; height: 100%; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); border-color: var(--primary); }
+        .card-img-box { width: 100%; aspect-ratio: 4/3; background: #ffffff; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--border); position: relative; overflow: hidden; }
+        .card-img { width: 100%; height: 100%; object-fit: contain; padding: 10px; cursor: pointer; transition: transform 0.3s ease; }
+        .product-card:hover .card-img { transform: scale(1.05); }
+        .card-body { padding: 1.25rem; flex: 1; display: flex; flex-direction: column; }
+        .card-cat { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--primary); letter-spacing: 0.5px; margin-bottom: 0.25rem; }
+        .card-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; line-height: 1.4; color: var(--text-main); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.8rem; }
+        .card-meta { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem; display: flex; flex-direction: column; gap: 2px; }
+        .card-price { font-size: 1.25rem; font-weight: 800; color: var(--text-main); margin-top: auto; display: flex; align-items: center; justify-content: space-between; }
+        .btn-cart-mini { width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .btn-cart-mini:hover { background: var(--primary); color: white; transform: scale(1.1); }
+
+        /* --- ADMIN: LAYOUT --- */
+        .admin-layout { display: flex; height: 100vh; overflow: hidden; }
+        .admin-sidebar { width: var(--sidebar-width); background: var(--secondary); color: white; display: flex; flex-direction: column; flex-shrink: 0; z-index: 100; transition: transform 0.3s ease, width 0.3s ease; overflow: hidden; white-space: nowrap; height: 100%; }
+        .admin-sidebar.collapsed { width: var(--sidebar-collapsed-width); }
+        .admin-sidebar.collapsed .logo-text, .admin-sidebar.collapsed .menu-text, .admin-sidebar.collapsed .badge-count { display: none; }
+        .admin-sidebar.collapsed .sidebar-logo { justify-content: center; padding: 1.5rem 0; }
+        .admin-sidebar.collapsed .menu-item { justify-content: center; padding: 1rem 0; }
+        .admin-sidebar.collapsed .menu-item i { margin: 0; }
+        .sidebar-logo { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 0.75rem; height: 80px; }
+        .sidebar-menu { padding: 1.5rem 1rem; flex: 1; display: flex; flex-direction: column; gap: 0.5rem; overflow-y: auto; overflow-x: hidden; }
+        .menu-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1rem; border-radius: 0.5rem; color: #94a3b8; font-weight: 500; transition: 0.2s; cursor: pointer; }
+        .menu-item:hover, .menu-item.active { background: var(--primary); color: white; }
+        .admin-main { flex: 1; background: var(--bg-body); overflow-y: auto; padding: 2rem; transition: margin 0.3s; position: relative; }
+        
+        /* --- ADMIN: TABELAS & CARDS --- */
+        .data-table-wrapper { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-card); width: 100%; -webkit-overflow-scrolling: touch; }
+        .data-table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        .data-table th { text-align: left; padding: 1rem; background: var(--bg-body); border-bottom: 2px solid var(--border); color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 700; }
+        .data-table td { padding: 1rem; border-bottom: 1px solid var(--border); font-size: 0.95rem; vertical-align: middle; background: var(--bg-card); }
+        .data-table tr:hover td { background: var(--primary-light); }
+        .admin-grid-view { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+        .admin-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; box-shadow: var(--shadow-sm); position: relative; }
+        .card-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; border-bottom: 1px dashed var(--border); padding-bottom: 0.5rem; }
+
+        /* --- UI: MODAIS & TOASTS --- */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 1rem; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: var(--bg-card); width: 100%; max-width: 900px; border-radius: 1rem; padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); animation: scaleIn 0.2s; max-height: 90vh; overflow-y: auto; position: relative; border: 1px solid var(--border); }
+        .close-modal { position: absolute; top: 1rem; right: 1rem; background: var(--bg-body); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid var(--border); z-index: 10; }
+        
+        .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; width: 90%; max-width: 350px; pointer-events: none; }
+        .toast { background: var(--secondary); color: white; padding: 12px 20px; border-radius: 8px; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 10px; animation: slideInRight 0.3s ease-out; font-size: 0.9rem; pointer-events: auto; }
+        .toast.success { border-left: 4px solid var(--success); }
+        .toast.error { border-left: 4px solid var(--danger); }
+
+        /* --- UI: CARRINHO (DRAWER) --- */
+        .cart-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 85%; max-width: 450px; background: var(--bg-card); z-index: 200; transform: translateX(100%); transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: -10px 0 30px rgba(0,0,0,0.2); }
+        .cart-drawer.open { transform: translateX(0); }
+        .cart-header { padding: 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--secondary); color: white; }
+        .cart-body { flex: 1; overflow-y: auto; padding: 1.5rem; }
+        .cart-footer { padding: 2rem; border-top: 1px solid var(--border); background: var(--bg-body); }
+        .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 150; display: none; }
+        .drawer-overlay.open { display: block; }
+        .qty-controls { display: flex; align-items: center; gap: 0.5rem; background: var(--bg-body); border: 1px solid var(--border); border-radius: 4px; padding: 2px; }
+        .qty-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: white; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; font-weight: bold; color: var(--text-main); }
+        
+        /* --- UI: AUTOCOMPLETE --- */
+        #editProdResults { position: absolute; width: 100%; max-height: 200px; overflow-y: auto; background: var(--bg-card); border: 1px solid var(--primary); border-radius: 4px; z-index: 2000; box-shadow: var(--shadow-lg); }
+        .search-result-item { padding: 10px; border-bottom: 1px solid var(--border); cursor: pointer; background: var(--bg-card); color: var(--text-main); }
+        
+        /* --- ANIMAÇÕES --- */
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .animate-spin-slow { animation: spin 2s linear infinite; }
+        @keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* --- RESPONSIVIDADE MOBILE --- */
+        @media (max-width: 768px) {
+            .container { padding: 0 1rem; }
+            .header-inner { gap: 1rem; }
+            .logo-text h1 { font-size: 1rem; }
+            .logo-text span { font-size: 0.6rem; }
+            .admin-sidebar { position: fixed; top: 0; left: 0; bottom: 0; transform: translateX(-100%); width: 85%; max-width: 300px; box-shadow: 2px 0 10px rgba(0,0,0,0.5); }
+            .admin-sidebar.active { transform: translateX(0); }
+            .btn-collapse-sidebar { display: none !important; }
+            .hide-mobile { display: none; }
+            .search-wrapper { display: none; }
+            .admin-main { padding: 1rem; width: 100%; }
+            .promo-grid { grid-template-columns: 1fr; }
+            .admin-grid-view { grid-template-columns: 1fr; }
+            .products-grid { grid-template-columns: 1fr 1fr; gap: 0.75rem; padding: 1rem 0; }
+            .product-card { border-radius: 0.5rem; }
+            .card-body { padding: 0.75rem; }
+            .card-title { font-size: 0.9rem; margin-bottom: 0.25rem; min-height: 2.4rem; }
+            .card-price { font-size: 1rem; }
+            .btn-cart-mini { width: 32px; height: 32px; }
+            .btn-cart-mini i { width: 16px; height: 16px; }
+            .toolbar { padding: 0.75rem 0; }
+            .toolbar input { margin-bottom: 0.5rem; }
+            .modal { padding: 1.5rem; max-height: 95vh; border-radius: 1rem 1rem 0 0; position: absolute; bottom: 0; width: 100%; margin: 0; max-width: 100%; }
+            .modal-overlay { align-items: flex-end; padding: 0; }
+        }
+        @media (min-width: 769px) { .btn-toggle-mobile { display: none; } }
+    </style>
+</head>
+<body>
+    
+    <!-- NOTIFICAÇÕES -->
+    <div id="toastContainer" class="toast-container"></div>
+    
+    <!-- MODAL DE RESTAURAÇÃO/BACKUP -->
+    <div id="restoreModal" class="modal-overlay" style="z-index: 2000;">
+        <div class="modal" style="max-width: 400px; text-align: center; border-radius: 1rem; position:relative; bottom:auto;">
+            <div style="width: 64px; height: 64px; background: var(--primary-light); color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                <i data-lucide="cloud-lightning" class="animate-spin-slow"></i> 
+            </div>
+            <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 1rem;">Sincronizando Firebase</h3>
+            <div style="background: var(--border); border-radius: 99px; height: 10px; overflow: hidden; margin-bottom: 0.5rem; width: 100%;">
+                <div id="restoreProgress" style="width: 0%; height: 100%; background: var(--primary); transition: width 0.1s linear;"></div>
+            </div>
+            <p id="restoreStatus" style="font-size: 0.9rem; color: var(--text-muted); font-weight: 500;">Conectando...</p>
+        </div>
+    </div>
+
+    <!-- MODAL DE LOGIN ADMIN -->
+    <div id="loginModal" class="modal-overlay" onclick="if(event.target === this) closeLogin()">
+        <div class="modal" style="max-width: 400px; text-align: center; border-radius: 1rem; position:relative; bottom:auto;">
+            <div style="width: 64px; height: 64px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);">
+                <i data-lucide="lock" color="white" size="28"></i>
+            </div>
+            <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Acesso Restrito</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Painel Administrativo Dupeças</p>
+            <form onsubmit="handleLogin(event)">
+                <input type="email" id="adminEmail" placeholder="E-mail de acesso" style="text-align: center; font-size: 1.1rem; letter-spacing: 1px;" required>
+                <input type="password" id="adminPass" placeholder="Senha de acesso" style="text-align: center; font-size: 1.1rem; letter-spacing: 2px;" required>
+                <button type="submit" class="btn btn-primary w-full">Acessar Painel</button>
+            </form>
+            <button onclick="closeLogin()" style="margin-top: 1.5rem; color: var(--text-muted); background: none; font-size: 0.9rem;">Voltar à Loja</button>
+        </div>
+    </div>
+
+    <!-- MODAL DETALHE DO PEDIDO -->
+    <div id="orderDetailModal" class="modal-overlay" onclick="if(event.target === this) closeOrderDetail()">
+        <div class="modal">
+            <div class="close-modal" onclick="closeOrderDetail()"><i data-lucide="x"></i></div>
+            <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem;">Detalhes do Pedido</h3>
+            <div id="orderDetailContent"></div>
+        </div>
+    </div>
+
+    <!-- MODAL FORMULÁRIO CLIENTE -->
+    <div id="clientFormModal" class="modal-overlay" style="z-index: 1600;" onclick="if(event.target === this) closeClientForm()">
+        <div class="modal" style="max-width: 600px;">
+            <div class="close-modal" onclick="closeClientForm()"><i data-lucide="x"></i></div>
+            <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1.5rem;">Cadastro Completo de Cliente</h3>
+            <form onsubmit="saveClient(event)" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <input type="hidden" id="cliId">
+                <div>
+                    <label>Dados Pessoais</label>
+                    <input type="text" id="cliName" placeholder="Nome Completo *" required>
+                    <div class="flex gap-4 flex-col md:flex-row">
+                        <input type="text" id="cliCpf" placeholder="CPF">
+                        <input type="email" id="cliEmail" placeholder="E-mail">
+                    </div>
+                    <input type="tel" id="cliPhone" placeholder="Telefone/WhatsApp *" required>
+                </div>
+                <div>
+                    <label>Endereço</label>
+                    <div class="flex gap-4">
+                        <input type="text" id="cliCep" placeholder="CEP" style="width: 120px;">
+                        <input type="text" id="cliAddress" placeholder="Logradouro" style="flex:1;">
+                    </div>
+                    <div class="flex gap-4">
+                        <input type="text" id="cliNum" placeholder="Nº" style="width: 80px;">
+                        <input type="text" id="cliDistrict" placeholder="Bairro" style="flex:1;">
+                    </div>
+                    <div class="flex gap-4">
+                        <input type="text" id="cliCity" placeholder="Cidade" style="flex:1;">
+                        <input type="text" id="cliState" placeholder="UF" style="width: 60px;">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-full">Salvar Cliente</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL EDIÇÃO DE PEDIDO -->
+    <div id="orderEditModal" class="modal-overlay" style="z-index: 1500;" onclick="if(event.target === this) closeEditOrder()">
+        <div class="modal" style="max-width: 800px;">
+            <div class="close-modal" onclick="closeEditOrder()"><i data-lucide="x"></i></div>
+            <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1rem;">Editar / Novo Pedido</h3>
+            
+            <div style="display:flex; flex-direction:column; gap:1.5rem; height: 100%;">
+                <div style="background: var(--bg-body); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border);">
+                    <h4 style="font-weight:700; margin-bottom:1rem;">Dados do Cliente</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <input type="text" id="editClientName" placeholder="Nome do Cliente" style="margin-bottom:0;">
+                        <input type="text" id="editClientPhone" placeholder="Telefone / WhatsApp" style="margin-bottom:0;">
+                        <input type="text" id="editClientEmail" placeholder="E-mail (opcional)" style="margin-bottom:0;">
+                        <input type="text" id="editClientCpf" placeholder="CPF (opcional)" style="margin-bottom:0;">
+                    </div>
+                </div>
+
+                <div style="flex:1; border:1px solid var(--border); border-radius:8px; padding:1.5rem; overflow-y:auto; max-height: 250px;">
+                    <h4 style="font-weight:700; margin-bottom:1rem;">Itens no Pedido</h4>
+                    <div id="editOrderItemsList"></div>
+                </div>
+
+                <div style="border:1px solid var(--border); border-radius:8px; padding:1.5rem; background: var(--bg-body); position: relative;">
+                    <h4 style="font-weight:700; margin-bottom:1rem;">Adicionar Produto</h4>
+                    <input type="text" id="editSearchProd" placeholder="Buscar produto para adicionar..." oninput="searchProdForOrder(this.value)">
+                    <div id="editProdResults" style="display: none;"></div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1rem;">
+                    <div style="font-size:1.2rem; font-weight:800;">Novo Total: <span id="editOrderTotal">R$ 0,00</span></div>
+                    <button onclick="saveOrderChanges()" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL FORMULÁRIO PRODUTO -->
+    <div id="productFormModal" class="modal-overlay" onclick="if(event.target === this) closeProductForm()">
+        <div class="modal">
+            <div class="close-modal" onclick="closeProductForm()"><i data-lucide="x"></i></div>
+            <h3 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 1.5rem;">Cadastro de Produto</h3>
+            <form onsubmit="saveProduct(event)">
+                <input type="hidden" id="prodId">
+                <div style="display: grid; grid-template-columns: 1fr; md:grid-template-columns: 1fr 2fr; gap: 2rem;">
+                    <div>
+                        <div style="width: 100%; aspect-ratio: 1; background: #f1f5f9; border-radius: var(--radius); overflow: hidden; position: relative; border: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer;" onclick="document.getElementById('fileInput').click()">
+                            <img id="formPreview" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                            <div id="uploadPlaceholder" style="text-align: center; color: var(--text-muted);">
+                                <i data-lucide="camera" size="32"></i><br><span style="font-size: 0.8rem;">Clique para enviar</span>
+                            </div>
+                        </div>
+                        <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="handleImageUpload(this)">
+                        <input type="text" id="prodImgUrl" placeholder="Ou URL da imagem" class="mt-2" onchange="previewUrl(this.value)">
+                    </div>
+                    <div>
+                        <div class="flex gap-4 flex-col md:flex-row">
+                            <input type="text" id="prodName" placeholder="Nome do Produto *" required class="w-full">
+                            <input type="text" id="prodSku" placeholder="SKU / Cód. *" required style="width: 100%; md:width: 140px;">
+                        </div>
+                        <div class="flex gap-4 flex-col md:flex-row">
+                            <input type="text" id="prodCat" list="catList" placeholder="Categoria *" required>
+                            <datalist id="catList"></datalist>
+                            <input type="text" id="prodSupplier" placeholder="Fornecedor">
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="w-full"><label>Preço (R$)</label><input type="number" id="prodPrice" step="0.01" required></div>
+                            <div class="w-full"><label>Estoque</label><input type="number" id="prodStock" required></div>
+                        </div>
+                        <fieldset style="border: 1px solid var(--border); padding: 1rem; border-radius: var(--radius); margin-bottom: 1rem;">
+                            <legend style="font-size: 0.85rem; font-weight: 700; color: var(--primary); padding: 0 0.5rem;">Dados Veiculares</legend>
+                            <div class="flex gap-4 flex-col md:flex-row">
+                                <div class="w-full"><label>Marca</label><select id="prodVehBrand"></select></div>
+                                <div class="w-full"><label>Modelo</label><input type="text" id="prodVehModel" placeholder="Ex: Gol"></div>
+                            </div>
+                            <div class="flex gap-4 flex-col md:flex-row">
+                                <div class="w-full"><label>Ano</label><input type="text" id="prodVehYear"></div>
+                                <div class="w-full"><label>Versão</label><input type="text" id="prodVehVersion"></div>
+                            </div>
+                        </fieldset>
+                        <textarea id="prodDesc" rows="3" placeholder="Descrição técnica completa..."></textarea>
+                        <button type="submit" class="btn btn-primary w-full">Salvar Produto</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DETALHE PRODUTO (LOJA) -->
+    <div id="productDetailModal" class="modal-overlay" onclick="if(event.target === this) closeProductDetail()">
+        <div class="modal">
+            <div class="close-modal" onclick="closeProductDetail()"><i data-lucide="x"></i></div>
+            <div style="display: flex; gap: 2rem; flex-direction: column; md:flex-row;">
+                <div style="flex: 1;">
+                    <img id="detailImg" src="" style="width: 100%; border-radius: var(--radius); border: 1px solid var(--border); aspect-ratio: 4/3; object-fit: contain; background: #fff;">
+                </div>
+                <div style="flex: 1.5; display: flex; flex-direction: column;">
+                    <span id="detailCat" class="badge" style="background: var(--primary-light); color: var(--primary); padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; align-self: flex-start;">CAT</span>
+                    <h2 id="detailName" style="font-size: 1.75rem; font-weight: 800; margin-top: 0.5rem; line-height: 1.2;">Nome</h2>
+                    <div id="detailSku" style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">SKU: ---</div>
+                    
+                    <div style="background: var(--bg-body); padding: 1rem; border-radius: var(--radius); margin-bottom: 1rem; border: 1px solid var(--border);">
+                        <h4 style="font-size: 0.85rem; text-transform: uppercase; font-weight: 700; color: var(--text-muted); margin-bottom: 0.5rem;">Compatibilidade</h4>
+                        <ul id="detailVehicleSpecs" style="font-size: 0.95rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;"></ul>
+                    </div>
+
+                    <div id="detailPrice" style="font-size: 2rem; font-weight: 800; color: var(--primary); margin-top: auto;">R$ 0,00</div>
+                    <p id="detailDesc" style="line-height: 1.6; color: var(--text-muted); margin-bottom: 1.5rem;">...</p>
+                    <button id="detailBtnAdd" class="btn btn-primary w-full" style="padding: 1rem;">Adicionar ao Carrinho</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DRAWER DO CARRINHO -->
+    <div id="cartDrawer" class="cart-drawer">
+        <div class="cart-header">
+            <h3 style="font-weight: 700; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="shopping-bag"></i> Seu Carrinho</h3>
+            <button onclick="toggleCart()" style="color: white; background: rgba(255,255,255,0.1); padding: 0.5rem; border-radius: 50%;"><i data-lucide="x"></i></button>
+        </div>
+        <div id="cartItems" class="cart-body"></div>
+        <div class="cart-footer">
+            <div class="checkout-form">
+                <h4 style="font-weight: 700; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 1rem; color: var(--text-muted);">Dados de Contato</h4>
+                <input type="text" id="clientName" placeholder="Nome Completo *" required>
+                <input type="tel" id="clientPhone" placeholder="WhatsApp / Telefone *" required>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 1.25rem; font-weight: 800; color: var(--text-main);">
+                <span>Total</span>
+                <span id="cartTotal">R$ 0,00</span>
+            </div>
+            <button onclick="checkout()" class="btn btn-primary w-full" style="padding: 1rem; background: #25d366; color: white; border: none;">
+                <i data-lucide="message-circle"></i> Finalizar no WhatsApp
+            </button>
+        </div>
+    </div>
+    <div id="drawerOverlay" class="drawer-overlay" onclick="toggleCart()"></div>
+
+    <!-- ======================= -->
+    <!-- VISÃO DO CLIENTE (LOJA) -->
+    <!-- ======================= -->
+    <div id="storeView">
+        <header>
+            <div class="container header-inner">
+                <div class="logo-area cursor-pointer" onclick="window.scrollTo(0,0)">
+                    <div class="logo-icon"><i data-lucide="settings-2"></i></div>
+                    <div class="logo-text">
+                        <h1>DUPEÇAS</h1>
+                        <span>Duarte Peças</span>
+                    </div>
+                </div>
+
+                <div class="search-wrapper hide-mobile">
+                    <i data-lucide="search" class="search-icon"></i>
+                    <input type="text" id="searchInput" placeholder="Pesquisar peça, SKU, marca..." oninput="applyFilters()">
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button onclick="toggleTheme()" class="btn-icon hide-mobile" title="Alternar Tema"><i data-lucide="moon"></i></button>
+                    <button onclick="openLogin()" class="btn-icon hide-mobile" title="Admin"><i data-lucide="shield"></i></button>
+                    <button onclick="toggleCart()" class="btn btn-primary" style="padding: 0.5rem 1rem; position: relative;">
+                        <i data-lucide="shopping-bag"></i> <span class="hide-mobile">Carrinho</span>
+                        <span id="cartCountBadge" class="hidden" style="position: absolute; top: -5px; right: -5px; background: var(--danger); width: 20px; height: 20px; border-radius: 50%; font-size: 11px; display: flex; align-items: center; justify-content: center; border: 2px solid white;">0</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="container promo-section">
+            <div class="promo-grid">
+                <div class="promo-card main">
+                    <div class="promo-content">
+                        <span class="promo-tag">Oferta da Semana</span>
+                        <h2 class="promo-title">Kits de Revisão<br>com 15% OFF</h2>
+                        <p class="promo-desc">Garanta a manutenção do seu veículo com as melhores marcas.</p>
+                        <button class="btn btn-primary" onclick="window.scrollTo(0,800)">Ver Ofertas</button>
+                    </div>
+                </div>
+                <div class="promo-card secondary">
+                    <div class="promo-content">
+                        <span class="promo-tag">Novidade</span>
+                        <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;">Óleos Sintéticos</h3>
+                        <p class="promo-desc">Alta performance.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="filter-box">
+                <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="car"></i> Compatibilidade Veicular</h2>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Encontre peças exatas para seu carro.</p>
+                <div class="filter-grid">
+                    <div>
+                        <label>Marca</label>
+                        <select id="filterBrand" onchange="applyFilters()">
+                            <option value="">Todas</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Modelo (Digite)</label>
+                        <input type="text" id="filterModel" placeholder="Ex: Gol, Onix..." oninput="applyFilters()" style="margin-bottom:0;">
+                    </div>
+                    <div>
+                        <label>Ano</label>
+                        <input type="text" id="filterYear" placeholder="Ex: 2022" oninput="applyFilters()" style="margin-bottom:0;">
+                    </div>
+                    <div>
+                        <label>SKU / Código</label>
+                        <input type="text" id="filterSku" placeholder="Código da peça" oninput="applyFilters()" style="margin-bottom:0;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <div class="container flex flex-col md:flex-row gap-4 justify-between items-center">
+                <div class="w-full md:hidden relative">
+                    <input type="text" placeholder="Buscar..." oninput="filterSearch(this.value)" style="margin: 0; padding-left: 1rem; border-radius: 99px;">
+                </div>
+                <div class="categories-scroll w-full md:w-auto" id="categoryFilters"></div>
+                <div class="flex gap-2 items-center w-full md:w-auto justify-end overflow-x-auto">
+                    <select id="sortOrder" onchange="applyFilters()" style="margin: 0; width: auto; padding: 0.5rem 2rem 0.5rem 1rem; border-radius: 99px; font-size: 0.9rem;">
+                        <option value="az">A-Z</option>
+                        <option value="za">Z-A</option>
+                        <option value="asc">Menor Preço</option>
+                        <option value="desc">Maior Preço</option>
+                    </select>
+                    <div class="flex bg-body rounded border p-1 hide-mobile">
+                        <button onclick="setView('grid')" class="btn-icon"><i data-lucide="grid" size="18"></i></button>
+                        <button onclick="setView('list')" class="btn-icon"><i data-lucide="list" size="18"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <main class="container">
+            <div id="resultsCount" style="margin-bottom: 1rem; font-weight: 600; color: var(--text-muted); font-size: 0.9rem;"></div>
+            <div id="productsContainer" class="products-grid"></div>
+            <div id="loadMoreBtn" class="hidden" style="text-align: center; margin-top: 2rem;">
+                <button onclick="loadMoreProducts()" class="btn btn-secondary">Ver mais produtos</button>
+            </div>
+            <div id="emptyState" class="hidden text-center py-20">
+                <div style="background: var(--bg-body); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                    <i data-lucide="package-search" size="40" color="#94a3b8"></i>
+                </div>
+                <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-main);">Nenhum produto encontrado</h3>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Tente ajustar os filtros veiculares ou sua busca.</p>
+                <button onclick="resetFilters()" class="btn btn-secondary">Limpar Filtros</button>
+            </div>
+        </main>
+
+        <footer style="background: #0f172a; color: #e2e8f0; padding-top: 4rem; margin-top: 4rem; border-top: 1px solid #1e293b;">
+            <div class="container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 3rem; padding-bottom: 3rem;">
+                <div>
+                    <h3 style="color: white; font-size: 1.25rem; font-weight: 800; margin-bottom: 0.5rem;">Dupeças Duarte Peças</h3>
+                    <p style="font-size: 0.9rem; line-height: 1.6; color: #94a3b8; margin-bottom: 1.5rem;">Referência em autopeças em Petrolina e região.</p>
+                </div>
+                <div>
+                    <h4 style="color: white; font-weight: 700; margin-bottom: 1.25rem;">Contato</h4>
+                    <ul style="display: flex; flex-direction: column; gap: 1rem; font-size: 0.95rem;">
+                        <li style="display: flex; gap: 0.75rem; color: #cbd5e1;"><i data-lucide="map-pin" style="color: var(--primary);"></i> Av. Sete de Setembro, 105 - Petrolina - PE</li>
+                        <li style="display: flex; gap: 0.75rem; color: #cbd5e1;"><i data-lucide="phone" style="color: var(--primary);"></i> (87) 9909-4280</li>
+                    </ul>
+                </div>
+            </div>
+            <div style="border-top: 1px solid #1e293b; padding: 1.5rem 0; text-align: center; font-size: 0.85rem; color: #64748b;">
+                © 2025 Dupeças Duarte Peças. Todos os direitos reservados.
+            </div>
+        </footer>
+    </div>
+
+    <!-- ======================= -->
+    <!-- VISÃO ADMIN (PAINEL)    -->
+    <!-- ======================= -->
+    <div id="adminView" class="hidden admin-layout">
+        <aside class="admin-sidebar" id="adminSidebar">
+            <div class="sidebar-logo">
+                <div class="logo-icon"><i data-lucide="settings-2"></i></div>
+                <div class="logo-text">
+                    <h3 style="font-weight: 800; font-size: 1.1rem;">ADMIN</h3>
+                    <span style="font-size: 0.75rem; opacity: 0.7;">Gerenciador (Firebase)</span>
+                </div>
+                <button class="md:hidden btn-toggle-mobile" onclick="toggleSidebarMobile()" style="margin-left: auto; color: white;"><i data-lucide="x"></i></button>
+            </div>
+            
+            <nav class="sidebar-menu">
+                <div class="menu-item active" onclick="setAdminTab('dashboard')"><i data-lucide="bar-chart-2"></i> <span class="menu-text">Dashboard</span></div>
+                <div class="menu-item" onclick="setAdminTab('products')"><i data-lucide="package"></i> <span class="menu-text">Produtos</span></div>
+                <div class="menu-item" onclick="setAdminTab('orders')"><i data-lucide="shopping-bag"></i> <span class="menu-text">Pedidos</span> <span id="orderCountBadge" class="badge-count" style="background: var(--danger); font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; margin-left: auto;">0</span></div>
+                <div class="menu-item" onclick="setAdminTab('clients')"><i data-lucide="users"></i> <span class="menu-text">Clientes</span></div>
+                <div class="menu-item" onclick="setAdminTab('reports')"><i data-lucide="pie-chart"></i> <span class="menu-text">Relatórios</span></div>
+                <div class="menu-item" onclick="setAdminTab('brands')"><i data-lucide="car"></i> <span class="menu-text">Marcas</span></div>
+                <div class="menu-item" onclick="setAdminTab('settings')"><i data-lucide="settings"></i> <span class="menu-text">Configurações</span></div>
+            </nav>
+            
+            <div style="padding: 1rem; border-top: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 0.5rem;">
+                <button onclick="toggleSidebarCollapse()" class="btn-icon btn-collapse-sidebar" style="color:white; width: 100%; justify-content: flex-start; gap: 10px; padding: 0.8rem;">
+                    <i id="collapseIcon" data-lucide="chevrons-left"></i> <span class="menu-text">Recolher</span>
+                </button>
+                <button onclick="logoutAdmin()" class="btn btn-danger w-full" style="justify-content: center; margin-top: 0.5rem;">
+                    <i data-lucide="log-out" style="width: 16px;"></i> <span class="menu-text">Sair</span>
+                </button>
+            </div>
+        </aside>
+
+        <main class="admin-main">
+            <header class="flex justify-between items-center mb-6">
+                <button class="md:hidden btn-icon" onclick="toggleSidebarMobile()"><i data-lucide="menu"></i></button>
+                <h2 id="pageTitle" style="font-size: 1.5rem; font-weight: 800; color: var(--text-main);">Visão Geral</h2>
+                <button onclick="toggleTheme()" class="btn-icon" title="Alternar Tema"><i data-lucide="moon"></i></button>
+            </header>
+
+            <div id="tab-dashboard" class="admin-tab">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                    <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
+                        <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem;">Vendas Totais</div>
+                        <div style="font-size: 1.8rem; font-weight: 800; color: var(--primary);" id="kpiSales">R$ 0,00</div>
+                    </div>
+                    <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; box-shadow: var(--shadow-sm); border: 1px solid var(--border); border-left: 4px solid var(--primary);">
+                        <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem;">Pedidos</div>
+                        <div style="font-size: 1.8rem; font-weight: 800;" id="kpiOrderCount">0</div>
+                    </div>
+                    <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; box-shadow: var(--shadow-sm); border: 1px solid var(--border); border-left: 4px solid var(--success);">
+                        <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem;">Estoque (Valor)</div>
+                        <div style="font-size: 1.8rem; font-weight: 800;" id="kpiStockVal">R$ 0,00</div>
+                    </div>
+                </div>
+                <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border);">
+                    <h4 style="font-weight: 700; margin-bottom: 1rem;">Vendas Recentes</h4>
+                    <div style="height: 250px;"><canvas id="salesChart"></canvas></div>
+                </div>
+            </div>
+
+            <div id="tab-products" class="admin-tab hidden">
+                <div class="flex flex-col md:flex-row justify-between gap-4 mb-6">
+                    <input type="text" placeholder="Filtrar por nome, SKU, veículo..." oninput="filterAdminTable(this.value)" style="margin: 0; max-width: 300px;">
+                    <div class="flex gap-2 items-center">
+                         <select id="adminProdLimit" onchange="renderAdminTable()" style="margin:0; width:auto;">
+                            <option value="25">25 itens</option>
+                            <option value="50">50 itens</option>
+                            <option value="100">100 itens</option>
+                            <option value="all">Todos</option>
+                        </select>
+                        <select id="adminProdSort" onchange="renderAdminTable()" style="margin:0; width:auto;">
+                            <option value="az">A-Z</option>
+                            <option value="za">Z-A</option>
+                            <option value="recent">Mais Recentes</option>
+                            <option value="lowstock">Estoque Baixo</option>
+                        </select>
+                        <div class="flex bg-body rounded border p-1 hide-mobile">
+                            <button onclick="setAdminViewMode('products', 'grid')" class="btn-icon"><i data-lucide="grid"></i></button>
+                            <button onclick="setAdminViewMode('products', 'list')" class="btn-icon"><i data-lucide="list"></i></button>
+                        </div>
+                        <button onclick="openProductForm()" class="btn btn-primary"><i data-lucide="plus"></i> Novo</button>
+                    </div>
+                </div>
+                <div id="adminProductsContainer"></div>
+            </div>
+
+            <div id="tab-reports" class="admin-tab hidden">
+                <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+                    <h3 class="font-bold text-lg">Central de Relatórios</h3>
+                    <div class="flex gap-2">
+                        <button onclick="generateExportData('txt')" class="btn btn-secondary btn-sm"><i data-lucide="file-text"></i> TXT</button>
+                        <button onclick="generateExportData('csv')" class="btn btn-secondary btn-sm"><i data-lucide="sheet"></i> CSV</button>
+                        <button onclick="generateExportData('xls')" class="btn btn-secondary btn-sm"><i data-lucide="table"></i> Excel</button>
+                        <button onclick="printReport()" class="btn btn-secondary btn-sm"><i data-lucide="printer"></i> PDF/Imprimir</button>
+                    </div>
+                </div>
+                <div style="background: var(--bg-card); padding: 1rem; border: 1px solid var(--border); border-radius: 0.5rem; margin-bottom: 1rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end;">
+                    <div style="flex:1; min-width: 150px;"><label>Data Inicial</label><input type="date" id="repStart" style="margin:0;"></div>
+                    <div style="flex:1; min-width: 150px;"><label>Data Final</label><input type="date" id="repEnd" style="margin:0;"></div>
+                    <button onclick="applyReportFilters()" class="btn btn-primary">Filtrar</button>
+                </div>
+                <div class="report-tabs">
+                    <button class="report-tab-btn active" onclick="switchReport('sales')">Vendas Detalhadas</button>
+                    <button class="report-tab-btn" onclick="switchReport('stock')">Estoque Baixo</button>
+                    <button class="report-tab-btn" onclick="switchReport('full-inventory')">Inventário Completo</button>
+                    <button class="report-tab-btn" onclick="switchReport('financial')">Financeiro</button>
+                </div>
+                <div id="report-content"></div>
+            </div>
+
+            <div id="tab-brands" class="admin-tab hidden">
+                <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border); max-width: 600px;">
+                    <h3 class="font-bold mb-4">Gerenciar Marcas de Veículos</h3>
+                    <div class="flex gap-2 mb-4">
+                        <input type="text" id="newBrandInput" placeholder="Nova Marca (Ex: Tesla)" style="margin: 0;">
+                        <button onclick="addBrand()" class="btn btn-primary">Adicionar</button>
+                    </div>
+                    <ul id="brandsList" style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius);"></ul>
+                </div>
+            </div>
+
+            <div id="tab-orders" class="admin-tab hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-lg">Gerenciamento de Pedidos</h3>
+                    <div class="flex gap-2">
+                        <div class="flex bg-body rounded border p-1 hide-mobile">
+                            <button onclick="setAdminViewMode('orders', 'grid')" class="btn-icon"><i data-lucide="grid"></i></button>
+                            <button onclick="setAdminViewMode('orders', 'list')" class="btn-icon"><i data-lucide="list"></i></button>
+                        </div>
+                        <button onclick="openEditOrder('new')" class="btn btn-primary"><i data-lucide="plus-circle"></i> Novo Pedido</button>
+                    </div>
+                </div>
+                <div id="adminOrdersContainer"></div>
+                <div id="noOrdersMsg" class="hidden" style="padding: 2rem; text-align: center; color: var(--text-muted);">Nenhum pedido registrado ainda.</div>
+            </div>
+
+            <div id="tab-clients" class="admin-tab hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-lg">Gerenciamento de Clientes</h3>
+                    <div class="flex gap-2">
+                         <div class="flex bg-body rounded border p-1 hide-mobile">
+                            <button onclick="setAdminViewMode('clients', 'grid')" class="btn-icon"><i data-lucide="grid"></i></button>
+                            <button onclick="setAdminViewMode('clients', 'list')" class="btn-icon"><i data-lucide="list"></i></button>
+                        </div>
+                        <button onclick="openClientForm()" class="btn btn-primary"><i data-lucide="user-plus"></i> Novo Cliente</button>
+                    </div>
+                </div>
+                <div id="adminClientsContainer"></div>
+            </div>
+
+            <div id="tab-settings" class="admin-tab hidden">
+                <div style="display: grid; gap: 1.5rem; max-width: 800px;">
+                    <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border);">
+                        <h3 style="font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="settings-2"></i> Dados de Pagamento</h3>
+                        <p class="text-sm text-muted mb-2">Chave PIX que será enviada no WhatsApp.</p>
+                        <input type="text" id="configPixKey" placeholder="Chave PIX" value="teste 123456789">
+                        <button onclick="saveSettings()" class="btn btn-primary">Salvar Configurações</button>
+                    </div>
+
+                    <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border);">
+                        <h3 style="font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="cloud"></i> Backups e Restauração</h3>
+                        <div class="mb-4">
+                            <h4 class="font-bold text-sm mb-2">Criar e Exportar Backup (Salva na Nuvem)</h4>
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                <button onclick="exportData('json')" class="btn btn-primary flex-1"><i data-lucide="save"></i> Salvar e Baixar Backup</button>
+                                <label class="btn btn-secondary flex-1 cursor-pointer">
+                                    <i data-lucide="upload"></i> Restaurar Arquivo Local
+                                    <input type="file" accept=".json" class="hidden" onchange="restoreBackup(this)">
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-sm mb-2">Últimos Backups na Nuvem (Firebase)</h4>
+                            <div id="cloudBackupsList" style="border: 1px solid var(--border); border-radius: 8px; max-height: 150px; overflow-y: auto;">
+                                <div style="padding:1rem; text-align:center; color:var(--text-muted);">Carregando backups...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border);">
+                        <h3 style="font-weight: 700; font-size: 1.1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="image"></i> Atualização em Massa</h3>
+                        <p class="text-sm text-muted mb-2">Formato: ID,URL_DA_IMAGEM (uma por linha)</p>
+                        <textarea id="bulkImgInput" rows="4" placeholder="Ex: 1715456,https://link.com/img.jpg"></textarea>
+                        <button onclick="bulkUpdateImages()" class="btn btn-primary w-full">Processar Imagens e Sincronizar</button>
+                    </div>
+                    <div style="background: #fef2f2; padding: 1.5rem; border-radius: 1rem; border: 1px solid #fecaca;">
+                        <h3 style="font-weight: 700; font-size: 1.1rem; margin-bottom: 0.5rem; color: #b91c1c;">Zona de Perigo</h3>
+                        <p class="text-sm text-muted mb-2">Requer senha de segurança (dupeca2026)</p>
+                        <button onclick="resetSystem()" class="btn btn-danger w-full">Apagar Todo o Banco de Dados</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc, writeBatch, query, orderBy, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        // Configuração Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyA1bJpcVTG8C7W6SDqYTUW2MGEgagiKN-E",
+            authDomain: "dupecas-77955.firebaseapp.com",
+            projectId: "dupecas-77955",
+            storageBucket: "dupecas-77955.firebasestorage.app",
+            messagingSenderId: "570238830984",
+            appId: "1:570238830984:web:83d08f95ce37fe5212123d"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Monitor de Estado de Autenticação
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.isAdmin = true;
+                document.getElementById('adminView').classList.remove('hidden');
+                document.getElementById('storeView').classList.add('hidden');
+                loadAdminDashboard();
+                checkExpiredOrders();
+            } else {
+                window.isAdmin = false;
+                document.getElementById('adminView').classList.add('hidden');
+                document.getElementById('storeView').classList.remove('hidden');
+            }
+        });
+
+        const DBService = {
+            async getAll(collectionName) {
+                try {
+                    const querySnapshot = await getDocs(collection(db, collectionName));
+                    return querySnapshot.docs.map(doc => doc.data());
+                } catch (error) { console.error("Erro ao ler " + collectionName, error); return []; }
+            },
+            async put(collectionName, data) {
+                const idString = String(data.id || Date.now());
+                await setDoc(doc(db, collectionName, idString), data, { merge: true });
+                return data;
+            },
+            async delete(collectionName, id) { await deleteDoc(doc(db, collectionName, String(id))); },
+            async clear(collectionName) {
+                const q = await getDocs(collection(db, collectionName));
+                const deletePromises = [];
+                q.forEach((doc) => { deletePromises.push(deleteDoc(doc.ref)); });
+                await Promise.all(deletePromises);
+            },
+            async saveCloudBackup(data) {
+                await addDoc(collection(db, 'system_backups'), { timestamp: Date.now(), content: JSON.stringify(data) });
+                const q = query(collection(db, 'system_backups'), orderBy('timestamp', 'asc'));
+                const snapshot = await getDocs(q);
+                if(snapshot.size > 3) {
+                    const toDelete = snapshot.size - 3;
+                    for(let i=0; i<toDelete; i++) await deleteDoc(snapshot.docs[i].ref);
+                }
+            },
+            async getCloudBackups() {
+                const q = query(collection(db, 'system_backups'), orderBy('timestamp', 'desc'));
+                const snapshot = await getDocs(q);
+                return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+            }
+        };
+        
+        window.DBService = DBService;
+        window.products = []; window.cart = []; window.orders = []; window.clients = []; window.brands = [];
+        window.currentFilter = 'Todos'; window.isAdmin = false;
+        window.pixKey = localStorage.getItem('dupecas_pix_key') || "teste 123456789";
+        window.visibleProductsLimit = 25; window.adminViewMode = 'list'; window.currentReportType = 'sales';
+
+        window.showToast = function(msg, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            let icon = type === 'success' ? 'check-circle' : 'alert-circle';
+            toast.innerHTML = `<i data-lucide="${icon}" size="20"></i> <span>${msg}</span>`;
+            container.appendChild(toast);
+            lucide.createIcons();
+            setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+        }
+
+        window.formatMoney = (val) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+        window.onload = async function() {
+            if (window.innerWidth < 768) window.adminViewMode = 'grid';
+            lucide.createIcons();
+            document.getElementById('configPixKey').value = window.pixKey;
+            await loadData();
+            // Auth check handles view switching
+            renderBrandsFilter(); renderCategories(); renderProducts(); updateCartUI(); initSidebarState();
+            if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
+        };
+
+        async function loadData() {
+            window.products = await DBService.getAll('products');
+            window.brands = await DBService.getAll('brands');
+            window.orders = await DBService.getAll('orders');
+            window.clients = await DBService.getAll('clients');
+            const localCart = localStorage.getItem('dupecas_cart');
+            window.cart = localCart ? JSON.parse(localCart) : [];
+            window.products.sort((a,b) => a.name.localeCompare(b.name));
+            // Default Data if empty
+            if (window.products.length === 0) {
+                const INITIAL = [{ id: 1, name: "Óleo Sintético 5W30", category: "Óleos", price: 45.90, stock: 50, image: "https://images.pexels.com/photos/4489749/pexels-photo-4489749.jpeg?auto=compress&cs=tinysrgb&w=600", sku: "OL5W30", vehicleBrand: "Todas", vehicleModel: "Universal", description: "Proteção máxima." }];
+                for(const p of INITIAL) await DBService.put('products', p);
+                window.products = [...INITIAL];
+            }
+            if (window.brands.length === 0) {
+                const BRANDS = ["Todas", "Audi", "BMW", "BYD", "Chevrolet", "Citroën", "Fiat", "Ford", "Honda", "Hyundai", "Jeep", "Kia", "Mercedes-Benz", "Mitsubishi", "Nissan", "Peugeot", "Renault", "Toyota", "Volkswagen", "Volvo", "Yamaha"].map(b => ({ name: b }));
+                for(const b of BRANDS) await DBService.put('brands', b);
+                window.brands = [...BRANDS];
+            }
+            let brandNames = window.brands.map(b => b.name).filter(b => b !== "Todas").sort();
+            window.brands = ["Todas", ...brandNames];
+        }
+        window.loadData = loadData; 
+
+        window.renderBrandsFilter = function() {
+            const html = window.brands.map(b => `<option value="${b}">${b}</option>`).join('');
+            if(document.getElementById('filterBrand')) document.getElementById('filterBrand').innerHTML = html;
+            if(document.getElementById('prodVehBrand')) document.getElementById('prodVehBrand').innerHTML = html;
+        }
+
+        window.renderCategories = function() {
+            const cats = ['Todos', ...new Set(window.products.map(p => p.category))];
+            document.getElementById('categoryFilters').innerHTML = cats.map(c => `<button class="cat-pill ${c === window.currentFilter ? 'active' : ''}" onclick="setCategoryFilter('${c}')">${c}</button>`).join('');
+            document.getElementById('catList').innerHTML = cats.filter(c => c!=='Todos').map(c => `<option value="${c}">`).join('');
+        }
+
+        window.setCategoryFilter = function(cat) { 
+            window.currentFilter = cat; 
+            document.getElementById('searchInput').value = '';
+            window.visibleProductsLimit = 25;
+            window.renderCategories(); window.applyFilters(); 
+        }
+        
+        window.setView = function(mode) { document.getElementById('productsContainer').className = mode === 'list' ? 'products-list' : 'products-grid'; applyFilters(); }
+        window.filterSearch = function(val) { document.getElementById('searchInput').value = val; applyFilters(); }
+
+        window.resetFilters = function() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterBrand').value = 'Todas';
+            document.getElementById('filterModel').value = '';
+            document.getElementById('filterYear').value = '';
+            document.getElementById('filterSku').value = '';
+            window.currentFilter = 'Todos';
+            window.visibleProductsLimit = 25;
+            window.renderCategories();
+            window.applyFilters();
+        }
+
+        window.applyFilters = function() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const fBrand = document.getElementById('filterBrand').value;
+            const fModel = document.getElementById('filterModel').value.toLowerCase();
+            const fYear = document.getElementById('filterYear').value;
+            const fSku = document.getElementById('filterSku').value.toLowerCase();
+            const sort = document.getElementById('sortOrder').value;
+
+            let filtered = window.products.filter(p => {
+                if (window.currentFilter !== 'Todos' && p.category !== window.currentFilter) return false;
+                const fullText = `${p.name} ${p.sku} ${p.category}`.toLowerCase();
+                return fullText.includes(search) &&
+                       (!fBrand || fBrand === 'Todas' || p.vehicleBrand === fBrand) &&
+                       (!fModel || (p.vehicleModel || '').toLowerCase().includes(fModel) || p.vehicleModel === 'Universal') &&
+                       (!fYear || (p.vehicleYear || '').includes(fYear)) &&
+                       (!fSku || (p.sku || '').toLowerCase().includes(fSku));
+            });
+
+            if(sort === 'az') filtered.sort((a,b) => a.name.localeCompare(b.name));
+            if(sort === 'za') filtered.sort((a,b) => b.name.localeCompare(a.name));
+            if(sort === 'asc') filtered.sort((a,b) => a.price - b.price);
+            if(sort === 'desc') filtered.sort((a,b) => b.price - a.price);
+            window.renderProducts(filtered);
+        }
+
+        window.renderProducts = function(list = null) {
+            const data = list || window.products;
+            const container = document.getElementById('productsContainer');
+            const empty = document.getElementById('emptyState');
+            const countEl = document.getElementById('resultsCount');
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            if(countEl) countEl.innerText = `Exibindo ${data.length} produto(s)`;
+            if(data.length === 0) { container.innerHTML = ''; empty.classList.remove('hidden'); loadMoreBtn.classList.add('hidden'); return; }
+            empty.classList.add('hidden');
+            const displayData = data.slice(0, window.visibleProductsLimit);
+            if (displayData.length < data.length) loadMoreBtn.classList.remove('hidden'); else loadMoreBtn.classList.add('hidden');
+            container.innerHTML = displayData.map(p => `
+                <div class="product-card">
+                    <div class="card-img-box" onclick="openDetail(${p.id})">
+                        <img src="${p.image}" class="card-img" loading="lazy">
+                        ${p.stock <= 5 && p.stock > 0 ? `<span style="position:absolute; top:8px; right:8px; background:var(--danger); color:white; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">POUCAS UNIDADES</span>` : ''}
+                        ${p.stock === 0 ? `<div style="position:absolute; inset:0; background:rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; color:white; font-weight:bold;">ESGOTADO</div>` : ''}
+                    </div>
+                    <div class="card-body">
+                        <div class="card-cat">${p.category}</div>
+                        <h3 class="card-title">${p.name}</h3>
+                        <div class="card-meta"><span><i data-lucide="tag" size="10" style="display:inline"></i> ${p.sku}</span><span><i data-lucide="car" size="10" style="display:inline"></i> ${p.vehicleBrand}</span></div>
+                        <div class="card-price">${formatMoney(p.price)}
+                            <button onclick="addToCart(${p.id})" class="btn-cart-mini" ${p.stock === 0 ? 'disabled style="opacity:0.5"' : ''}><i data-lucide="plus" size="20"></i></button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        window.loadMoreProducts = function() { window.visibleProductsLimit += 25; window.applyFilters(); }
+        window.openDetail = function(id) {
+            const p = window.products.find(x => x.id === id); if(!p) return;
+            document.getElementById('detailImg').src = p.image;
+            document.getElementById('detailName').innerText = p.name;
+            document.getElementById('detailSku').innerText = `SKU: ${p.sku} | Fornecedor: ${p.supplier || '-'}`;
+            document.getElementById('detailCat').innerText = p.category;
+            document.getElementById('detailDesc').innerText = p.description || 'Sem descrição.';
+            document.getElementById('detailPrice').innerText = formatMoney(p.price);
+            document.getElementById('detailVehicleSpecs').innerHTML = `<li><strong>Marca:</strong> ${p.vehicleBrand}</li><li><strong>Modelo:</strong> ${p.vehicleModel || 'Universal'}</li><li><strong>Ano:</strong> ${p.vehicleYear || 'Todos'}</li><li><strong>Versão:</strong> ${p.vehicleVersion || '-'}</li><li><strong>Estoque:</strong> ${p.stock} un.</li>`;
+            const btn = document.getElementById('detailBtnAdd');
+            if(p.stock === 0) { btn.disabled = true; btn.innerText = "Esgotado"; btn.style.background = "#94a3b8"; } 
+            else { btn.disabled = false; btn.innerText = "Adicionar ao Carrinho"; btn.style.background = "var(--primary)"; btn.onclick = () => { addToCart(p.id); closeProductDetail(); }; }
+            document.getElementById('productDetailModal').classList.add('active');
+        }
+        window.closeProductDetail = function() { document.getElementById('productDetailModal').classList.remove('active'); }
+        window.toggleCart = function() { document.getElementById('cartDrawer').classList.toggle('open'); document.getElementById('drawerOverlay').classList.toggle('open'); }
+        window.addToCart = function(id) {
+            const prod = window.products.find(p => p.id === id);
+            const item = window.cart.find(i => i.id === id);
+            if (item) { if (item.quantity >= prod.stock) return showToast("Estoque máximo atingido!", "error"); item.quantity++; } 
+            else { window.cart.push({ ...prod, quantity: 1 }); }
+            saveCartLocal(); updateCartUI(); showToast("Adicionado ao carrinho!");
+        }
+        window.changeCartQty = function(id, delta) {
+            const item = window.cart.find(i => i.id === id); if (!item) return;
+            const prod = window.products.find(p => p.id === id);
+            if (delta > 0) { if (item.quantity >= prod.stock) return showToast("Estoque limite atingido!", "error"); item.quantity++; } 
+            else { if (item.quantity > 1) item.quantity--; else if(confirm("Remover este item?")) window.cart = window.cart.filter(i => i.id !== id); }
+            saveCartLocal(); updateCartUI();
+        }
+        window.saveCartLocal = function() { localStorage.setItem('dupecas_cart', JSON.stringify(window.cart)); }
+        window.updateCartUI = function() {
+            const container = document.getElementById('cartItems');
+            const totalEl = document.getElementById('cartTotal');
+            const badge = document.getElementById('cartCountBadge');
+            const count = window.cart.reduce((a, b) => a + b.quantity, 0);
+            badge.innerText = count; badge.classList.toggle('hidden', count === 0);
+            if (window.cart.length === 0) { container.innerHTML = `<div class="text-center py-10 text-muted"><i data-lucide="shopping-bag" size="48"></i><p>Carrinho vazio</p></div>`; totalEl.innerText = formatMoney(0); } 
+            else {
+                let total = 0;
+                container.innerHTML = window.cart.map(item => { total += item.price * item.quantity; return `<div style="display:flex; gap:10px; margin-bottom:1rem; border-bottom:1px solid #eee; padding-bottom:1rem; align-items: center;"><img src="${item.image}" style="width:50px; height:50px; object-fit:cover; border-radius:4px;"><div style="flex:1;"><div class="font-bold text-sm">${item.name}</div><div class="text-xs text-muted">SKU: ${item.sku}</div><div class="text-xs text-muted mb-1">${formatMoney(item.price)} un.</div><div class="qty-controls" style="display:inline-flex;"><button class="qty-btn" onclick="changeCartQty(${item.id}, -1)">-</button><span class="qty-val">${item.quantity}</span><button class="qty-btn" onclick="changeCartQty(${item.id}, 1)">+</button></div></div><div style="text-align:right;"><div class="font-bold text-primary">${formatMoney(item.price * item.quantity)}</div><button onclick="removeFromCart(${item.id})" class="text-danger" style="font-size:0.8rem; margin-top:5px;"><i data-lucide="trash-2" size="16"></i></button></div></div>`; }).join('');
+                totalEl.innerText = formatMoney(total);
+            }
+            lucide.createIcons();
+        }
+        window.removeFromCart = function(id) { window.cart = window.cart.filter(i => i.id !== id); saveCartLocal(); updateCartUI(); }
+        window.checkout = async function() {
+            if (window.cart.length === 0) return showToast("Carrinho vazio!", "error");
+            const name = document.getElementById('clientName').value; const phone = document.getElementById('clientPhone').value;
+            if(!name || !phone) return showToast("Preencha nome e telefone!", "error");
+            const total = window.cart.reduce((a, b) => a + (b.price * b.quantity), 0);
+            const newOrder = { id: Date.now(), timestamp: Date.now(), date: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR'), customer: name, phone: phone, email: "", cpf: "", total: total, status: 'Pendente', items: JSON.parse(JSON.stringify(window.cart)) };
+            window.orders.unshift(newOrder); await DBService.put('orders', newOrder);
+            const existingClient = window.clients.find(c => c.phone === phone);
+            if (!existingClient) { const newClient = { id: Date.now(), name: name, phone: phone, email: "", cpf: "" }; window.clients.push(newClient); await DBService.put('clients', newClient); }
+            for (const item of window.cart) { const prod = window.products.find(p => p.id === item.id); if(prod) { prod.stock -= item.quantity; await DBService.put('products', prod); } }
+            const itemsList = window.cart.map(i => `📦 ${i.quantity}x ${i.name} (SKU: ${i.sku})`).join('\n');
+            const msg = `*PEDIDO #${newOrder.id}*\n👤 *${name}*\n📞 ${phone}\n\n${itemsList}\n\n💰 *Total: ${formatMoney(total)}*\n\n🔑 *Chave PIX:* ${window.pixKey}\n\n⚠️ *Aviso:* O seu pedido ficará reservado por 72h.`;
+            window.cart = []; localStorage.removeItem('dupecas_cart'); updateCartUI(); toggleCart(); renderProducts();
+            window.open(`https://wa.me/558799094280?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        window.openLogin = function() { document.getElementById('loginModal').classList.add('active'); }
+        window.closeLogin = function() { document.getElementById('loginModal').classList.remove('active'); }
+        window.handleLogin = async function(e) { e.preventDefault(); const email = document.getElementById('adminEmail').value; const pass = document.getElementById('adminPass').value; try { await signInWithEmailAndPassword(auth, email, pass); closeLogin(); } catch (error) { console.error(error); showToast("Credenciais inválidas.", "error"); } }
+        window.logoutAdmin = async function() { try { await signOut(auth); } catch (error) { showToast("Erro ao sair", "error"); } }
+
+        window.checkExpiredOrders = async function() {
+            const now = Date.now(); const limit = 72 * 60 * 60 * 1000; 
+            let updated = false;
+            for (const order of window.orders) { if ((order.status === 'Pendente' || !order.status) && order.timestamp && (now - order.timestamp > limit)) { await cancelOrderLogic(order.id, true); updated = true; } }
+            if(updated) { showToast("Pedidos expirados limpos."); renderOrdersTable(); loadData(); }
+        }
+
+        window.toggleSidebarMobile = function() { document.getElementById('adminSidebar').classList.toggle('active'); }
+        window.initSidebarState = function() { if (localStorage.getItem('sidebarCollapsed') === 'true') { document.getElementById('adminSidebar').classList.add('collapsed'); document.getElementById('collapseIcon').setAttribute('data-lucide', 'chevrons-right'); } }
+        window.toggleSidebarCollapse = function() { const sidebar = document.getElementById('adminSidebar'); sidebar.classList.toggle('collapsed'); localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed')); document.getElementById('collapseIcon').setAttribute('data-lucide', sidebar.classList.contains('collapsed') ? 'chevrons-right' : 'chevrons-left'); lucide.createIcons(); }
+        
+        window.setAdminTab = function(tab) {
+            document.querySelectorAll('.admin-tab').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tab}`).classList.remove('hidden');
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            if(window.innerWidth <= 768) document.getElementById('adminSidebar').classList.remove('active');
+            if (tab === 'dashboard') loadAdminDashboard();
+            if (tab === 'products') renderAdminTable();
+            if (tab === 'orders') renderOrdersTable();
+            if (tab === 'clients') renderClientsTable();
+            if (tab === 'reports') switchReport('sales');
+            if (tab === 'brands') renderBrandsList();
+            if (tab === 'settings') renderCloudBackups(); 
+        }
+
+        window.setAdminViewMode = function(section, mode) { window.adminViewMode = mode; if(section === 'products') renderAdminTable(); if(section === 'orders') renderOrdersTable(); if(section === 'clients') renderClientsTable(); }
+
+        let salesChartRef;
+        window.loadAdminDashboard = function() {
+            const totalVal = window.products.reduce((a, b) => a + (b.price * b.stock), 0);
+            const validOrders = window.orders.filter(o => o.status !== 'Cancelado');
+            document.getElementById('kpiSales').innerText = formatMoney(validOrders.reduce((a,b)=>a+b.total, 0));
+            document.getElementById('kpiOrderCount').innerText = validOrders.length;
+            document.getElementById('kpiStockVal').innerText = formatMoney(totalVal);
+            const ctx = document.getElementById('salesChart');
+            if(salesChartRef) salesChartRef.destroy();
+            const dataSales = [1200, 1900, 3000, 5000, 2000, 3000, validOrders.reduce((a,b)=>a+b.total, 0)];
+            salesChartRef = new Chart(ctx, { type: 'line', data: { labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'], datasets: [{ label: 'Vendas (R$)', data: dataSales, borderColor: '#2563eb', backgroundColor: 'rgba(37, 99, 235, 0.1)', fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false } });
+        }
+
+        window.renderAdminTable = function(filter = '') {
+            const container = document.getElementById('adminProductsContainer');
+            const limit = document.getElementById('adminProdLimit').value === 'all' ? window.products.length : parseInt(document.getElementById('adminProdLimit').value);
+            const sort = document.getElementById('adminProdSort').value;
+            let filtered = window.products.filter(p => (p.name + p.sku + p.vehicleBrand).toLowerCase().includes(filter.toLowerCase()));
+            if(sort === 'az') filtered.sort((a,b) => a.name.localeCompare(b.name));
+            if(sort === 'za') filtered.sort((a,b) => b.name.localeCompare(a.name));
+            if(sort === 'recent') filtered.sort((a,b) => b.id - a.id);
+            if(sort === 'lowstock') filtered.sort((a,b) => a.stock - b.stock);
+            const display = filtered.slice(0, limit);
+            const listViewHTML = `<div class="data-table-wrapper table-responsive"><table class="data-table"><thead><tr><th>Imagem</th><th>Produto / SKU</th><th>Aplicação</th><th>Preço</th><th>Estoque</th><th style="text-align: center;">Ações</th></tr></thead><tbody>${display.map(p => `<tr><td><img src="${p.image}" style="width:40px; height:40px; object-fit:cover; border-radius:4px;"></td><td><div class="font-bold">${p.name}</div><div class="text-sm text-muted">${p.sku}</div></td><td>${p.vehicleBrand}</td><td>${formatMoney(p.price)}</td><td style="font-weight:bold; color:${p.stock<5 ? 'red':'green'}">${p.stock}</td><td style="text-align:center;"><button onclick="editProduct(${p.id})" class="btn-icon"><i data-lucide="edit-3" size="16"></i></button><button onclick="deleteProduct(${p.id})" class="btn-icon" style="color:var(--danger)"><i data-lucide="trash-2" size="16"></i></button></td></tr>`).join('')}</tbody></table></div>`;
+            const gridViewHTML = `<div class="admin-grid-view">${display.map(p => `<div class="admin-card"><img src="${p.image}" style="width:100%; height:150px; object-fit:cover; border-radius:4px;"><div class="font-bold">${p.name}</div><div class="card-row"><span class="card-label">SKU:</span> ${p.sku}</div><div class="card-row"><span class="card-label">Preço:</span> ${formatMoney(p.price)}</div><div class="card-row"><span class="card-label">Estoque:</span> <span style="color:${p.stock<5?'red':'green'}">${p.stock}</span></div><div class="card-actions"><button onclick="editProduct(${p.id})" class="btn btn-secondary w-full">Editar</button><button onclick="deleteProduct(${p.id})" class="btn btn-danger w-full">Excluir</button></div></div>`).join('')}</div>`;
+            container.innerHTML = window.adminViewMode === 'grid' ? gridViewHTML : listViewHTML;
+            lucide.createIcons();
+        }
+        window.filterAdminTable = function(val) { renderAdminTable(val); }
+
+        window.renderOrdersTable = function() {
+            const container = document.getElementById('adminOrdersContainer');
+            document.getElementById('orderCountBadge').innerText = window.orders.length;
+            if(window.orders.length === 0) { document.getElementById('noOrdersMsg').classList.remove('hidden'); container.innerHTML = ''; return; }
+            document.getElementById('noOrdersMsg').classList.add('hidden'); 
+            const listViewHTML = `<div class="data-table-wrapper table-responsive"><table class="data-table"><thead><tr><th>ID</th><th>Data</th><th>Cliente</th><th>Total</th><th>Status</th><th>Ações</th></tr></thead><tbody>${window.orders.map(o => `<tr><td>#${o.id.toString().slice(-6)}</td><td>${o.date}</td><td>${o.customer}<br><span class="text-xs text-muted">${o.phone}</span></td><td class="font-bold">${formatMoney(o.total)}</td><td><span class="status-badge status-${o.status||'Pendente'}">${o.status||'Pendente'}</span></td><td style="display:flex; gap:0.5rem; justify-content:center;"><button onclick="printOrder(${o.id})" class="btn-icon" title="Imprimir Nota"><i data-lucide="printer"></i></button><button onclick="shareOrder(${o.id})" class="btn-icon" title="Compartilhar"><i data-lucide="share-2"></i></button><button onclick="openOrderDetail(${o.id})" class="btn-icon text-primary"><i data-lucide="eye"></i></button>${o.status!=='Cancelado' ? `<button onclick="cancelOrder(${o.id})" title="Cancelar e Estornar" class="btn-icon text-danger"><i data-lucide="ban"></i></button>`:''}${o.status!=='Cancelado' ? `<button onclick="openEditOrder(${o.id})" class="btn-icon text-warning"><i data-lucide="edit"></i></button>`:''}</td></tr>`).join('')}</tbody></table></div>`;
+            const gridViewHTML = `<div class="admin-grid-view">${window.orders.map(o => `<div class="admin-card"><div class="flex justify-between items-center"><span class="font-bold">#${o.id.toString().slice(-6)}</span><span class="status-badge status-${o.status||'Pendente'}">${o.status}</span></div><div class="card-row"><span class="card-label">Cliente:</span> ${o.customer}</div><div class="card-row"><span class="card-label">Data:</span> ${o.date}</div><div class="card-row"><span class="card-label">Total:</span> ${formatMoney(o.total)}</div><div class="card-actions"><button onclick="printOrder(${o.id})" class="btn btn-secondary"><i data-lucide="printer"></i></button><button onclick="shareOrder(${o.id})" class="btn btn-secondary"><i data-lucide="share-2"></i></button><button onclick="openOrderDetail(${o.id})" class="btn btn-primary">Ver</button>${o.status!=='Cancelado' ? `<button onclick="cancelOrder(${o.id})" class="btn btn-danger">Cancelar</button>`:''}</div></div>`).join('')}</div>`;
+            container.innerHTML = window.adminViewMode === 'grid' ? gridViewHTML : listViewHTML;
+            lucide.createIcons();
+        }
+
+        window.renderClientsTable = function() {
+            const container = document.getElementById('adminClientsContainer');
+            const listViewHTML = `<div class="data-table-wrapper table-responsive"><table class="data-table"><thead><tr><th>Nome</th><th>Contato</th><th>E-mail / CPF</th><th>Ações</th></tr></thead><tbody>${window.clients.map(c => `<tr><td>${c.name}</td><td>${c.phone}</td><td>${c.email || '-'}<br><small>${c.cpf || ''}</small></td><td><button onclick="editClient(${c.id})" class="btn-icon"><i data-lucide="edit"></i></button><button onclick="deleteClient(${c.id})" class="btn-icon text-danger"><i data-lucide="trash-2"></i></button></td></tr>`).join('')}</tbody></table></div>`;
+            const gridViewHTML = `<div class="admin-grid-view">${window.clients.map(c => `<div class="admin-card"><div class="font-bold">${c.name}</div><div class="card-row"><span class="card-label">Tel:</span> ${c.phone}</div><div class="card-row"><span class="card-label">CPF:</span> ${c.cpf||'-'}</div><div class="card-actions"><button onclick="editClient(${c.id})" class="btn btn-secondary">Editar</button><button onclick="deleteClient(${c.id})" class="btn btn-danger">Excluir</button></div></div>`).join('')}</div>`;
+            container.innerHTML = window.adminViewMode === 'grid' ? gridViewHTML : listViewHTML;
+            lucide.createIcons();
+        }
+
+        window.renderBrandsList = function() { document.getElementById('brandsList').innerHTML = window.brands.map(b => `<li style="padding:0.5rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">${b} ${b !== 'Todas' ? `<button onclick="removeBrand('${b}')" style="color:red;">X</button>` : ''}</li>`).join(''); }
+        window.addBrand = async function() { const val = document.getElementById('newBrandInput').value; if(val && !window.brands.includes(val)) { window.brands.push(val); window.brands.sort(); await DBService.put('brands', { name: val }); renderBrandsList(); renderBrandsFilter(); showToast("Marca adicionada!"); } document.getElementById('newBrandInput').value = ''; }
+        window.removeBrand = async function(name) { if(confirm('Remover marca?')) { window.brands = window.brands.filter(b => b !== name); await DBService.delete('brands', name); renderBrandsList(); renderBrandsFilter(); } }
+
+        window.openProductForm = function() { ['prodId','prodName','prodSku','prodCat','prodSupplier','prodPrice','prodStock','prodDesc','prodVehModel','prodVehYear','prodVehVersion','prodImgUrl'].forEach(id => document.getElementById(id).value = ''); document.getElementById('prodVehBrand').value = 'Todas'; document.getElementById('formPreview').style.display = 'none'; document.getElementById('uploadPlaceholder').style.display = 'block'; document.getElementById('productFormModal').classList.add('active'); }
+        window.closeProductForm = function() { document.getElementById('productFormModal').classList.remove('active'); }
+        window.editProduct = function(id) { const p = window.products.find(x => x.id === id); document.getElementById('prodId').value = p.id; document.getElementById('prodName').value = p.name; document.getElementById('prodSku').value = p.sku; document.getElementById('prodCat').value = p.category; document.getElementById('prodSupplier').value = p.supplier || ''; document.getElementById('prodPrice').value = p.price; document.getElementById('prodStock').value = p.stock; document.getElementById('prodVehBrand').value = p.vehicleBrand; document.getElementById('prodVehModel').value = p.vehicleModel; document.getElementById('prodVehYear').value = p.vehicleYear || ''; document.getElementById('prodVehVersion').value = p.vehicleVersion || ''; document.getElementById('prodDesc').value = p.description || ""; document.getElementById('prodImgUrl').value = p.image; document.getElementById('formPreview').src = p.image; document.getElementById('formPreview').style.display = 'block'; document.getElementById('uploadPlaceholder').style.display = 'none'; document.getElementById('productFormModal').classList.add('active'); }
+        window.saveProduct = async function(e) { e.preventDefault(); const id = document.getElementById('prodId').value; const newProd = { id: id ? parseInt(id) : Date.now(), name: document.getElementById('prodName').value, sku: document.getElementById('prodSku').value, category: document.getElementById('prodCat').value, supplier: document.getElementById('prodSupplier').value, price: parseFloat(document.getElementById('prodPrice').value), stock: parseInt(document.getElementById('prodStock').value), vehicleBrand: document.getElementById('prodVehBrand').value, vehicleModel: document.getElementById('prodVehModel').value, vehicleYear: document.getElementById('prodVehYear').value, vehicleVersion: document.getElementById('prodVehVersion').value, description: document.getElementById('prodDesc').value, image: document.getElementById('formPreview').src }; await DBService.put('products', newProd); if(id) { const idx = window.products.findIndex(p => p.id == id); window.products[idx] = newProd; } else { window.products.push(newProd); } closeProductForm(); renderAdminTable(); showToast("Produto Salvo!"); }
+        
+        // UPLOAD PARA CLOUDINARY
+        window.handleImageUpload = async function(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const preview = document.getElementById('formPreview');
+                const placeholder = document.getElementById('uploadPlaceholder');
+                const urlInput = document.getElementById('prodImgUrl');
+                placeholder.innerHTML = `<div class="animate-spin-slow" style="color:var(--primary); margin-bottom:10px;"><i data-lucide="cloud-lightning" size="32"></i></div><span style="font-size:0.8rem; font-weight:bold; color:var(--primary);">Otimizando...<br>Cloudinary</span>`; lucide.createIcons();
+                try {
+                    const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', 'dvoczbxfo'); 
+                    const response = await fetch('https://api.cloudinary.com/v1_1/dvoczbxfo/image/upload', { method: 'POST', body: formData });
+                    const data = await response.json(); if (data.error) throw new Error(data.error.message);
+                    let optimizedUrl = data.secure_url; if (optimizedUrl.includes('/upload/')) optimizedUrl = optimizedUrl.replace('/upload/', '/upload/w_800,q_auto,f_auto/');
+                    preview.src = optimizedUrl; preview.style.display = 'block'; placeholder.style.display = 'none'; urlInput.value = optimizedUrl; showToast("✅ Foto salva!", "success");
+                } catch (error) { console.error("ERRO NO UPLOAD:", error); placeholder.innerHTML = `<i data-lucide="camera" size="32"></i><br><span style="font-size: 0.8rem;">Erro. Tentar novamente.</span>`; lucide.createIcons(); alert("Erro Upload Cloudinary: " + error.message); }
+            }
+        }
+        window.previewUrl = function(url) { if(url) { document.getElementById('formPreview').src = url; document.getElementById('formPreview').style.display = 'block'; document.getElementById('uploadPlaceholder').style.display = 'none'; } }
+        window.deleteProduct = async function(id) { if(confirm("Excluir?")) { window.products = window.products.filter(p => p.id !== id); await DBService.delete('products', id); renderAdminTable(); showToast("Produto Excluído"); } }
+
+        window.openClientForm = function() { ['cliId', 'cliName', 'cliCpf', 'cliEmail', 'cliPhone', 'cliCep', 'cliAddress', 'cliNum', 'cliDistrict', 'cliCity', 'cliState'].forEach(id => document.getElementById(id).value = ''); document.getElementById('clientFormModal').classList.add('active'); }
+        window.closeClientForm = function() { document.getElementById('clientFormModal').classList.remove('active'); }
+        window.saveClient = async function(e) { e.preventDefault(); const id = document.getElementById('cliId').value; const client = { id: id ? parseInt(id) : Date.now(), name: document.getElementById('cliName').value, cpf: document.getElementById('cliCpf').value, email: document.getElementById('cliEmail').value, phone: document.getElementById('cliPhone').value, address: { cep: document.getElementById('cliCep').value, street: document.getElementById('cliAddress').value, num: document.getElementById('cliNum').value, district: document.getElementById('cliDistrict').value, city: document.getElementById('cliCity').value, state: document.getElementById('cliState').value } }; await DBService.put('clients', client); if(id) { const idx = window.clients.findIndex(c => c.id == id); window.clients[idx] = client; } else { window.clients.push(client); } closeClientForm(); renderClientsTable(); showToast("Cliente salvo!"); }
+        window.editClient = function(id) { const c = window.clients.find(x => x.id === id); if(!c) return; document.getElementById('cliId').value = c.id; document.getElementById('cliName').value = c.name; document.getElementById('cliCpf').value = c.cpf || ''; document.getElementById('cliEmail').value = c.email || ''; document.getElementById('cliPhone').value = c.phone; if(c.address){ document.getElementById('cliCep').value = c.address.cep; document.getElementById('cliAddress').value = c.address.street; document.getElementById('cliNum').value = c.address.num; document.getElementById('cliDistrict').value = c.address.district; document.getElementById('cliCity').value = c.address.city; document.getElementById('cliState').value = c.address.state; } document.getElementById('clientFormModal').classList.add('active'); }
+        window.deleteClient = async function(id) { if(confirm("Excluir cliente?")) { window.clients = window.clients.filter(c => c.id !== id); await DBService.delete('clients', id); renderClientsTable(); showToast("Cliente excluído."); } }
+
+        let editingOrder = null;
+        window.openEditOrder = function(id) { if(id === 'new') { editingOrder = { id: Date.now(), date: new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR'), status: 'Pendente', customer: '', phone: '', email: '', cpf: '', items: [], total: 0 }; } else { const originalOrder = window.orders.find(o => o.id === id); if(!originalOrder) return; editingOrder = JSON.parse(JSON.stringify(originalOrder)); } renderEditModal(); document.getElementById('orderEditModal').classList.add('active'); }
+        window.closeEditOrder = function() { editingOrder = null; document.getElementById('orderEditModal').classList.remove('active'); }
+        window.renderEditModal = function() { document.getElementById('editClientName').value = editingOrder.customer || ''; document.getElementById('editClientPhone').value = editingOrder.phone || ''; document.getElementById('editClientEmail').value = editingOrder.email || ''; document.getElementById('editClientCpf').value = editingOrder.cpf || ''; const list = document.getElementById('editOrderItemsList'); if(!editingOrder.items.length) { list.innerHTML = `<div class="text-muted text-center py-4">Sem itens</div>`; } else { list.innerHTML = editingOrder.items.map(i => `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:0.5rem 0;"><div style="flex:1;"><div class="font-bold">${i.name}</div><div class="text-xs text-muted">${formatMoney(i.price)} un.</div></div><div class="qty-controls" style="margin:0 10px;"><button class="qty-btn" onclick="editChangeQty(${i.id}, -1)">-</button><span class="qty-val">${i.quantity}</span><button class="qty-btn" onclick="editChangeQty(${i.id}, 1)">+</button></div><button onclick="editRemoveItem(${i.id})" class="text-danger"><i data-lucide="trash-2" size="16"></i></button></div>`).join(''); } editingOrder.total = editingOrder.items.reduce((a,b)=> a + (b.price * b.quantity), 0); document.getElementById('editOrderTotal').innerText = formatMoney(editingOrder.total); lucide.createIcons(); }
+        window.searchProdForOrder = function(val) { const resDiv = document.getElementById('editProdResults'); if(val.length < 2) { resDiv.style.display = 'none'; return; } const results = window.products.filter(p => p.name.toLowerCase().includes(val.toLowerCase()) || p.sku.toLowerCase().includes(val.toLowerCase())); if(results.length > 0) { resDiv.style.display = 'block'; resDiv.innerHTML = results.map(p => `<div class="search-result-item" onclick="addProdToOrder(${p.id})"><div class="font-bold text-sm">${p.name}</div><div class="text-xs text-muted">SKU: ${p.sku} | Estoque: ${p.stock} | ${formatMoney(p.price)}</div></div>`).join(''); } else resDiv.style.display = 'none'; }
+        window.addProdToOrder = function(prodId) { const p = window.products.find(x => x.id === prodId); if(!p) return; const existing = editingOrder.items.find(i => i.id === prodId); if(existing) existing.quantity++; else editingOrder.items.push({ id: p.id, name: p.name, price: p.price, image: p.image, quantity: 1, sku: p.sku, vehicleBrand: p.vehicleBrand, vehicleModel: p.vehicleModel }); document.getElementById('editSearchProd').value = ''; document.getElementById('editProdResults').style.display = 'none'; renderEditModal(); }
+        window.editChangeQty = function(id, delta) { const item = editingOrder.items.find(i => i.id === id); if(!item) return; if(delta > 0) item.quantity++; else if(item.quantity > 1) item.quantity--; renderEditModal(); }
+        window.editRemoveItem = function(id) { editingOrder.items = editingOrder.items.filter(i => i.id !== id); renderEditModal(); }
+        window.saveOrderChanges = async function() { 
+            editingOrder.customer = document.getElementById('editClientName').value; editingOrder.phone = document.getElementById('editClientPhone').value; editingOrder.email = document.getElementById('editClientEmail').value; editingOrder.cpf = document.getElementById('editClientCpf').value; 
+            if(!editingOrder.customer || !editingOrder.phone) return alert("Nome e Telefone são obrigatórios!"); 
+            const originalOrder = window.orders.find(o => o.id === editingOrder.id); 
+            if(originalOrder) { for (const item of originalOrder.items) { const prod = window.products.find(p => p.id === item.id); if(prod) prod.stock += item.quantity; } } else { window.orders.unshift(editingOrder); } 
+            for (const item of editingOrder.items) { const prod = window.products.find(p => p.id === item.id); if(prod) { if(prod.stock < item.quantity) { alert(`Estoque insuficiente para ${prod.name}.`); await loadData(); return; } prod.stock -= item.quantity; } } 
+            for (const p of window.products) await DBService.put('products', p); 
+            if(originalOrder) { Object.assign(originalOrder, editingOrder); await DBService.put('orders', editingOrder); } else { await DBService.put('orders', editingOrder); } 
+            const existingClient = window.clients.find(c => c.phone === editingOrder.phone);
+            if(existingClient) { existingClient.name = editingOrder.customer; existingClient.email = editingOrder.email; existingClient.cpf = editingOrder.cpf; await DBService.put('clients', existingClient); }
+            else { const newCli = { id: Date.now(), name: editingOrder.customer, phone: editingOrder.phone, email: editingOrder.email, cpf: editingOrder.cpf }; window.clients.push(newCli); await DBService.put('clients', newCli); }
+            closeEditOrder(); renderOrdersTable(); loadAdminDashboard(); showToast("Pedido salvo com sucesso!"); 
+        }
+
+        window.openOrderDetail = function(orderId) { const o = window.orders.find(x => x.id === orderId); if(!o) return; const html = `<div style="background:var(--bg-body); padding:1rem; border-radius:8px; margin-bottom:1rem;"><p><strong>Cliente:</strong> ${o.customer}</p><p><strong>Contato:</strong> ${o.phone}</p>${o.email ? `<p><strong>Email:</strong> ${o.email}</p>` : ''}${o.cpf ? `<p><strong>CPF:</strong> ${o.cpf}</p>` : ''}<p><strong>Data:</strong> ${o.date}</p><p><strong>Status:</strong> ${o.status || 'Pendente'}</p></div><h4 style="font-weight:bold; margin-bottom:0.5rem;">Itens do Pedido:</h4><div style="max-height:200px; overflow-y:auto; border:1px solid var(--border); border-radius:8px; margin-bottom:1rem;"><table style="width:100%; font-size:0.9rem;">${o.items.map(i => `<tr style="border-bottom:1px solid var(--border);"><td style="padding:0.5rem;"><img src="${i.image}" width="30"></td><td style="padding:0.5rem;"><strong>${i.name}</strong><br><span class="text-muted text-xs">SKU: ${i.sku || '-'}</span></td><td style="padding:0.5rem; text-align:right;">${i.quantity} x ${formatMoney(i.price)}</td><td style="padding:0.5rem; text-align:right; font-weight:bold;">${formatMoney(i.price * i.quantity)}</td></tr>`).join('')}</table></div><div style="text-align:right; font-size:1.25rem; font-weight:800; color:var(--primary);">Total: ${formatMoney(o.total)}</div>`; document.getElementById('orderDetailContent').innerHTML = html; document.getElementById('orderDetailModal').classList.add('active'); }
+        window.closeOrderDetail = function() { document.getElementById('orderDetailModal').classList.remove('active'); }
+        window.confirmOrder = async function(id) { const o = window.orders.find(x => x.id === id); if(o) { o.status = 'Entregue'; await DBService.put('orders', o); renderOrdersTable(); showToast("Entregue!"); } }
+        window.cancelOrderLogic = async function(id, isAuto = false) { const o = window.orders.find(x => x.id === id); if(!o || o.status === 'Cancelado') return; for (const item of o.items) { const prod = window.products.find(p => p.id === item.id); if (prod) { prod.stock += item.quantity; await DBService.put('products', prod); } } o.status = 'Cancelado'; await DBService.put('orders', o); if(!isAuto) { renderOrdersTable(); loadAdminDashboard(); showToast("Cancelado e estornado."); } }
+        window.cancelOrder = function(id) { if(confirm("Cancelar pedido e devolver estoque?")) cancelOrderLogic(id); }
+
+        window.generateOrderHTML = function(o) {
+            return `<div style="font-family: monospace; width: 300px; padding: 20px; border: 1px solid #000; background: white;"><div style="text-align:center; border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 10px;"><h2 style="margin:0; font-size: 1.2rem;">DUPEÇAS</h2><p style="margin:0; font-size: 0.8rem;">Duarte Peças</p><p style="margin:0; font-size: 0.8rem;">Av. Sete de Setembro, 105 - Petrolina/PE</p><p style="margin:0; font-size: 0.8rem;">(87) 9909-4280</p></div><div style="font-size: 0.9rem; margin-bottom: 10px;"><strong>PEDIDO: #${o.id}</strong><br>Data: ${o.date}<br><strong>CLIENTE:</strong> ${o.customer} (${o.phone})</div><table style="width: 100%; font-size: 0.8rem; border-collapse: collapse;"><tr style="border-bottom: 1px solid #000;"><th style="text-align:left;">Item / Detalhes</th><th style="text-align:right;">Qtd</th><th style="text-align:right;">R$</th></tr>${o.items.map(i => {const p = window.products.find(prod => prod.id === i.id) || {}; return `<tr><td style="padding-top:5px;"><strong>${i.name}</strong><br>SKU: ${p.sku || '-'}<br>Marca: ${p.vehicleBrand || '-'} ${p.vehicleModel || '-'}</td><td style="text-align:right; vertical-align:top;">${i.quantity}</td><td style="text-align:right; vertical-align:top;">${(i.price * i.quantity).toFixed(2)}</td></tr>`;}).join('')}</table><div style="border-top: 1px dashed #000; margin-top: 10px; padding-top: 5px; text-align: right; font-weight: bold; font-size: 1.1rem;">TOTAL: ${formatMoney(o.total)}</div></div>`;
+        }
+        window.printOrder = function(id) { const o = window.orders.find(x => x.id === id); if(!o) return; const content = window.generateOrderHTML(o); const win = window.open('', '', 'height=600,width=400'); win.document.write('<html><head><title>Imprimir</title></head><body>'); win.document.write(content); win.document.write('</body></html>'); win.document.close(); win.print(); }
+        window.shareOrder = async function(id) { const o = window.orders.find(x => x.id === id); if(!o) return; const text = `PEDIDO #${o.id}\nCliente: ${o.customer}\nTotal: ${formatMoney(o.total)}`; if (navigator.share) await navigator.share({ title: 'Pedido Dupeças', text: text }); else alert("Copie os dados:\n" + text); }
+
+        window.restoreBackup = function(input) {
+            const file = input.files[0]; if (!file || !confirm("Isso SUBSTITUIRÁ o banco atual. Continuar?")) return;
+            const modal = document.getElementById('restoreModal'); const progress = document.getElementById('restoreProgress'); const status = document.getElementById('restoreStatus');
+            modal.classList.add('active'); progress.style.width = '5%'; status.innerText = "Lendo arquivo...";
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    status.innerText = "Limpando banco antigo..."; progress.style.width = '10%';
+                    await DBService.clear('products'); await DBService.clear('orders'); await DBService.clear('brands'); await DBService.clear('clients');
+                    status.innerText = "Restaurando dados...";
+                    const totalItems = (data.products?.length || 0) + (data.orders?.length || 0) + (data.clients?.length || 0) + (data.brands?.length || 0);
+                    let processed = 0;
+                    const updateProg = () => { processed++; const pct = 10 + Math.floor((processed / totalItems) * 90); progress.style.width = pct + '%'; };
+                    if(data.products) for(const p of data.products) { await DBService.put('products', p); updateProg(); }
+                    if(data.orders) for(const o of data.orders) { await DBService.put('orders', o); updateProg(); }
+                    if(data.clients) for(const c of data.clients) { await DBService.put('clients', c); updateProg(); }
+                    if(data.brands) for(const b of data.brands) { await DBService.put('brands', typeof b === 'string' ? {name:b} : b); updateProg(); }
+                    status.innerText = "Atualizando sistema..."; await loadData(); 
+                    renderAdminTable(); renderOrdersTable(); renderClientsTable(); loadAdminDashboard(); renderBrandsFilter();
+                    modal.classList.remove('active'); showToast("Backup restaurado com sucesso!");
+                } catch (err) { alert("Erro crítico na restauração: " + err.message); modal.classList.remove('active'); } finally { input.value = ''; }
+            };
+            reader.readAsText(file);
+        }
+
+        window.applyReportFilters = function() { switchReport(window.currentReportType); }
+        window.switchReport = function(type) {
+            window.currentReportType = type;
+            document.querySelectorAll('.report-tab-btn').forEach(b => b.classList.remove('active')); event.target.classList.add('active');
+            const container = document.getElementById('report-content');
+            const startStr = document.getElementById('repStart').value; const endStr = document.getElementById('repEnd').value;
+            let startTs = 0; let endTs = Infinity;
+            if (startStr) { const d = new Date(startStr + "T00:00:00"); startTs = d.getTime(); }
+            if (endStr) { const d = new Date(endStr + "T23:59:59"); endTs = d.getTime(); }
+            let html = ''; let rows = []; 
+            if (type === 'sales') {
+                let totalSales = 0; let count = 0;
+                window.orders.forEach(o => {
+                    const oTs = o.timestamp || 0; 
+                    if (oTs >= startTs && oTs <= endTs && o.status !== 'Cancelado') {
+                        o.items.forEach(i => { const subTotal = i.price * i.quantity; rows.push({ Data: o.date, Pedido: `#${o.id}`, Cliente: o.customer, Produto: i.name, SKU: i.sku || '-', Qtd: i.quantity, Valor: formatMoney(i.price), Total: formatMoney(subTotal) }); totalSales += subTotal; count += i.quantity; });
+                    }
+                });
+                html = `<h4 class="font-bold mb-4">Relatório de Vendas</h4><div class="data-table-wrapper"><table class="data-table"><thead><tr><th>Data</th><th>Pedido</th><th>Cliente</th><th>Produto</th><th>SKU</th><th>Qtd</th><th>Valor Unit.</th><th>Total</th></tr></thead><tbody>${rows.map(r => `<tr><td>${r.Data}</td><td>${r.Pedido}</td><td>${r.Cliente}</td><td>${r.Produto}</td><td>${r.SKU}</td><td>${r.Qtd}</td><td>${r.Valor}</td><td>${r.Total}</td></tr>`).join('')}</tbody><tfoot><tr style="background:#f1f5f9; font-weight:bold;"><td colspan="5">TOTAIS</td><td>${count}</td><td>-</td><td>${formatMoney(totalSales)}</td></tr></tfoot></table></div>`;
+            } else if (type === 'stock') {
+                const low = window.products.filter(p => p.stock < 5); rows = low.map(p => ({ Produto: p.name, SKU: p.sku, Estoque: p.stock }));
+                html = `<h4 class="font-bold mb-4">Estoque Crítico (<5)</h4><div class="data-table-wrapper"><table class="data-table"><thead><tr><th>Produto</th><th>SKU</th><th>Estoque</th></tr></thead><tbody>${rows.map(r => `<tr><td>${r.Produto}</td><td>${r.SKU}</td><td style="color:red;font-weight:bold;">${r.Estoque}</td></tr>`).join('')}</tbody></table></div>`;
+            } else if (type === 'full-inventory') {
+                let grandTotal = 0; let totalItems = 0;
+                window.products.forEach(p => { const totalVal = p.price * p.stock; rows.push({ Produto: p.name, SKU: p.sku, Preco: formatMoney(p.price), Qtd: p.stock, Total: formatMoney(totalVal) }); grandTotal += totalVal; totalItems += p.stock; });
+                html = `<h4 class="font-bold mb-4">Inventário Completo</h4><div class="mb-4 font-bold text-lg text-primary">Valor Total em Estoque: ${formatMoney(grandTotal)}</div><div class="data-table-wrapper"><table class="data-table"><thead><tr><th>Produto</th><th>SKU</th><th>Preço Unit.</th><th>Qtd.</th><th>Valor Total</th></tr></thead><tbody>${rows.map(r => `<tr><td>${r.Produto}</td><td>${r.SKU}</td><td>${r.Preco}</td><td>${r.Qtd}</td><td class="font-bold">${r.Total}</td></tr>`).join('')}</tbody><tfoot><tr style="background:#f1f5f9; font-weight:bold;"><td colspan="3">TOTAIS</td><td>${totalItems}</td><td>${formatMoney(grandTotal)}</td></tr></tfoot></table></div>`;
+            } else if (type === 'financial') {
+                const stockVal = window.products.reduce((a,b)=>a+(b.price*b.stock),0);
+                const salesVal = window.orders.filter(o=>o.status!=='Cancelado' && o.timestamp >= startTs && o.timestamp <= endTs).reduce((a,b)=>a+b.total,0);
+                rows = [{ Metric: "Valor em Estoque", Value: formatMoney(stockVal) }, { Metric: "Total Vendido (Período)", Value: formatMoney(salesVal) }];
+                html = `<h4 class="font-bold mb-4">Resumo Financeiro</h4><div class="flex gap-4 flex-wrap"><div class="p-4 bg-body rounded border flex-1">Valor em Estoque: <span class="font-bold text-lg block text-primary">${formatMoney(stockVal)}</span></div><div class="p-4 bg-body rounded border flex-1">Vendas no Período: <span class="font-bold text-lg block text-success">${formatMoney(salesVal)}</span></div></div>`;
+            }
+            window.currentReportRows = rows; container.innerHTML = html;
+        }
+
+        window.generateExportData = function(format) {
+            const rows = window.currentReportRows;
+            if (!rows || rows.length === 0) { alert("Nenhum dado para exportar. Gere o relatório primeiro."); return; }
+            let content = ""; let filename = `relatorio_${window.currentReportType}_${Date.now()}.${format}`; let mime = "text/plain";
+            const headers = Object.keys(rows[0]);
+            if (format === 'csv' || format === 'txt') {
+                const separator = format === 'csv' ? ',' : '\t'; if (format === 'csv') content += "\uFEFF"; 
+                content += headers.join(separator) + "\n";
+                rows.forEach(r => { const line = headers.map(h => { let val = String(r[h]); if (format === 'csv' && (val.includes(',') || val.includes('"'))) { val = `"${val.replace(/"/g, '""')}"`; } return val; }); content += line.join(separator) + "\n"; });
+                mime = format === 'csv' ? "text/csv" : "text/plain";
+            } else if (format === 'xls') {
+                mime = "application/vnd.ms-excel";
+                content = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"></head><body><table><thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${headers.map(h => `<td>${r[h]}</td>`).join('')}</tr>`).join('')}</tbody></table></body></html>`;
+            }
+            const a = document.createElement("a"); const file = new Blob([content], { type: mime }); a.href = URL.createObjectURL(file); a.download = filename; a.click();
+        }
+
+        window.printReport = function() {
+            const content = document.getElementById('report-content').innerHTML;
+            const win = window.open('', '', 'height=600,width=800');
+            win.document.write(`<html><head><title>Relatório - Dupeças</title><style>body{font-family:sans-serif; padding: 20px;} table{width:100%; border-collapse:collapse; margin-top:20px; font-size:12px;} th,td{border:1px solid #ddd; padding:8px; text-align:left;} th{background:#f1f5f9; font-weight:bold;} tfoot{font-weight:bold; background:#eee;} h4 {margin-bottom: 5px; font-size: 18px;}</style></head><body><h2>Dupeças Duarte Peças - Relatório</h2><p>Data de Emissão: ${new Date().toLocaleString()}</p><hr>${content}<script>window.print();<\/script></body></html>`);
+            win.document.close();
+        }
+
+        window.toggleTheme = function() { document.body.classList.toggle('dark-mode'); localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light'); }
+        window.saveSettings = function() { window.pixKey = document.getElementById('configPixKey').value; localStorage.setItem('dupecas_pix_key', window.pixKey); showToast("Configurações Salvas"); }
+        
+        window.bulkUpdateImages = async function() { 
+            const txt = document.getElementById('bulkImgInput').value; if(!txt) return; showToast("Iniciando processamento...", "info");
+            const lines = txt.split('\n'); let count = 0; const updates = [];
+            for (const l of lines) { const parts = l.split(','); if(parts.length >= 2) { const id = parts[0].trim(); const url = parts.slice(1).join(',').trim(); const prod = window.products.find(x => String(x.id) === String(id)); if (prod && url) { prod.image = url; updates.push(DBService.put('products', prod)); count++; } } } 
+            try { if(updates.length > 0) { await Promise.all(updates); showToast(`${count} imagens atualizadas no Banco de Dados!`); renderAdminTable(); document.getElementById('bulkImgInput').value = ''; } else { showToast("Nenhum ID correspondente encontrado.", "error"); } } catch (err) { console.error(err); showToast("Erro ao sincronizar com Firebase.", "error"); }
+        }
+        
+        window.resetSystem = async function() { const pwd = prompt("Senha:"); if(pwd === "dupeca2026") { if(confirm("Apagar tudo?")) { await DBService.clear('products'); await DBService.clear('orders'); await DBService.clear('brands'); await DBService.clear('clients'); window.location.reload(); } } }
+        window.exportData = async function(type) { const data = {timestamp:Date.now(), products:window.products, orders:window.orders, clients:window.clients, brands:window.brands.map(b=>({name:b}))}; await DBService.saveCloudBackup(data); renderCloudBackups(); const content = JSON.stringify(data); const a = document.createElement("a"); const file = new Blob([content], {type:'application/json'}); a.href = URL.createObjectURL(file); a.download = `backup_${Date.now()}.json`; a.click(); }
+        window.renderCloudBackups = async function() { const list = document.getElementById('cloudBackupsList'); try { const backups = await DBService.getCloudBackups(); list.innerHTML = backups.length ? backups.map(b => `<div style="padding:0.5rem; border-bottom:1px solid #eee; display:flex; justify-content:space-between;"><div>Backup ${new Date(b.timestamp).toLocaleString()}</div><button onclick='restoreCloudBackup(${JSON.stringify(b.content)})' class="btn-sm btn-secondary">Restaurar</button></div>`).join('') : 'Sem backups.'; } catch(e) { list.innerText = "Erro ao carregar backups."; } }
+        window.restoreCloudBackup = function(json) { if(!confirm("Restaurar backup da nuvem? Isso substituirá os dados atuais.")) return; const blob = new Blob([json], {type: 'application/json'}); const file = new File([blob], "cloud_backup.json"); const dummyInput = { files: [file], value: '' }; restoreBackup(dummyInput); }
+
+    </script>
+</body>
+</html>
+```
