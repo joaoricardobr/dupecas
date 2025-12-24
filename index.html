@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-PT">
 <head>
@@ -291,6 +292,7 @@
             <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Acesso Restrito</h2>
             <p style="color: var(--text-muted); margin-bottom: 2rem;">Painel Administrativo Dupeças</p>
             <form onsubmit="handleLogin(event)">
+                <input type="email" id="adminEmail" placeholder="E-mail de acesso" style="text-align: center; font-size: 1.1rem; letter-spacing: 1px;" required>
                 <input type="password" id="adminPass" placeholder="Senha de acesso" style="text-align: center; font-size: 1.1rem; letter-spacing: 2px;" required>
                 <button type="submit" class="btn btn-primary w-full">Acessar Painel</button>
             </form>
@@ -866,6 +868,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc, writeBatch, query, orderBy, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         // IMPORTAÇÃO DO STORAGE (Mantida caso seja necessário backup, mas upload principal será via Cloudinary)
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
@@ -881,8 +884,26 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
         const analytics = getAnalytics(app);
         const storage = getStorage(app);
+
+        // --- AUTHENTICATION STATE OBSERVER ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Usuário logado
+                window.isAdmin = true;
+                document.getElementById('adminView').classList.remove('hidden');
+                document.getElementById('storeView').classList.add('hidden');
+                loadAdminDashboard();
+                checkExpiredOrders();
+            } else {
+                // Usuário deslogado
+                window.isAdmin = false;
+                document.getElementById('adminView').classList.add('hidden');
+                document.getElementById('storeView').classList.remove('hidden');
+            }
+        });
 
         const DBService = {
             async getAll(collectionName) {
@@ -961,12 +982,7 @@
             document.getElementById('configPixKey').value = window.pixKey;
             await loadData();
             
-            if (localStorage.getItem('dupecas_admin_logged') === 'true') {
-                window.isAdmin = true;
-                document.getElementById('adminView').classList.remove('hidden');
-                document.getElementById('storeView').classList.add('hidden');
-                loadAdminDashboard();
-            }
+            // A verificação de login agora é feita pelo onAuthStateChanged acima
 
             renderBrandsFilter();
             renderCategories();
@@ -1284,24 +1300,32 @@
         window.openLogin = function() { document.getElementById('loginModal').classList.add('active'); }
         window.closeLogin = function() { document.getElementById('loginModal').classList.remove('active'); }
         
-        window.handleLogin = function(e) {
+        // --- FUNÇÃO DE LOGIN ATUALIZADA ---
+        window.handleLogin = async function(e) {
             e.preventDefault();
-            if (document.getElementById('adminPass').value === 'admin') {
-                window.isAdmin = true;
-                localStorage.setItem('dupecas_admin_logged', 'true');
-                document.getElementById('adminView').classList.remove('hidden');
-                document.getElementById('storeView').classList.add('hidden');
+            const email = document.getElementById('adminEmail').value;
+            const pass = document.getElementById('adminPass').value;
+            
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
                 closeLogin();
-                loadAdminDashboard();
-                checkExpiredOrders();
-            } else showToast("Senha incorreta!", "error");
+                // O observador onAuthStateChanged cuidará da mudança de tela
+            } catch (error) {
+                console.error(error);
+                let msg = "Erro ao fazer login.";
+                if(error.code === 'auth/invalid-credential') msg = "E-mail ou senha incorretos.";
+                showToast(msg, "error");
+            }
         }
 
-        window.logoutAdmin = function() {
-            window.isAdmin = false;
-            localStorage.removeItem('dupecas_admin_logged');
-            document.getElementById('adminView').classList.add('hidden');
-            document.getElementById('storeView').classList.remove('hidden');
+        // --- FUNÇÃO DE LOGOUT ATUALIZADA ---
+        window.logoutAdmin = async function() {
+            try {
+                await signOut(auth);
+                // O observador onAuthStateChanged cuidará da mudança de tela
+            } catch (error) {
+                showToast("Erro ao sair", "error");
+            }
         }
 
         window.checkExpiredOrders = async function() {
