@@ -164,6 +164,30 @@
         
         .btn-cart-mini { width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         .btn-cart-mini:hover { background: var(--primary); color: white; transform: scale(1.1); }
+        
+        /* NOVO: Estilo para botão de compartilhar no card */
+        .btn-share-prod {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 10;
+            transition: 0.2s;
+        }
+        .btn-share-prod:hover {
+            color: var(--primary);
+            transform: scale(1.1);
+            background: var(--primary-light);
+        }
 
         /* Layout Admin */
         .admin-layout { display: flex; height: 100vh; overflow: hidden; }
@@ -982,6 +1006,9 @@
             document.getElementById('configPixKey').value = window.pixKey;
             await loadData();
             
+            // VERIFICA SE HÁ LINK DE PRODUTO PARA ABRIR AUTOMATICAMENTE
+            checkUrlHash();
+
             // A verificação de login agora é feita pelo onAuthStateChanged acima
 
             renderBrandsFilter();
@@ -991,6 +1018,23 @@
             initSidebarState();
             if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
         };
+
+        // --- FUNÇÃO PARA VERIFICAR LINK COMPARTILHADO ---
+        window.checkUrlHash = function() {
+            const hash = window.location.hash;
+            if(hash && hash.startsWith('#prod-')) {
+                const id = parseInt(hash.replace('#prod-', ''));
+                if(!isNaN(id)) {
+                    // Pequeno delay para garantir que o DOM e os dados estão prontos
+                    setTimeout(() => {
+                        const productExists = window.products.some(p => p.id === id);
+                        if(productExists) {
+                            openDetail(id);
+                        }
+                    }, 500);
+                }
+            }
+        }
 
         async function loadData() {
             window.products = await DBService.getAll('products');
@@ -1082,6 +1126,35 @@
             window.renderProducts(filtered);
         }
 
+        // --- FUNÇÃO DE COMPARTILHAMENTO ATUALIZADA ---
+        window.shareProduct = async function(id, e) {
+            e.stopPropagation(); // Impede que o modal de detalhes abra ao clicar no compartilhar
+            const p = window.products.find(x => x.id === id);
+            
+            // Link com referência (Hash)
+            const url = `${window.location.origin}${window.location.pathname}#prod-${id}`;
+            const text = `Confira ${p.name} por ${formatMoney(p.price)} na Dupeças!`;
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Dupeças - ' + p.name,
+                        text: text,
+                        url: url
+                    });
+                } catch (err) {
+                    console.log('Erro ao compartilhar:', err);
+                }
+            } else {
+                // Fallback para copiar link
+                navigator.clipboard.writeText(url + "\n" + text).then(() => {
+                    showToast("Link copiado para a área de transferência!");
+                }, () => {
+                    showToast("Erro ao copiar link", "error");
+                });
+            }
+        }
+
         window.renderProducts = function(list = null) {
             const data = list || window.products;
             const container = document.getElementById('productsContainer');
@@ -1103,9 +1176,13 @@
             if (displayData.length < data.length) loadMoreBtn.classList.remove('hidden');
             else loadMoreBtn.classList.add('hidden');
 
+            // ADICIONADO BOTÃO DE COMPARTILHAR NO CARD
             container.innerHTML = displayData.map(p => `
                 <div class="product-card">
                     <div class="card-img-box" onclick="openDetail(${p.id})">
+                        <button onclick="shareProduct(${p.id}, event)" class="btn-share-prod" title="Compartilhar">
+                            <i data-lucide="share-2" size="16"></i>
+                        </button>
                         <img src="${p.image}" class="card-img" loading="lazy">
                         ${p.stock <= 5 && p.stock > 0 ? `<span style="position:absolute; top:8px; right:8px; background:var(--danger); color:white; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">POUCAS UNIDADES</span>` : ''}
                         ${p.stock === 0 ? `<div style="position:absolute; inset:0; background:rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; color:white; font-weight:bold;">ESGOTADO</div>` : ''}
@@ -1137,6 +1214,9 @@
         window.openDetail = function(id) {
             const p = window.products.find(x => x.id === id);
             if(!p) return;
+            // Atualiza Hash na URL sem recarregar (para que o link seja compartilhável direto da barra de endereço também)
+            history.pushState(null, null, `#prod-${id}`);
+            
             document.getElementById('detailImg').src = p.image;
             document.getElementById('detailName').innerText = p.name;
             document.getElementById('detailSku').innerText = `SKU: ${p.sku} | Fornecedor: ${p.supplier || '-'}`;
@@ -1159,7 +1239,11 @@
             }
             document.getElementById('productDetailModal').classList.add('active');
         }
-        window.closeProductDetail = function() { document.getElementById('productDetailModal').classList.remove('active'); }
+        window.closeProductDetail = function() { 
+            document.getElementById('productDetailModal').classList.remove('active'); 
+            // Limpa o Hash da URL ao fechar
+            history.pushState(null, null, window.location.pathname + window.location.search);
+        }
 
         window.toggleCart = function() {
             document.getElementById('cartDrawer').classList.toggle('open');
