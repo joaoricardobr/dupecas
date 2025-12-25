@@ -1,20 +1,4 @@
-Aqui está o código completo atualizado.
 
-**O que foi feito para atender aos seus pedidos:**
-
-1.  **Imagens dos Produtos (Proporção e Preenchimento):**
-    *   Reescrevi o CSS da classe `.card-img-box` e `.card-img`.
-    *   Agora utilizo `aspect-ratio: 4/3` (padrão retangular de foto) ou `1/1` (quadrado) dependendo do dispositivo, garantindo que o card tenha sempre o mesmo tamanho visual.
-    *   Usei `object-fit: contain` com fundo branco. **Por que?** Em autopeças, usar `cover` (cortar para preencher) esconde detalhes da peça (parafusos, encaixes). O `contain` garante que a peça inteira apareça, mas agora ela é centralizada num box de tamanho fixo, sem distorcer o layout.
-2.  **Responsividade e Híbrido:**
-    *   **Mobile Grid:** Forcei 2 colunas no celular (`grid-template-columns: 1fr 1fr`) para parecer aplicativos como Shopee/Mercado Livre.
-    *   **Touch Friendly:** Aumentei áreas de toque e removi o "zoom" acidental em inputs no iPhone.
-    *   **Admin Mobile:** A barra lateral agora funciona como uma "gaveta" (Drawer) sobrepondo o conteúdo, melhorando a experiência em telas pequenas.
-3.  **Preservação:** Todo o código anterior (Firebase, Cloudinary, Lógica) foi mantido.
-
-Basta salvar e rodar.
-
-```html
 <!DOCTYPE html>
 <html lang="pt-PT">
 <head>
@@ -180,6 +164,30 @@ Basta salvar e rodar.
         
         .btn-cart-mini { width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         .btn-cart-mini:hover { background: var(--primary); color: white; transform: scale(1.1); }
+        
+        /* NOVO: Estilo para botão de compartilhar no card */
+        .btn-share-prod {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 10;
+            transition: 0.2s;
+        }
+        .btn-share-prod:hover {
+            color: var(--primary);
+            transform: scale(1.1);
+            background: var(--primary-light);
+        }
 
         /* Layout Admin */
         .admin-layout { display: flex; height: 100vh; overflow: hidden; }
@@ -308,6 +316,7 @@ Basta salvar e rodar.
             <h2 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Acesso Restrito</h2>
             <p style="color: var(--text-muted); margin-bottom: 2rem;">Painel Administrativo Dupeças</p>
             <form onsubmit="handleLogin(event)">
+                <input type="email" id="adminEmail" placeholder="E-mail de acesso" style="text-align: center; font-size: 1.1rem; letter-spacing: 1px;" required>
                 <input type="password" id="adminPass" placeholder="Senha de acesso" style="text-align: center; font-size: 1.1rem; letter-spacing: 2px;" required>
                 <button type="submit" class="btn btn-primary w-full">Acessar Painel</button>
             </form>
@@ -883,6 +892,7 @@ Basta salvar e rodar.
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs, setDoc, doc, deleteDoc, writeBatch, query, orderBy, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         // IMPORTAÇÃO DO STORAGE (Mantida caso seja necessário backup, mas upload principal será via Cloudinary)
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
@@ -898,8 +908,26 @@ Basta salvar e rodar.
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
         const analytics = getAnalytics(app);
         const storage = getStorage(app);
+
+        // --- AUTHENTICATION STATE OBSERVER ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Usuário logado
+                window.isAdmin = true;
+                document.getElementById('adminView').classList.remove('hidden');
+                document.getElementById('storeView').classList.add('hidden');
+                loadAdminDashboard();
+                checkExpiredOrders();
+            } else {
+                // Usuário deslogado
+                window.isAdmin = false;
+                document.getElementById('adminView').classList.add('hidden');
+                document.getElementById('storeView').classList.remove('hidden');
+            }
+        });
 
         const DBService = {
             async getAll(collectionName) {
@@ -978,12 +1006,10 @@ Basta salvar e rodar.
             document.getElementById('configPixKey').value = window.pixKey;
             await loadData();
             
-            if (localStorage.getItem('dupecas_admin_logged') === 'true') {
-                window.isAdmin = true;
-                document.getElementById('adminView').classList.remove('hidden');
-                document.getElementById('storeView').classList.add('hidden');
-                loadAdminDashboard();
-            }
+            // VERIFICA SE HÁ LINK DE PRODUTO PARA ABRIR AUTOMATICAMENTE
+            checkUrlHash();
+
+            // A verificação de login agora é feita pelo onAuthStateChanged acima
 
             renderBrandsFilter();
             renderCategories();
@@ -992,6 +1018,23 @@ Basta salvar e rodar.
             initSidebarState();
             if(localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
         };
+
+        // --- FUNÇÃO PARA VERIFICAR LINK COMPARTILHADO ---
+        window.checkUrlHash = function() {
+            const hash = window.location.hash;
+            if(hash && hash.startsWith('#prod-')) {
+                const id = parseInt(hash.replace('#prod-', ''));
+                if(!isNaN(id)) {
+                    // Pequeno delay para garantir que o DOM e os dados estão prontos
+                    setTimeout(() => {
+                        const productExists = window.products.some(p => p.id === id);
+                        if(productExists) {
+                            openDetail(id);
+                        }
+                    }, 500);
+                }
+            }
+        }
 
         async function loadData() {
             window.products = await DBService.getAll('products');
@@ -1083,6 +1126,35 @@ Basta salvar e rodar.
             window.renderProducts(filtered);
         }
 
+        // --- FUNÇÃO DE COMPARTILHAMENTO ATUALIZADA ---
+        window.shareProduct = async function(id, e) {
+            e.stopPropagation(); // Impede que o modal de detalhes abra ao clicar no compartilhar
+            const p = window.products.find(x => x.id === id);
+            
+            // Link com referência (Hash)
+            const url = `${window.location.origin}${window.location.pathname}#prod-${id}`;
+            const text = `Confira ${p.name} por ${formatMoney(p.price)} na Dupeças!`;
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Dupeças - ' + p.name,
+                        text: text,
+                        url: url
+                    });
+                } catch (err) {
+                    console.log('Erro ao compartilhar:', err);
+                }
+            } else {
+                // Fallback para copiar link
+                navigator.clipboard.writeText(url + "\n" + text).then(() => {
+                    showToast("Link copiado para a área de transferência!");
+                }, () => {
+                    showToast("Erro ao copiar link", "error");
+                });
+            }
+        }
+
         window.renderProducts = function(list = null) {
             const data = list || window.products;
             const container = document.getElementById('productsContainer');
@@ -1104,9 +1176,13 @@ Basta salvar e rodar.
             if (displayData.length < data.length) loadMoreBtn.classList.remove('hidden');
             else loadMoreBtn.classList.add('hidden');
 
+            // ADICIONADO BOTÃO DE COMPARTILHAR NO CARD
             container.innerHTML = displayData.map(p => `
                 <div class="product-card">
                     <div class="card-img-box" onclick="openDetail(${p.id})">
+                        <button onclick="shareProduct(${p.id}, event)" class="btn-share-prod" title="Compartilhar">
+                            <i data-lucide="share-2" size="16"></i>
+                        </button>
                         <img src="${p.image}" class="card-img" loading="lazy">
                         ${p.stock <= 5 && p.stock > 0 ? `<span style="position:absolute; top:8px; right:8px; background:var(--danger); color:white; font-size:10px; padding:2px 6px; border-radius:4px; font-weight:bold;">POUCAS UNIDADES</span>` : ''}
                         ${p.stock === 0 ? `<div style="position:absolute; inset:0; background:rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; color:white; font-weight:bold;">ESGOTADO</div>` : ''}
@@ -1138,6 +1214,9 @@ Basta salvar e rodar.
         window.openDetail = function(id) {
             const p = window.products.find(x => x.id === id);
             if(!p) return;
+            // Atualiza Hash na URL sem recarregar (para que o link seja compartilhável direto da barra de endereço também)
+            history.pushState(null, null, `#prod-${id}`);
+            
             document.getElementById('detailImg').src = p.image;
             document.getElementById('detailName').innerText = p.name;
             document.getElementById('detailSku').innerText = `SKU: ${p.sku} | Fornecedor: ${p.supplier || '-'}`;
@@ -1160,7 +1239,11 @@ Basta salvar e rodar.
             }
             document.getElementById('productDetailModal').classList.add('active');
         }
-        window.closeProductDetail = function() { document.getElementById('productDetailModal').classList.remove('active'); }
+        window.closeProductDetail = function() { 
+            document.getElementById('productDetailModal').classList.remove('active'); 
+            // Limpa o Hash da URL ao fechar
+            history.pushState(null, null, window.location.pathname + window.location.search);
+        }
 
         window.toggleCart = function() {
             document.getElementById('cartDrawer').classList.toggle('open');
@@ -1301,24 +1384,32 @@ Basta salvar e rodar.
         window.openLogin = function() { document.getElementById('loginModal').classList.add('active'); }
         window.closeLogin = function() { document.getElementById('loginModal').classList.remove('active'); }
         
-        window.handleLogin = function(e) {
+        // --- FUNÇÃO DE LOGIN ATUALIZADA ---
+        window.handleLogin = async function(e) {
             e.preventDefault();
-            if (document.getElementById('adminPass').value === 'admin') {
-                window.isAdmin = true;
-                localStorage.setItem('dupecas_admin_logged', 'true');
-                document.getElementById('adminView').classList.remove('hidden');
-                document.getElementById('storeView').classList.add('hidden');
+            const email = document.getElementById('adminEmail').value;
+            const pass = document.getElementById('adminPass').value;
+            
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
                 closeLogin();
-                loadAdminDashboard();
-                checkExpiredOrders();
-            } else showToast("Senha incorreta!", "error");
+                // O observador onAuthStateChanged cuidará da mudança de tela
+            } catch (error) {
+                console.error(error);
+                let msg = "Erro ao fazer login.";
+                if(error.code === 'auth/invalid-credential') msg = "E-mail ou senha incorretos.";
+                showToast(msg, "error");
+            }
         }
 
-        window.logoutAdmin = function() {
-            window.isAdmin = false;
-            localStorage.removeItem('dupecas_admin_logged');
-            document.getElementById('adminView').classList.add('hidden');
-            document.getElementById('storeView').classList.remove('hidden');
+        // --- FUNÇÃO DE LOGOUT ATUALIZADA ---
+        window.logoutAdmin = async function() {
+            try {
+                await signOut(auth);
+                // O observador onAuthStateChanged cuidará da mudança de tela
+            } catch (error) {
+                showToast("Erro ao sair", "error");
+            }
         }
 
         window.checkExpiredOrders = async function() {
