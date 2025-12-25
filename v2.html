@@ -56,7 +56,7 @@
         /* Inputs otimizados para mobile */
         input, select, textarea { 
             width: 100%; padding: 0.8rem 1rem; border: 1px solid var(--border); border-radius: var(--radius); 
-            margin-bottom: 1rem; background: var(--bg-body); color: var(--text-main); font-size: 16px; /* Evita zoom no iOS */
+            margin-bottom: 1rem; background: var(--bg-body); color: var(--text-main); font-size: 16px; 
             transition: all 0.2s; appearance: none; -webkit-appearance: none;
         }
         input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
@@ -120,6 +120,33 @@
             gap: 1.5rem; 
             padding: 2rem 0; 
         }
+
+        /* CORREÇÃO: Estilo LISTA (Grade vs Lista) */
+        .products-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding: 2rem 0;
+        }
+        
+        .products-list .product-card {
+            flex-direction: row;
+            height: 140px;
+            align-items: center;
+        }
+
+        .products-list .card-img-box {
+            width: 140px;
+            height: 100%;
+            border-bottom: none;
+            border-right: 1px solid var(--border);
+        }
+
+        .products-list .card-body {
+            padding: 1rem 1.5rem;
+        }
+
+        /* Fim correção Lista */
         
         .product-card { 
             background: var(--bg-card); 
@@ -130,14 +157,14 @@
             position: relative; 
             display: flex; 
             flex-direction: column;
-            height: 100%;
+            height: 100%; /* Padrão Grade */
         }
         .product-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); border-color: var(--primary); }
         
         .card-img-box {
             width: 100%;
-            aspect-ratio: 4/3; /* Mantém a proporção constante */
-            background: #ffffff; /* Fundo branco para peças recortadas */
+            aspect-ratio: 4/3; 
+            background: #ffffff; 
             display: flex;
             align-items: center;
             justify-content: center;
@@ -149,7 +176,7 @@
         .card-img { 
             width: 100%; 
             height: 100%; 
-            object-fit: contain; /* Mostra a peça inteira sem cortar */
+            object-fit: contain; 
             padding: 10px;
             cursor: pointer;
             transition: transform 0.3s ease;
@@ -165,7 +192,6 @@
         .btn-cart-mini { width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; transition: 0.2s; }
         .btn-cart-mini:hover { background: var(--primary); color: white; transform: scale(1.1); }
         
-        /* NOVO: Estilo para botão de compartilhar no card */
         .btn-share-prod {
             position: absolute;
             top: 10px;
@@ -215,6 +241,80 @@
         .admin-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 0.75rem; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; box-shadow: var(--shadow-sm); position: relative; }
         .card-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; border-bottom: 1px dashed var(--border); padding-bottom: 0.5rem; }
 
+        /* Report Tabs Styling (CORREÇÃO PEDIDA) */
+        .report-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .report-tab-btn {
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .report-tab-btn:hover {
+            background: var(--bg-body);
+            color: var(--primary);
+            border-color: var(--primary);
+        }
+        .report-tab-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Dashboard Widgets Styling (CORREÇÃO PEDIDA) */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .dash-widget {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+        .dash-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+        .dash-title {
+            font-weight: 700;
+            color: var(--text-main);
+            font-size: 1rem;
+        }
+        .list-rank-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px dashed var(--border);
+            font-size: 0.9rem;
+        }
+        .rank-num {
+            font-weight: 800;
+            color: var(--primary);
+            width: 20px;
+        }
+
         /* Modais */
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); padding: 1rem; }
         .modal-overlay.active { display: flex; }
@@ -263,6 +363,7 @@
             .admin-main { padding: 1rem; width: 100%; }
             .promo-grid { grid-template-columns: 1fr; }
             .admin-grid-view { grid-template-columns: 1fr; }
+            .dashboard-grid { grid-template-columns: 1fr; }
             
             /* Melhorias no Grid Mobile (2 colunas estilo App) */
             .products-grid { 
@@ -270,6 +371,19 @@
                 gap: 0.75rem; 
                 padding: 1rem 0;
             }
+
+            /* Correção lista mobile */
+            .products-list .product-card {
+                flex-direction: column;
+                height: auto;
+            }
+            .products-list .card-img-box {
+                width: 100%;
+                height: 150px;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+            
             .product-card { border-radius: 0.5rem; }
             .card-body { padding: 0.75rem; }
             .card-title { font-size: 0.9rem; margin-bottom: 0.25rem; min-height: 2.4rem; }
@@ -504,6 +618,7 @@
 
         <main class="container">
             <div id="resultsCount" style="margin-bottom: 1rem; font-weight: 600; color: var(--text-muted); font-size: 0.9rem;"></div>
+            <!-- CORREÇÃO: Container recebe classes dinamicamente -->
             <div id="productsContainer" class="products-grid"></div>
             
             <div id="loadMoreBtn" class="hidden" style="text-align: center; margin-top: 2rem;">
@@ -621,22 +736,48 @@
             </header>
 
             <div id="tab-dashboard" class="admin-tab">
+                <div class="flex justify-end mb-4">
+                    <select id="dashPeriod" onchange="loadAdminDashboard()" style="width: auto; padding: 0.5rem 1rem;">
+                        <option value="7">Últimos 7 dias</option>
+                        <option value="30" selected>Últimos 30 dias</option>
+                        <option value="all">Todo o Período</option>
+                    </select>
+                </div>
+
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
                     <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
-                        <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem;">Vendas Totais</div>
+                        <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem;">Vendas (Período)</div>
                         <div style="font-size: 1.8rem; font-weight: 800; color: var(--primary);" id="kpiSales">R$ 0,00</div>
                     </div>
                     <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; box-shadow: var(--shadow-sm); border: 1px solid var(--border); border-left: 4px solid var(--primary);">
-                        <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem;">Pedidos</div>
+                        <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem;">Pedidos (Período)</div>
                         <div style="font-size: 1.8rem; font-weight: 800;" id="kpiOrderCount">0</div>
                     </div>
                     <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; box-shadow: var(--shadow-sm); border: 1px solid var(--border); border-left: 4px solid var(--success);">
-                        <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem;">Estoque (Valor)</div>
+                        <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem;">Valor em Estoque</div>
                         <div style="font-size: 1.8rem; font-weight: 800;" id="kpiStockVal">R$ 0,00</div>
                     </div>
                 </div>
+
+                <!-- Novos Widgets de Dashboard -->
+                <div class="dashboard-grid">
+                    <div class="dash-widget">
+                        <div class="dash-header"><span class="dash-title">Mais Vendidos</span><i data-lucide="trending-up" class="text-success"></i></div>
+                        <div id="dashTopProducts"></div>
+                    </div>
+                    <div class="dash-widget">
+                        <div class="dash-header"><span class="dash-title">Menos Vendidos</span><i data-lucide="trending-down" class="text-danger"></i></div>
+                        <div id="dashWorstProducts"></div>
+                    </div>
+                    <div class="dash-widget">
+                        <div class="dash-header"><span class="dash-title">Sugestão de Promoção</span><i data-lucide="percent" class="text-warning"></i></div>
+                        <p class="text-xs text-muted mb-2">Alto estoque & Baixa saída</p>
+                        <div id="dashPromoSuggestions"></div>
+                    </div>
+                </div>
+
                 <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--border);">
-                    <h4 style="font-weight: 700; margin-bottom: 1rem;">Vendas Recentes</h4>
+                    <h4 style="font-weight: 700; margin-bottom: 1rem;">Histórico de Vendas</h4>
                     <div style="height: 250px;"><canvas id="salesChart"></canvas></div>
                 </div>
             </div>
@@ -694,10 +835,10 @@
                 </div>
 
                 <div class="report-tabs">
-                    <button class="report-tab-btn active" onclick="switchReport('sales')">Vendas Detalhadas</button>
-                    <button class="report-tab-btn" onclick="switchReport('stock')">Estoque Baixo</button>
-                    <button class="report-tab-btn" onclick="switchReport('full-inventory')">Inventário Completo</button>
-                    <button class="report-tab-btn" onclick="switchReport('financial')">Financeiro</button>
+                    <button class="report-tab-btn active" onclick="switchReport('sales')"><i data-lucide="shopping-cart" size="16"></i> Vendas Detalhadas</button>
+                    <button class="report-tab-btn" onclick="switchReport('stock')"><i data-lucide="alert-triangle" size="16"></i> Estoque Baixo</button>
+                    <button class="report-tab-btn" onclick="switchReport('full-inventory')"><i data-lucide="package" size="16"></i> Inventário Completo</button>
+                    <button class="report-tab-btn" onclick="switchReport('financial')"><i data-lucide="dollar-sign" size="16"></i> Financeiro</button>
                 </div>
                 <div id="report-content"></div>
             </div>
@@ -1006,7 +1147,7 @@
             document.getElementById('configPixKey').value = window.pixKey;
             await loadData();
             
-            // VERIFICA SE HÁ LINK DE PRODUTO PARA ABRIR AUTOMATICAMENTE
+            // CORREÇÃO: VERIFICA SE HÁ LINK DE PRODUTO PARA ABRIR AUTOMATICAMENTE DEPOIS DO DATA LOAD
             checkUrlHash();
 
             // A verificação de login agora é feita pelo onAuthStateChanged acima
@@ -1035,6 +1176,9 @@
                 }
             }
         }
+        
+        // Listener para mudanças de hash sem recarregar
+        window.addEventListener('hashchange', checkUrlHash);
 
         async function loadData() {
             window.products = await DBService.getAll('products');
@@ -1085,7 +1229,20 @@
             window.applyFilters(); 
         }
         
-        window.setView = function(mode) { document.getElementById('productsContainer').className = mode === 'list' ? 'products-list' : 'products-grid'; applyFilters(); }
+        // CORREÇÃO: Função SetView agora aplica classes de Layout corretas
+        window.setView = function(mode) { 
+            const container = document.getElementById('productsContainer');
+            if (mode === 'list') {
+                container.classList.remove('products-grid');
+                container.classList.add('products-list');
+            } else {
+                container.classList.remove('products-list');
+                container.classList.add('products-grid');
+            }
+            // Não precisa chamar renderProducts se apenas mudar CSS, mas applyFilters garante integridade
+            applyFilters(); 
+        }
+        
         window.filterSearch = function(val) { document.getElementById('searchInput').value = val; applyFilters(); }
 
         window.resetFilters = function() {
@@ -1241,7 +1398,7 @@
         }
         window.closeProductDetail = function() { 
             document.getElementById('productDetailModal').classList.remove('active'); 
-            // Limpa o Hash da URL ao fechar
+            // Limpa o Hash da URL ao fechar para evitar reabrir ao dar refresh
             history.pushState(null, null, window.location.pathname + window.location.search);
         }
 
@@ -1464,21 +1621,104 @@
         }
 
         let salesChartRef;
+        // DASHBOARD AVANÇADO CORRIGIDO
         window.loadAdminDashboard = function() {
-            const totalVal = window.products.reduce((a, b) => a + (b.price * b.stock), 0);
-            const validOrders = window.orders.filter(o => o.status !== 'Cancelado');
-            document.getElementById('kpiSales').innerText = formatMoney(validOrders.reduce((a,b)=>a+b.total, 0));
-            document.getElementById('kpiOrderCount').innerText = validOrders.length;
-            document.getElementById('kpiStockVal').innerText = formatMoney(totalVal);
+            const daysFilter = document.getElementById('dashPeriod') ? parseInt(document.getElementById('dashPeriod').value) : 30;
+            const now = Date.now();
+            const timeLimit = isNaN(daysFilter) ? 0 : now - (daysFilter * 24 * 60 * 60 * 1000);
 
+            // Filtrar pedidos válidos (não cancelados e dentro do período)
+            const validOrders = window.orders.filter(o => o.status !== 'Cancelado' && (o.timestamp || 0) >= timeLimit);
+            
+            // KPIs Básicos
+            const totalSales = validOrders.reduce((a,b)=>a+b.total, 0);
+            const totalStockVal = window.products.reduce((a, b) => a + (b.price * b.stock), 0);
+            
+            document.getElementById('kpiSales').innerText = formatMoney(totalSales);
+            document.getElementById('kpiOrderCount').innerText = validOrders.length;
+            document.getElementById('kpiStockVal').innerText = formatMoney(totalStockVal);
+
+            // Calcular Vendas por Produto
+            const productSalesMap = {};
+            validOrders.forEach(o => {
+                o.items.forEach(i => {
+                    if(!productSalesMap[i.id]) productSalesMap[i.id] = { ...i, sold: 0 };
+                    productSalesMap[i.id].sold += i.quantity;
+                });
+            });
+
+            // Ordenar: Mais Vendidos vs Menos Vendidos
+            const sortedSales = Object.values(productSalesMap).sort((a,b) => b.sold - a.sold);
+            const top5 = sortedSales.slice(0, 5);
+            
+            // Menos vendidos: produtos que existem mas não estão no top de vendas ou têm venda 0
+            // Para simplificar, pegamos os produtos com menos saídas do mapa de vendas
+            let worst5 = [...sortedSales].reverse().slice(0, 5);
+            if (worst5.length < 5) {
+                // Adicionar produtos que nunca foram vendidos no período
+                const soldIds = new Set(sortedSales.map(x => x.id));
+                const unsold = window.products.filter(p => !soldIds.has(p.id)).slice(0, 5 - worst5.length);
+                worst5 = [...worst5, ...unsold.map(p => ({...p, sold: 0}))];
+            }
+
+            // Sugestão Promoção: Alto Estoque (>20) e Baixa Venda (<2)
+            const promoCandidates = window.products.filter(p => {
+                const sales = productSalesMap[p.id] ? productSalesMap[p.id].sold : 0;
+                return p.stock > 20 && sales < 2;
+            }).slice(0, 5);
+
+            // Render Widgets
+            document.getElementById('dashTopProducts').innerHTML = top5.length ? top5.map((p, i) => `
+                <div class="list-rank-item">
+                    <span class="rank-num">#${i+1}</span>
+                    <span style="flex:1; margin-left:10px;">${p.name}</span>
+                    <span class="badge text-sm bg-primary-light text-primary font-bold">${p.sold} un</span>
+                </div>
+            `).join('') : '<p class="text-muted text-sm">Sem dados de vendas.</p>';
+
+            document.getElementById('dashWorstProducts').innerHTML = worst5.length ? worst5.map((p) => `
+                <div class="list-rank-item">
+                    <span style="flex:1;">${p.name}</span>
+                    <span class="text-xs text-muted">${p.sold} vendas</span>
+                </div>
+            `).join('') : '<p class="text-muted text-sm">Sem dados.</p>';
+
+            document.getElementById('dashPromoSuggestions').innerHTML = promoCandidates.length ? promoCandidates.map((p) => `
+                <div class="list-rank-item">
+                    <span style="flex:1;">${p.name}</span>
+                    <div style="text-align:right;">
+                         <div class="text-xs text-muted">Est: ${p.stock}</div>
+                         <div class="text-xs text-danger">Baixa Saída</div>
+                    </div>
+                </div>
+            `).join('') : '<p class="text-muted text-sm">Nenhuma sugestão no momento.</p>';
+
+            // Gráfico
             const ctx = document.getElementById('salesChart');
             if(salesChartRef) salesChartRef.destroy();
-            const dataSales = [1200, 1900, 3000, 5000, 2000, 3000, validOrders.reduce((a,b)=>a+b.total, 0)];
+            const labels = [];
+            const dataGraph = [];
+            // Agrupar por dia (últimos 7 dias para visualização limpa)
+            for(let i=6; i>=0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const dayStr = d.toLocaleDateString('pt-BR');
+                labels.push(dayStr.slice(0,5)); // dd/mm
+                
+                // Soma do dia
+                const dayTotal = validOrders.filter(o => {
+                    const od = new Date(o.timestamp);
+                    return od.getDate() === d.getDate() && od.getMonth() === d.getMonth();
+                }).reduce((a,b)=>a+b.total, 0);
+                dataGraph.push(dayTotal);
+            }
+
             salesChartRef = new Chart(ctx, {
-                type: 'line',
-                data: { labels: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'], datasets: [{ label: 'Vendas (R$)', data: dataSales, borderColor: '#2563eb', backgroundColor: 'rgba(37, 99, 235, 0.1)', fill: true, tension: 0.4 }] },
-                options: { responsive: true, maintainAspectRatio: false }
+                type: 'bar',
+                data: { labels: labels, datasets: [{ label: 'Vendas (R$)', data: dataGraph, backgroundColor: '#2563eb', borderRadius: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
             });
+            lucide.createIcons();
         }
 
         window.renderAdminTable = function(filter = '') {
